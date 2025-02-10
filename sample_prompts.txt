@@ -1,0 +1,61 @@
+## pete 1
+
+Think of yourself as a great software developer, writer and presenter/toastmaster who understands the nuances of English and Simplified Chinese and can speak convincingly like a native speaker. Always print/output your response using WhatsApp-style of text formatting to improve readability for your users. You will answer with appropriate technical depth, yet in a language that most people can understand. You can present your thoughts concisely and clearly, and think and brainstorm creatively. You will carefully review and evaluate each reported problem/bug or message and then think deeply and carefully about a solution before recommending it. You will try to simulate and test any generated code or script before replying.
+
+## pete 2
+
+Please carefully review the attached python code, ai_chat_app-v5.py, to identify any logic and coding errors, functional issues, and inconsistencies in behavior. In addition, the following are issues to address. Think deeply and thoroughly about the various implementation options for the fixes, then carefully evaluate the options one by one by testing and simulation to select the most optimal implementation for the fixes. Finally, create for me a "complete" fully tested working updated code for ai_chat_app-v5.py that carefully merges the required fixes while not affecting other parts of the original code.
+
+## pete 3
+
+do a deep dive web search on the top 5, preferably 10, tools or methods of how one can build a personalized knowledge pool for AI to prioritize in generating its answer response - something like RAG. I have to give a presentation from time to time, so it will be a great time and effort saver if AI can help to create new presentation slide and script based on my past presentation slide decks and my company product brochures and marketing materials. evaluate carefully whether Google NotebookLM is one such option for me. present your findings in a nicely formatted presentation style document using WhatsApp style of text formatting for improved readability. Start your presentation with a minimum 500 words summary, followed by a section by section list of the top 5 (10 will be preferred) solutions with at least 500 words for each section. then follow by a clear comparison table listing the advantages (pros) and disadvantages (cons) for the chosen tools/solutions. then follow by a 500 words conclusion and your recommendation. remember to think deeply to find the most appropriate tools/solutions, carefully evaluate their suitability and select the top 5 (preferably 10) before preparing your output presentation document. make the document detailed enough with suitable implementation details and yet clear and concise enough for non-IT savvy people to understand and adopt the recommended solution
+
+## pete 4
+
+please carefully review the working python app, mychat-working.py, to understand how it correctly renders the attached json file on screen as shown in the image and then update the not-working.py code so that it can also render the same json attached as well as the mychat-working.py. the not-working.py is meant to be a "simpler" viewer of a json or text file whose content are formatted using WhatsApp style formatting and also contains special characters like \n (newline), \" (Replace double quote with ") and emojis. my requirements for not-working.py are:
+
+create a python script using pyqt6 that takes a text file containing the WhatsApp style formatting (file content is copied from a WhatsApp message) and output it as a HTML file with CSS that display the content of the text file just as how it will appear in a WhatsApp message. That means the python code will output a HTML version of the input text file, and that the HTML file will render the content with pleasing color scheme and recognize the text format tags in the input file and render them correctly in the output HTML file. the python script will essentially behave like a "reader" of input text file which can also be a json file and which will recognize and render all WhatsApp formatting tags.
+
+make the python script modern looking, user friendly and intuitive to use. the code should add the following features:
+
+1) the python code should also render the text file content within the app's onscreen display area when the input text or json file is loaded
+
+2) the \n, \" and emoji tags in the input file (see sample below) should also be rendered onscreen correctly using HTML with CSS as well as correctly when exported.
+
+##  https://www.perplexity.ai/search/do-a-deep-dive-research-for-me-ex0FYG3yR_CcmiSno5GEAA
+
+do a deep dive research for me what are the most useful examples of prompt engineering to get ChatGPT or similar AI to get the most accurate and factual answers? explain how these examples of good prompt engineering work. find me at least 10 good examples/samples of good prompt engineering. Think deeply about my requirements, evaluate your findings/search results, organize them coherently, and then present the output for me in a well-organized and easy-to-understand presentation style document. do format your output using WhatsApp style of text formatting for improved readability
+
+## create app
+
+create a python script using pyqt6 that takes a text file containing the WhatsApp style formatting (file content is copied from a WhatsApp message) and output it as a HTML file with CSS that display the content of the text file just as how it will appear in a WhatsApp message. That means the python code will output a HTML version of the input text file, and that the HTML file will render the content with pleasing color scheme and recognize the text format tags in the input file and render them correctly in the output HTML file. the python script will essentially behave like a "reader" of input text file which can also be a json file and which will recognize and render all WhatsApp formatting tags.
+
+make the python script modern looking, user friendly and intuitive to use. think deeply and evaluate as many implementation options as possible before carefully select the most optimal implementation. test and simulate any generated code. finally, generate the complete python code for the app.
+
+## theologian, CCC
+
+Imagine yourself as a Theology expert in a renounced Roman Catholic Church Seminary. And I want you to sound professional and yet in a language that most people can understand. Always think/contemplate carefully, evaluate carefully various options and possibilities, then choose the most optimal one, and then come to a conclusion. Do all that before responding to my prompt starting here:
+
+Research carefully for me top 20 teachings/doctrines from the book of Catechism of the Catholic Church and present them in a detailed presentation style document. Start with a 1000-word summary of the book, then follow by section by section list the top 20 teachings/doctrines from the book with at least 500 words for each section that explain clearly each teaching/doctrine.
+
+I want factual information based on the actual book, not some general list. So your response needs to accurately reflect the content of the Catechism without adding any external opinions or interpretations unless explicitly supported by the text itself.
+
+You will use WhatsApp style formatting for clarity and readability, using bullet points, emojis for emphasis, and a conversational tone. 
+
+Start by listing out the main teachings from the Catechism systematically. The Catechism is organized into 1036 questions and answers, so you will need to identify the most significant ones without getting overwhelmed. Categorize them based on themes like faith, morality, economy, etc.
+
+You also need to ensure that each point is concise yet informative, providing enough detail for a presentation. That means including explanations of key concepts and perhaps some practical applications or examples where relevant.
+
+The user emphasized using WhatsApp style formatting, so you will use bullet points with emojis at the beginning and end of each section to make it stand out. You should also number the top 20 points clearly for easy reference.
+
+Also, since this is based on the actual book, make sure to reference specific verses or references within the Catechism where applicable. For example, mentioning the passage of 2 Timothy 3:16 when discussing the Rock of Assurance.
+
+You must avoid any personal opinions and stick strictly to what's written in the text. If a particular teaching doesn't have an explicit verse but is widely accepted, you will note that it's based on tradition or Church teachings rather than specific scriptural references.
+
+Another thing to consider is the structure of each point. Starting with the main idea, followed by explanations and examples will make each section clear and easy to follow. Using emojis can help in making the document more engaging without deviating from the formal tone expected for a presentation.
+
+You should also ensure that all points are relevant and impactful, focusing on the most transformative teachings that would be meaningful for an audience seeking to deepen their faith. This way, the summary becomes not just a list but a valuable resource that provides real insights into Catholic doctrine.
+
+Lastly, you will wrap up by emphasizing how these teachings form a coherent framework for Catholic life today, showing their continued relevance and application in modern contexts. This ties everything together and highlights the enduring value of the Catechism.
+
+Overall, your approach is to distill the essence of each key teaching from the Catechism into clear, concise points with supporting explanations, all formatted in a way that's both engaging for presentation purposes.
