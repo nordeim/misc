@@ -46,9 +46,9 @@ Where R_(μν) is the Ricci curvature tensor, R is the scalar curvature, g_(μν
 
 To derive the linear stress-energy-mass tensor with analytical means, by using an anti-derivative. In theory to resolve and determine the values of the universe.
 
-<think>
+/<think>
 To explain special and general relativity effectively on a comprehensive platform, it is essential to clearly delineate the two theories, provide examples and illustrations, explores specific techniques to solve problems. The laws must explain time dilation, coordinate invariance, Simultaneity distinction, rules of contracts and compensations although limited the story to 5distribution of mass- energy within a gravity field.
 
-<think>
+/<think>
 
 In conclusion, Albert Einstein's theory of relativity revolutionized our understanding of space, time, and gravity. Special relativity introduced concepts like time dilation, length contraction, and the equivalence of mass and energy, while general relativity described gravity as the curvature of spacetime. These theories have been confirmed by numerous experiments and observations and have led to new insights into the fundamental nature of the universe. By understanding these principles, a student of physics can gain a deeper appreciation for the intricacies of the cosmos.
