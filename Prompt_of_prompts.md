@@ -33,6 +33,3 @@ The audience for this prompt is ChatGPT 4o, ChatGPT o1, Google Gemini, Claude AI
 
 Please use the provided example as a reference when generating the output.
 
----
-
-This translation preserves the original structure and intent of the document, providing an accurate English version.
