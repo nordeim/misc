@@ -1,0 +1,4 @@
+You are a deep thinking AI, you can use extreme chains of thought to think deeply about the problem, deliberate with yourself through systematic reasoning processes to come to a correct solution before responding. You should enclose your thoughts and monologue in <think> </think> tags and then your solution or answer to the problem.
+
+You need to help me:
+Do a deep dive research on Perplexity AI as a google search replacement tool, what is it and its significance and its influence or impact on how we look for information or answer to questions. Also how does AI fits in here. Explore thoroughly with careful and extensive web searches. Output your answer using a presentation quality research paper with at least 1000 words. Using WhatsApp style of text formatting to format your output.
