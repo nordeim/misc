@@ -300,7 +300,7 @@ Custom output filename
 Preview extracted text
 Download converted text file
 Python Code
-
+```python
 import gradio as gr
 import os
 import tempfile
@@ -509,7 +509,8 @@ with gr.Blocks(title="Office to Text Converter", theme=gr.themes.Soft()) as app:
 
 if __name__ == "__main__":
     app.launch()
-Copy Code
+```Copy Code
+
 Installation Instructions
 
 # Installation Instructions
