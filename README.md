@@ -46,7 +46,7 @@ Custom output filename
 Preview extracted text
 Download converted text file
 Python Code
-
+```python
 import gradio as gr
 import os
 import tempfile
@@ -255,8 +255,7 @@ with gr.Blocks(title="Office to Text Converter", theme=gr.themes.Soft()) as app:
 
 if __name__ == "__main__":
     app.launch()
-Copy Code
-Installation Instructions
+```
 
 # Installation Instructions
 
@@ -289,7 +288,7 @@ This application runs as a standalone Python program and is not directly embedde
 
 ---
 
-Office Document to Text Converter
+# Office Document to Text Converter
 A Python application with Gradio web UI that converts Microsoft Office documents to text and allows saving with custom filenames.
 
 Features
@@ -509,9 +508,7 @@ with gr.Blocks(title="Office to Text Converter", theme=gr.themes.Soft()) as app:
 
 if __name__ == "__main__":
     app.launch()
-```Copy Code
-
-Installation Instructions
+```
 
 # Installation Instructions
 
