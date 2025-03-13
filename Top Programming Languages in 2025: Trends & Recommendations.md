@@ -203,7 +203,7 @@ JavaScript maintains **undisputed dominance in web development** while making **
 | **Use Cases**         | Real-time browser AI, edge ML                 | Complex model training            |  
 | **Performance**       | WebGPU/WebAssembly acceleration               | CUDA/NVIDIA GPU optimization      |  
 
-**Key JavaScript AI Advantages**:  
+**1. Key JavaScript AI Advantages**:  
 - **Browser-native execution**: Run ML models directly on client devices (e.g., fraud detection filters)[4]  
 - **Real-time processing**: Achieve  B[WebAssembly ML Module]
     B --> C[Python Backend API]
