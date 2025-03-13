@@ -1,5 +1,3 @@
-Here's a concise research summary formatted for WhatsApp:
-
 *Top Programming Languages in 2025: Trends & Recommendations*
 
 *1. Overall Popularity (TIOBE Index 2025)*
