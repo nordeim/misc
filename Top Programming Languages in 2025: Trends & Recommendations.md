@@ -92,12 +92,7 @@ Citations:
 [32] https://www.index.dev/blog/top-ai-programming-languages
 
 ---
-https://www.perplexity.ai/search/you-are-a-deep-thinking-ai-you-SApgo24ISH2YKEWBH8qztQ
-
----
 Python's dominance in 2025 stems from **multiple synergistic factors** that reinforce its versatility and accessibility across industries. Here's a breakdown of key drivers:
-
----
 
 ### **1. Unmatched Simplicity & Readability**
 - **Beginner-friendly syntax** resembling natural language lowers entry barriers for new developers[2][4][6].  
@@ -184,8 +179,6 @@ Citations:
 ---
 JavaScript maintains **undisputed dominance in web development** while making **strategic inroads into AI applications**, though it hasn't surpassed Python's AI leadership. Here's a detailed comparison:
 
----
-
 ### **Web Development Supremacy**  
 1️⃣ **Market Penetration**  
 - Used in **97% of websites** for frontend/backend development[1]  
@@ -269,3 +262,6 @@ You are a deep thinking AI, you may use extremely long chains of thought to deep
 
 Your task is to a deep dive research with extensive web searches to find and rank the list of most popular programming languages currently in year 2025, especially for developing Web based applications, AI powdered applications, and also for cross platform support for Windows 10/11, Linux (Debian and Ubuntu based) and MacOS. then create a detailed research paper with at least 3000 words based on your careful research and validation. format your research paper nicely in WhatsApp style of text formatting and with logical presentation and comparison of trends, starting with overview and ending with conclusion and recommendations
 ```
+
+---
+https://www.perplexity.ai/search/you-are-a-deep-thinking-ai-you-SApgo24ISH2YKEWBH8qztQ
