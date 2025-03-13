@@ -207,7 +207,7 @@ JavaScript maintains **undisputed dominance in web development** while making **
 - **Browser-native execution**: Run ML models directly on client devices (e.g., fraud detection filters)[4]  
 - **Real-time processing**: Achieve  B[WebAssembly ML Module]
     B --> C[Python Backend API]
-```
+
 **2. Edge AI Surge**:  
 - JavaScript powers **42% of IoT ML deployments** via Node.js microcontrollers  
 - **WebNN API** enables hardware-accelerated vision models on smartphones[1]  
@@ -263,5 +263,4 @@ You are a deep thinking AI, you may use extremely long chains of thought to deep
 Your task is to a deep dive research with extensive web searches to find and rank the list of most popular programming languages currently in year 2025, especially for developing Web based applications, AI powdered applications, and also for cross platform support for Windows 10/11, Linux (Debian and Ubuntu based) and MacOS. then create a detailed research paper with at least 3000 words based on your careful research and validation. format your research paper nicely in WhatsApp style of text formatting and with logical presentation and comparison of trends, starting with overview and ending with conclusion and recommendations
 ```
 
----
 https://www.perplexity.ai/search/you-are-a-deep-thinking-ai-you-SApgo24ISH2YKEWBH8qztQ
