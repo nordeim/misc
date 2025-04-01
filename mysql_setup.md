@@ -1,3 +1,66 @@
+mysql> CREATE USER 'root'@'127.0.0.1' IDENTIFIED BY 'Admin1234';
+Query OK, 0 rows affected (0.02 sec)
+
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'127.0.0.1';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> SELECT Host, User FROM user WHERE User='root';
++-----------+------+
+| Host      | User |
++-----------+------+
+| 127.0.0.1 | root |
+| localhost | root |
++-----------+------+
+2 rows in set (0.00 sec)
+
+mysql> FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> CREATE USER 'myadmin'@'%' IDENTIFIED BY 'Admin1234';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'myadmin'@'%';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> CREATE USER 'myadmin'@'127.0.0.1' IDENTIFIED BY 'Admin1234';
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'myadmin'@'127.0.0.1';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'myadmin'@'localhost';
+ERROR 1410 (42000): You are not allowed to create a user with GRANT
+mysql> CREATE USER 'myadmin'@'localhost' IDENTIFIED BY 'Admin1234';
+Query OK, 0 rows affected (0.01 sec)
+
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'myadmin'@'localhost';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> SELECT Host, User FROM user WHERE User='root';
++-----------+------+
+| Host      | User |
++-----------+------+
+| 127.0.0.1 | root |
+| localhost | root |
++-----------+------+
+2 rows in set (0.00 sec)
+
+mysql> SELECT Host, User FROM user WHERE User='myadmin';
++-----------+---------+
+| Host      | User    |
++-----------+---------+
+| %         | myadmin |
+| 127.0.0.1 | myadmin |
+| localhost | myadmin |
++-----------+---------+
+3 rows in set (0.00 sec)
+
+mysql> FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> exit
+
+---
 root@pop-os:/etc# ps -ef | grep mysql
 root     2727382 2658287  0 10:44 pts/3    00:00:00 /bin/sh /usr/bin/mysqld_safe --skip-grant-tables
 mysql    2727539 2727382  0 10:44 pts/3    00:00:02 /usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib/mysql/plugin --user=mysql --skip-grant-tables --log-error=/var/log/mysql/error.log --pid-file=pop-os.pid
