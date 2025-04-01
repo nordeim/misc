@@ -1,3 +1,98 @@
+root@pop-os:/etc# ps -ef | grep mysql
+root     2727382 2658287  0 10:44 pts/3    00:00:00 /bin/sh /usr/bin/mysqld_safe --skip-grant-tables
+mysql    2727539 2727382  0 10:44 pts/3    00:00:02 /usr/sbin/mysqld --basedir=/usr --datadir=/var/lib/mysql --plugin-dir=/usr/lib/mysql/plugin --user=mysql --skip-grant-tables --log-error=/var/log/mysql/error.log --pid-file=pop-os.pid
+root     2728096 2658287  0 10:48 pts/3    00:00:00 grep --color=auto mysql
+root@pop-os:/etc# kill 2727539 2727382
+root@pop-os:/etc# ps -ef | grep mysql2025-04-01T02:48:43.426223Z mysqld_safe mysqld from pid file /var/lib/mysql/pop-os.pid ended
+
+root     2728139 2658287  0 10:48 pts/3    00:00:00 grep --color=auto mysql
+[1]+  Done                    mysqld_safe --skip-grant-tables
+root@pop-os:/etc# ps -ef | grep mysql
+root     2728141 2658287  0 10:48 pts/3    00:00:00 grep --color=auto mysql
+root@pop-os:/etc# systemctl stop mysql
+root@pop-os:/etc# systemctl status mysql
+○ mysql.service - MySQL Community Server
+     Loaded: loaded (/usr/lib/systemd/system/mysql.service; enabled; preset: enabled)
+     Active: inactive (dead) since Tue 2025-04-01 10:43:23 +08; 5min ago
+   Duration: 2min 38.196s
+    Process: 2726738 ExecStartPre=/usr/share/mysql/mysql-systemd-start pre (code=exited, status=0/SUCCESS)
+    Process: 2726746 ExecStart=/usr/sbin/mysqld (code=exited, status=0/SUCCESS)
+   Main PID: 2726746 (code=exited, status=0/SUCCESS)
+     Status: "Server shutdown complete"
+        CPU: 1.621s
+
+Apr 01 10:40:43 pop-os systemd[1]: Starting mysql.service - MySQL Community Server...
+Apr 01 10:40:43 pop-os systemd[1]: Started mysql.service - MySQL Community Server.
+Apr 01 10:43:22 pop-os systemd[1]: Stopping mysql.service - MySQL Community Server...
+Apr 01 10:43:23 pop-os systemd[1]: mysql.service: Deactivated successfully.
+Apr 01 10:43:23 pop-os systemd[1]: Stopped mysql.service - MySQL Community Server.
+Apr 01 10:43:23 pop-os systemd[1]: mysql.service: Consumed 1.621s CPU time, 467.2M memory peak, 0B memory swap peak.
+root@pop-os:/etc# ps -ef | grep mysql
+root     2728163 2658287  0 10:49 pts/3    00:00:00 grep --color=auto mysql
+root@pop-os:/etc# 
+root@pop-os:/etc# 
+root@pop-os:/etc# rm -rf /var/lib/mysql
+root@pop-os:/etc# ls -l /var/lib/mysql
+ls: cannot access '/var/lib/mysql': No such file or directory
+root@pop-os:/etc# mysqld --initialize --user=mysql --datadir=/var/lib/mysql
+mysqld: Can't create directory '/var/lib/mysql/' (OS errno 13 - Permission denied)
+root@pop-os:/etc# mkdir /var/lib/mysql/
+root@pop-os:/etc# chown mysql:mysql /var/lib/mysql/
+root@pop-os:/etc# mysqld --initialize --user=mysql --datadir=/var/lib/mysql
+root@pop-os:/etc# ls -l /var/lib/mysql
+total 79276
+-rw-r----- 1 mysql mysql       56 Apr  1 10:50  auto.cnf
+-rw------- 1 mysql mysql     1705 Apr  1 10:50  ca-key.pem
+-rw-r--r-- 1 mysql mysql     1112 Apr  1 10:50  ca.pem
+-rw-r--r-- 1 mysql mysql     1112 Apr  1 10:50  client-cert.pem
+-rw------- 1 mysql mysql     1705 Apr  1 10:50  client-key.pem
+-rw-r----- 1 mysql mysql   196608 Apr  1 10:50 '#ib_16384_0.dblwr'
+-rw-r----- 1 mysql mysql  8585216 Apr  1 10:50 '#ib_16384_1.dblwr'
+-rw-r----- 1 mysql mysql     5927 Apr  1 10:50  ib_buffer_pool
+-rw-r----- 1 mysql mysql 12582912 Apr  1 10:50  ibdata1
+drwxr-x--- 2 mysql mysql      680 Apr  1 10:50 '#innodb_redo'
+drwxr-x--- 2 mysql mysql       40 Apr  1 10:50 '#innodb_temp'
+drwxr-x--- 2 mysql mysql      160 Apr  1 10:50  mysql
+-rw-r----- 1 mysql mysql 26214400 Apr  1 10:50  mysql.ibd
+drwxr-x--- 2 mysql mysql     2240 Apr  1 10:50  performance_schema
+-rw------- 1 mysql mysql     1705 Apr  1 10:50  private_key.pem
+-rw-r--r-- 1 mysql mysql      452 Apr  1 10:50  public_key.pem
+-rw-r--r-- 1 mysql mysql     1112 Apr  1 10:50  server-cert.pem
+-rw------- 1 mysql mysql     1705 Apr  1 10:50  server-key.pem
+drwxr-x--- 2 mysql mysql       60 Apr  1 10:50  sys
+-rw-r----- 1 mysql mysql 16777216 Apr  1 10:50  undo_001
+-rw-r----- 1 mysql mysql 16777216 Apr  1 10:50  undo_002
+root@pop-os:/etc# ps -ef | grep mysql
+root     2728404 2658287  0 10:50 pts/3    00:00:00 grep --color=auto mysql
+root@pop-os:/etc# systemctl restart mysql
+root@pop-os:/etc# ps -ef | grep mysql
+mysql    2728451       1 13 10:50 ?        00:00:00 /usr/sbin/mysqld
+root     2728505 2658287  0 10:51 pts/3    00:00:00 grep --color=auto mysql
+root@pop-os:/etc# mysql -u root
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: NO)
+root@pop-os:/etc# mysql -u root -p
+Enter password: 
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+root@pop-os:/etc# cat /var/log/mysql/error.log | grep "temporary password"
+2025-04-01T02:50:15.516562Z 6 [Note] [MY-010454] [Server] A temporary password is generated for root@localhost: izC!<k=-S3sK
+root@pop-os:/etc# mysql -u root -p
+Enter password: 
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 10
+Server version: 8.0.41-0ubuntu0.24.04.1
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+
+---
+
 mysql> UPDATE user SET authentication_string='*2B12E1A2252D642C09F640B63ED35DCC5690464A', plugin='mysql_native_password' WHERE user='root' AND host='localhost';
 Query OK, 0 rows affected (0.00 sec)
 Rows matched: 0  Changed: 0  Warnings: 0
