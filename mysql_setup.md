@@ -51,3 +51,55 @@ root     2726836 2658287  0 10:40 pts/3    00:00:00 grep --color=auto mysql
 root@pop-os:/etc# mysql -u root -p
 Enter password: 
 ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+
+---
+
+root@pop-os:/etc# systemctl stop mysql
+root@pop-os:/etc# systemctl status mysql
+○ mysql.service - MySQL Community Server
+     Loaded: loaded (/usr/lib/systemd/system/mysql.service; enabled; preset: enabled)
+     Active: inactive (dead) since Tue 2025-04-01 10:43:23 +08; 2s ago
+   Duration: 2min 38.196s
+    Process: 2726738 ExecStartPre=/usr/share/mysql/mysql-systemd-start pre (code=exited, status=0/SUCCESS)
+    Process: 2726746 ExecStart=/usr/sbin/mysqld (code=exited, status=0/SUCCESS)
+   Main PID: 2726746 (code=exited, status=0/SUCCESS)
+     Status: "Server shutdown complete"
+        CPU: 1.621s
+
+Apr 01 10:40:43 pop-os systemd[1]: Starting mysql.service - MySQL Community Server...
+Apr 01 10:40:43 pop-os systemd[1]: Started mysql.service - MySQL Community Server.
+Apr 01 10:43:22 pop-os systemd[1]: Stopping mysql.service - MySQL Community Server...
+Apr 01 10:43:23 pop-os systemd[1]: mysql.service: Deactivated successfully.
+Apr 01 10:43:23 pop-os systemd[1]: Stopped mysql.service - MySQL Community Server.
+Apr 01 10:43:23 pop-os systemd[1]: mysql.service: Consumed 1.621s CPU time, 467.2M memory peak, 0B memory swap peak.
+root@pop-os:/etc# ps -ef | grep mysql
+root     2727185 2658287  0 10:43 pts/3    00:00:00 grep --color=auto mysql
+root@pop-os:/etc# mysqld_safe --skip-grant-tables &
+[1] 2727204
+root@pop-os:/etc# 2025-04-01T02:43:51.809660Z mysqld_safe Logging to '/var/log/mysql/error.log'.
+2025-04-01T02:43:51.811433Z mysqld_safe Directory '/var/run/mysqld' for UNIX socket file don't exists.
+
+[1]+  Exit 1                  mysqld_safe --skip-grant-tables
+root@pop-os:/etc# ls -l /var/run/mysqld
+ls: cannot access '/var/run/mysqld': No such file or directory
+root@pop-os:/etc# mkdir /var/run/mysqld
+root@pop-os:/etc# chown mysql:mysql /var/run/mysqld
+root@pop-os:/etc# mysqld_safe --skip-grant-tables &
+[1] 2727382
+root@pop-os:/etc# 2025-04-01T02:44:21.239666Z mysqld_safe Logging to '/var/log/mysql/error.log'.
+2025-04-01T02:44:21.263083Z mysqld_safe Starting mysqld daemon with databases from /var/lib/mysql
+
+root@pop-os:/etc# mysql -u root
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 7
+Server version: 8.0.41-0ubuntu0.24.04.1 (Ubuntu)
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
