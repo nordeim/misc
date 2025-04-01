@@ -102,4 +102,13 @@ owners.
 
 Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
 
-mysql>
+mysql> USE mysql;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> SELECT Host, User, authentication_string, plugin FROM user WHERE User='root';
+Empty set (0.00 sec)
+
+---
+
