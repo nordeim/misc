@@ -1,3 +1,4 @@
+https://copilot.microsoft.com/shares/Qv6ysA8FsFG7jvCCS6Tmo  
 mysql> CREATE USER 'root'@'127.0.0.1' IDENTIFIED BY 'Admin1234';
 Query OK, 0 rows affected (0.02 sec)
 
