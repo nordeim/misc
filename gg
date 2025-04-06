@@ -1,0 +1,109 @@
+#tar -cf - etc/passwd etc/shadow etc/group etc/sudoers etc/localtime etc/hostname etc/profile *sh boot/*5.19.16* usr/lib/firmware usr/src/* usr/lib/modules/5.19.16-051916-generic boot/*6.0.0* usr/lib/modules/6.0.0-1-amd64 etc/resolv.conf etc/resolv.conf.1 misc usr/local/bin/* usr/local/lib/* usr/lib/x86_64-linux-gnu/libplacebo.so.192 etc/wpa_supplicant.conf etc/wpa_supplicant/wpa_supplicant.conf etc/timezone etc/locale.gen usr/lib/casper/casper-md5check.1 usr/lib/systemd/system/casper-md5check.service etc/systemd/system/custom_tasks_at_startup.service etc/systemd/system/default.target.wants/custom_tasks_at_startup.service usr/lib/casper/casper-md5check etc/systemd/system/multi-user.target.wants/casper-md5check.service | tar -xvf - -C /
+#tar -cf - opt/zoom opt/microsoft opt/google usr/share/doc/zoom usr/bin/zoom usr/bin/google-chrome* usr/bin/microsoft-edge* | tar -xvf - -C /
+
+if [ ! -z "$1" ] ; then
+  imagepath=$1
+else
+  echo "missing parameter #1 which is image_path like casper_mpv_1" 
+fi
+
+if [ ! -z "$2" ] ; then
+  imagever=$2
+else
+  echo "missing parameter #2 which is image_version like `date -I`"
+  sleep 5
+fi
+
+[ -d /mnt ] ||  mkdir /mnt
+[ -d /mnt/_nr_ ] && rm -rf /mnt/_nr_
+if [ -d /mnt/nr ] ; then
+   [ -d /mnt/nr/casper ] || mv /mnt/nr /mnt/_nr_
+fi
+
+sda3dev=`ls -l /dev/disk/by-uuid/aa9f1d4d-86f6-4576-8fdd-faef64ec0d38 | awk -F/ '{print $NF}'`
+mount | grep $sda3dev | egrep '/cdrom|/run/live/medium'
+
+if [ $? -eq 0 ] ; then
+
+   if [ ! -d /mnt/nr/casper ] ; then
+      if [ -d /run/live/medium/casper ] ; then
+         ln -s /run/live/medium /mnt/nr
+      elif [ -d /cdrom/casper ] ; then
+         ln -s /cdrom /mnt/nr
+      fi
+   fi
+
+else
+
+  mount | grep $sda3dev && umount /dev/$sda3dev
+  mount | grep $sda3dev 
+  if [ $? -ne 0 ] ; then
+    fsck.ext4 /dev/$sda3dev
+    mount -t ext4 /dev/$sda3dev /mnt/nr
+  fi
+
+fi
+
+if [ ! -d /mnt/nr/casper ] ; then
+     
+   echo "image folder NOT Found at /mnt/nr/casper"
+   echo "you need to mount image filesystem at /mnt/nr manually"
+   sleep 7
+   exit 1
+     
+fi
+     
+ tomountimage=/mnt/nr/${imagepath}/filesystem.squashfs_${imagever}
+ tomakeimage=/mnt/nr/${imagepath}/filesystem.squashfs_`date -I`
+ echo "to mount image: $tomountimage"
+ echo "to make image: $tomakeimage"
+ 
+ if [ -d ~pete/proj ] ; then
+ 
+   cd ~pete/proj
+ 
+   mount | grep proj
+ 
+   if [ $? -ne 0 ] ; then
+ 
+     if [ ! -f ~pete/proj/fin/proc/version ] ; then
+ 
+#        mv ~pete/proj/to ~pete/proj/to_`uname -r`_`date -I`
+#        touch ~pete/proj/to
+        rm -rf ~pete/proj/fm ~pete/proj/fin ~pete/proj/temp
+        mkdir ~pete/proj/fm ~pete/proj/fin  ~pete/proj/temp
+ 
+       if [ $? -eq 0 ] ; then
+        [ -d ~pete/proj/fm ] && mount -t squashfs -o loop $tomountimage ~pete/proj/fm
+        [ -f ~pete/proj/fm/etc/passwd ] && mount -t overlay -o lowerdir=fm,upperdir=to,workdir=temp overlay fin
+        [ -f ~pete/proj/fin/etc/passwd ] || mount -t overlay -o lowerdir=/run/live/rootfs/filesystem.squashfs,upperdir=to,workdir=temp overlay fin
+        [ -f ~pete/proj/fin/etc/passwd ] || mount -t overlay -o lowerdir=/rofs,upperdir=to,workdir=temp overlay fin
+        [ -f ~pete/proj/fin/etc/passwd ] && for i in dev dev/pts proc sys run; do mount -B /$i fin/$i ; done
+        mount | grep proj
+        echo "chroot fin /bin/bash"
+        echo "apt update"
+        echo "apt upgrade"
+        echo "apt update"
+        echo "apt upgrade"
+       else
+        echo "Cleanup of fm fin to and temp folders in /home/pete/proj FAILED"
+       fi
+    
+    else
+ 
+       cd ~pete/proj
+ 
+       if [ -d ~pete/proj/fin/dev ] ; then
+         for i in dev/pts dev proc sys run; do umount fin/$i ; done
+         for i in dev/pts dev proc sys run; do umount fin/$i ; done
+       fi
+       [ -d ~pete/proj/fin/dev ] && for i in dev/pts dev proc sys run; do umount -f fin/$i ; done
+       mount | grep proj
+       echo "mksquashfs fin  $tomakeimage"
+ 
+    fi
+ 
+  fi
+ 
+ fi
+ 
