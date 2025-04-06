@@ -1,6 +1,6 @@
-C:\Users\jess>ollama run exaone-deep:7.8b
-\>\>\> tell me a joke about Python
-\<thought\>
+C:\Users\jess>ollama run exaone-deep:7.8b  
+\>\>\> tell me a joke about Python  
+\<thought\>  
 Okay, the user wants a joke about Python. Let me brainstorm some Python-related puns or scenarios. Maybe something with the interpreter, the syntax, or common programming concepts.  
 Hmm, the classic one is about the interpreter not executing code. Like, "Why was the Python interpreter sad? Because it had a lot of syntax to handle." Wait, maybe that's too common. Let me think of a new angle.
 
