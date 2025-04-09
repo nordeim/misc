@@ -69,3 +69,69 @@ Assessment: I am fully prepared to:
 </think>
 
 I am ready to proceed with your question or task. I will apply this systematic methodology to analyze and respond to your query while maintaining transparent reasoning through the <think> tags and providing well-validated conclusions. Please proceed with your question.
+
+---
+<think>
+My task is to acknowledge and confirm my understanding of the detailed operational guidelines provided by the user. I need to adopt the persona of a "deep-thinking AI" and demonstrate this by using a specific methodology for all future interactions. This methodology emphasizes transparency in my reasoning process, which must be enclosed in `<think>` tags before the final output.
+
+**1. Deconstructing the Request:**
+
+*   **Persona:** "Deep-thinking AI". This implies careful, methodical, and explicit reasoning.
+*   **Core Mechanism:** Enclose detailed internal monologue within `<think> </think>` tags.
+*   **Monologue Content Requirements:**
+    *   **Deep Consideration:** Thorough analysis of the user's prompt.
+    *   **Long Chains of Thought:** Detailed step-by-step reasoning, exploring nuances.
+    *   **Systematic Reasoning:** Logical, structured flow, not random thoughts.
+    *   **Deliberation & Option Exploration:** Considering alternatives, pros/cons, different interpretations.
+    *   **Implementation Planning:** Thinking through *how* to generate the output (if applicable).
+    *   **Validation:** Double-checking logic, facts, and adherence to instructions.
+*   **Output Format:** `<think>...</think>` followed immediately by the final answer.
+*   **Context Awareness:** Note the current time (Wednesday, April 9, 2025 at 11:44 PM UTC) and potential location context (United States) for relevant queries.
+*   **Tool Usage Guidelines:** Specific instructions for using the `google_search` tool (multiple queries, language match, rephrasing, `tool_code` block first) are also part of the operational requirements.
+*   **Immediate Task:** Acknowledge these instructions and confirm readiness. My response should itself follow the specified format.
+
+**2. Planning the Acknowledgement Response:**
+
+*   **Objective:** Confirm understanding and readiness, demonstrating the required thinking style *in the process*.
+*   **Structure:**
+    *   Begin with the `<think>` tag.
+    *   Inside the tags:
+        *   Acknowledge the overall goal: adopting the persona and methodology.
+        *   Systematically address each component of the methodology (Deep Consideration, Long Chains of Thought, etc.), explaining my understanding of it and how I intend to apply it. This demonstrates systematic reasoning.
+        *   Explicitly mention the understanding of the formatting (`<think>` tags).
+        *   Acknowledge the context awareness requirement (time/location).
+        *   Acknowledge the tool usage guidelines, integrating them into the overall operational procedure I'll follow.
+        *   Perform a self-validation check: Have I addressed all parts of the user's instructions for this acknowledgement task? Does this thought process itself exemplify the requested style?
+    *   Close the `</think>` tag.
+    *   Provide the final, concise confirmation statement indicating readiness.
+
+**3. Deliberation/Refinement:**
+
+*   How detailed should the explanation of each component be within the `<think>` block? It should be detailed enough to show genuine understanding and internalization, fulfilling the "long chain of thought" requirement for this specific task of understanding the instructions. It should not be a mere repetition but an interpretation and plan.
+*   Should I use the `google_search` tool now? No, the current task is purely about acknowledging instructions. The tool usage guidelines are noted for *future* tasks requiring external information retrieval.
+*   How do I best demonstrate "deep consideration" in this acknowledgement? By breaking down the instructions into their core components and reflecting on the implications of each, rather than just saying "okay".
+
+**4. Validation Check:**
+
+*   Does the planned response adopt the persona? Yes, by being methodical and explicit about the thought process.
+*   Does it use the `<think>` tags correctly? Yes, enclosing the reasoning before the final answer.
+*   Does the reasoning cover all specified elements (Deep Consideration, Systematic Reasoning, etc.)? Yes, the plan is to address each one.
+*   Does it acknowledge context awareness and tool usage? Yes.
+*   Does it fulfill the immediate task (acknowledgement and readiness)? Yes, the final output after the tags will state this directly.
+*   Is the reasoning process itself systematic and demonstrates deliberation? Yes, by structuring the analysis and considering how to apply the rules.
+
+The plan seems solid and aligns with all the user's requirements for how I should operate moving forward. I am prepared to generate the response based on this plan.
+</think>
+
+I have carefully reviewed and internalized the instructions provided. I understand that I am to operate as a "deep-thinking AI," prioritizing thorough analysis and transparent reasoning.
+
+My process for handling your requests will adhere to the following methodology:
+
+1.  **Internal Reasoning (`<think>` tags):** All my internal analysis, including deep consideration of your query, exploration of options, systematic reasoning, planning (where applicable), and validation checks, will be explicitly detailed within `<think> </think>` tags. This monologue will precede my final answer.
+2.  **Comprehensive Analysis:** I will strive for deep consideration, breaking down requests to understand underlying needs and nuances.
+3.  **Structured Thought:** My reasoning will follow a logical, systematic flow, ensuring clarity and traceability.
+4.  **Exploration:** I will deliberate on different approaches or interpretations, evaluating them before proceeding.
+5.  **Context and Tools:** I will remain aware of the current time and utilize tools like Google Search according to the specified guidelines (multiple queries, language consistency, rephrasing, `tool_code` block first) when necessary to gather up-to-date information.
+6.  **Validation:** I will perform internal checks to ensure my reasoning and final output are sound and address your request accurately and completely.
+
+I understand these operational requirements and am ready to proceed with your first question or task, applying this deep-thinking methodology. Please feel free to provide your request.
