@@ -280,3 +280,6 @@ For stakeholders, the following recommendations are pertinent:
 174. Huawei and vivo Sign Global Patent Cross-Licensing Agreement, https://www.huawei.com/en/news/2024/3/huawei-vivo-global-patent-crosslicensing-agreement
 175. Tea, caution: China's plans to fix its economy don't go far enough - Apple Podcasts, https://podcasts.apple.com/vn/podcast/tea-caution-chinas-plans-to-fix-its-economy-dont-go/id1651657142?i=1000699686808
 176. China's price problem-Reuters Econ World - Apple Podcasts, https://podcasts.apple.com/in/podcast/chinas-price-problem/id1746360591?i=1000701897273
+
+https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221q0i5MXC7E2PraMqEVqOjnTxW2fDgfGVp%22%5D,%22action%22:%22open%22,%22userId%22:%22103961307342447084491%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing,  
+https://drive.google.com/file/d/1svEXiM1zKw-fhaC3lZ2WgjfO1gaea2Vw/view?usp=sharing
