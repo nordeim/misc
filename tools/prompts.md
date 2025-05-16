@@ -44,3 +44,28 @@ $ cat compacted_input_file.md  # can have any extension as long as the input sou
 <content of `path3/filename3.ext3` added here, taken wholesale straight from `path3/filename3.ext3` >
 ```
 < can have any number of lines in between because the input file can be the output of auto code generated with comments in between enclosed code files>
+
+---
+Please double-check that your Python script for extracting embedded code files meets the following criteria/rules. Create a complete updated python script if your previous generated script do not comply with any of the rules below:
+
+1. Parse command-line arguments (sys.argv), prompt if missing.
+2. Check input file exists and is a text file (no null bytes).
+3. Read all lines from input.
+4. Use regex to find code fences: opening ```ext, closing ```.
+5. For each opening fence:
+   a. Try to extract filename from the preceding line if it matches “# path/filename”.
+   b. Else, try the next line if it matches “// path/filename” (handling quoted or unquoted filenames).
+   c. If neither, reject this block.
+   d. Scan forward for the matching closing fence. If none, reject.
+6. If filename and closing fence found:
+   a. Normalize and strip quotes/backticks.
+   b. Create parent directories as needed.
+   c. Write the content lines (excluding any filename marker) to the target file.
+   d. Log success; increment counter.
+7. At the end, log summary: total blocks found, extracted, rejected with reasons.
+8. Wrap in main() guard, use clear print statements for progress and summary.
+9. will always overwrite the existing file, meaning content with duplicate filenames should sequentially overwrite the previous content. The content of the same (duplicate) filenames should contain the last content processed. The rule is always to overwrite existing content with the same filename, but give a warning about this happening so that the user can later check the source input file for any possible error. 
+
+Cases to be rejected:
+- Blocks without proper filename markers.
+- Missing closing fence.
