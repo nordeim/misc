@@ -1,20 +1,3 @@
-<think>
-1. Parse command-line arguments using sys.argv:
-   - If fewer than 2 inputs given, prompt the user via input().
-2. Validate that the “list of files” input exists and is a file.
-3. Read the list file line by line, ignoring blank lines.
-4. For each path:
-   a. Check existence and regular file.
-   b. Read in binary and scan for null bytes (reject if any).
-   c. If “text,” decode to UTF-8 (errors=replace).
-   d. Write a header, code fence with extension, then the file’s content.
-   e. Log progress.
-5. Keep counters and lists of rejected files.
-6. At the end, print a summary of processed and rejected files.
-7. Wrap in a main() guard.
-</think>
-
-```python
 #!/usr/bin/env python3
 """
 assemble_code_files_from_given_list_as_input.py
@@ -125,12 +108,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-```
 
-Save this script as `assemble_code_files_from_given_list_as_input.py`, make it executable (`chmod +x …`), and run:
-
-```bash
-./assemble_code_files_from_given_list_as_input.py list_of_files.txt output_assembled_files.txt
-```
 
 It will log each file’s status, assemble text files into the output with fenced code blocks, and print a summary at the end.
