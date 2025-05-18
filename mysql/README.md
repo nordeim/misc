@@ -1,3 +1,4 @@
+```bash
 rm -rf /var/lib/mysql
 # rm -rf /Home1/neon/current/var/lib/mysql
 mkdir /var/lib/mysql
@@ -8,8 +9,8 @@ rm /var/log/mysql/error.log
 ps -ef | grep mysql
 systemctl start mysql.service
 mysql_secure_installation
-
-
+```
+```
 # sudo -u mysql mysql
 ERROR 1045 (28000): Access denied for user 'pete'@'localhost' (using password: NO)
 root@pop-os:/cdrom/project# sudo -u mysql mysql -u root
@@ -41,6 +42,7 @@ Query OK, 0 rows affected (0.01 sec)
 
 mysql> flush privileges;
 Query OK, 0 rows affected (0.00 sec)
+```
 
 ---
 It appears your MySQL server is failing to start because a crucial InnoDB redo log file is missing. The error logs clearly indicate this:
