@@ -1,6 +1,6 @@
 # TaskMaster Pro: Modern Task Management
 
-![TaskMaster Pro Banner](https://i.imgur.com/YourImgUrl.png)
+![image](https://github.com/user-attachments/assets/12d80146-07f9-4fba-a608-2cd0ad7b0585)
 
 TaskMaster Pro is a full-featured, powerful task management application designed to help you organize your life with style and efficiency. Built with Python and PySide6, it offers a beautiful modern interface with multiple views, smart organization features, and productivity tools to keep you on track.
 
