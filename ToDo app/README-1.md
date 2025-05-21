@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/your-org/your-repo/main/.github/banner.png" width="680" alt="TODO Pro banner">
-</p>
+![image](https://github.com/user-attachments/assets/7254d2af-030b-4c8d-88e8-4f72d2aaf847)
 
 <h1 align="center">🔥 TODO Pro</h1>
 <p align="center">
