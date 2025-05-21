@@ -3801,4 +3801,1055 @@ class KanbanColumn(QWidget):
             background-color: {theme['bg_tertiary']};
             border-radius: 4px;
         """)
-        header.setAlignment
+        header.setAlignment(Qt.AlignCenter)
+        layout.addWidget(header)
+        
+        # Task count
+        self.task_count = QLabel("0 tasks")
+        self.task_count.setAlignment(Qt.AlignCenter)
+        self.task_count.setStyleSheet(f"color: {theme['text_secondary']}; font-size: 12px;")
+        layout.addWidget(self.task_count)
+        
+        # Tasks list
+        self.task_list = QListWidget()
+        self.task_list.setDragEnabled(True)
+        self.task_list.setAcceptDrops(True)
+        self.task_list.setDragDropMode(QListWidget.DragDrop)
+        self.task_list.setDefaultDropAction(Qt.MoveAction)
+        self.task_list.setSelectionMode(QListWidget.SingleSelection)
+        self.task_list.setMinimumHeight(300)
+        self.task_list.setStyleSheet(f"""
+            QListWidget {{
+                background-color: {theme['bg_secondary']};
+                border-radius: 6px;
+                padding: 4px;
+            }}
+            QListWidget::item {{
+                background-color: transparent;
+                padding: 0px;
+                margin: 4px 0px;
+            }}
+        """)
+        
+        layout.addWidget(self.task_list)
+        
+        # Apply column styling
+        self.setStyleSheet(f"""
+            background-color: {theme['bg_tertiary']};
+            border-radius: 8px;
+            min-width: 250px;
+            max-width: 350px;
+        """)
+        
+        # Set fixed width
+        self.setMinimumWidth(280)
+        self.setMaximumWidth(350)
+    
+    def loadTasks(self, tasks):
+        """Load tasks into the column."""
+        self.tasks = tasks
+        self.task_list.clear()
+        
+        for task in tasks:
+            item = QListWidgetItem()
+            card = BoardTaskCard(task)
+            
+            # Connect signals
+            card.editRequested.connect(self.editRequested)
+            card.deleteRequested.connect(self.deleteRequested)
+            card.statusChanged.connect(self.taskMoved)
+            
+            item.setSizeHint(card.sizeHint())
+            self.task_list.addItem(item)
+            self.task_list.setItemWidget(item, card)
+        
+        # Update count
+        self.task_count.setText(f"{len(tasks)} tasks")
+    
+    def editRequested(self, task_id):
+        """Pass along edit request signal."""
+        parent = self.parent()
+        if parent and hasattr(parent, 'editRequested'):
+            parent.editRequested.emit(task_id)
+    
+    def deleteRequested(self, task_id):
+        """Pass along delete request signal."""
+        parent = self.parent()
+        if parent and hasattr(parent, 'deleteRequested'):
+            parent.deleteRequested.emit(task_id)
+    
+    def dragEnterEvent(self, event):
+        """Handle drag enter event."""
+        if event.mimeData().hasText():
+            event.accept()
+        else:
+            event.ignore()
+    
+    def dragMoveEvent(self, event):
+        """Handle drag move event."""
+        if event.mimeData().hasText():
+            event.accept()
+        else:
+            event.ignore()
+    
+    def dropEvent(self, event):
+        """Handle drop event."""
+        if event.mimeData().hasText():
+            # Get the task ID from mime data
+            task_id = int(event.mimeData().text())
+            
+            # Emit signal that task was moved to this column
+            self.taskMoved.emit(task_id, self.status)
+            
+            event.accept()
+        else:
+            event.ignore()
+
+
+class BoardView(QWidget):
+    """Kanban board view for tasks."""
+    
+    editRequested = Signal(int)
+    deleteRequested = Signal(int)
+    statusChanged = Signal(int, str)
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.initUI()
+    
+    def initUI(self):
+        # Main layout
+        layout = QHBoxLayout(self)
+        layout.setSpacing(15)
+        
+        # Create columns
+        self.todo_column = KanbanColumn("To Do", "todo", self)
+        self.in_progress_column = KanbanColumn("In Progress", "in_progress", self)
+        self.review_column = KanbanColumn("Review", "review", self)
+        self.done_column = KanbanColumn("Done", "done", self)
+        
+        # Connect signals
+        self.todo_column.taskMoved.connect(self.statusChanged)
+        self.in_progress_column.taskMoved.connect(self.statusChanged)
+        self.review_column.taskMoved.connect(self.statusChanged)
+        self.done_column.taskMoved.connect(self.statusChanged)
+        
+        # Add to layout
+        layout.addWidget(self.todo_column)
+        layout.addWidget(self.in_progress_column)
+        layout.addWidget(self.review_column)
+        layout.addWidget(self.done_column)
+        
+        # Make columns scrollable
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        
+        container = QWidget()
+        container.setLayout(layout)
+        scroll_area.setWidget(container)
+        
+        # Set as main layout
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addWidget(scroll_area)
+    
+    def loadTasks(self):
+        """Load tasks into appropriate columns."""
+        # Get tasks for each status
+        todo_tasks = TaskModel.get_tasks_by_status("todo")
+        in_progress_tasks = TaskModel.get_tasks_by_status("in_progress")
+        review_tasks = TaskModel.get_tasks_by_status("review")
+        done_tasks = TaskModel.get_tasks_by_status("done")
+        
+        # Load into columns
+        self.todo_column.loadTasks(todo_tasks)
+        self.in_progress_column.loadTasks(in_progress_tasks)
+        self.review_column.loadTasks(review_tasks)
+        self.done_column.loadTasks(done_tasks)
+
+
+class MainWindow(QMainWindow):
+    """Main application window."""
+    
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle(f"{APP_NAME} {VERSION}")
+        self.setMinimumSize(1000, 700)
+        
+        # Initialize settings
+        self.settings = QSettings("TaskMaster", "TaskMaster")
+        self.restoreGeometry(self.settings.value("geometry", QByteArray()))
+        self.restoreState(self.settings.value("windowState", QByteArray()))
+        
+        # Current view type
+        self.current_view = ViewType.LIST
+        
+        # Initialize UI
+        self.initUI()
+        
+        # Load tasks
+        self.loadTasks()
+        
+        # Set up system tray
+        self.setupTray()
+        
+        # Start a timer to check for due tasks
+        self.reminder_timer = QTimer(self)
+        self.reminder_timer.timeout.connect(self.checkDueTasks)
+        self.reminder_timer.start(60000)  # Check every minute
+    
+    def initUI(self):
+        # Central widget
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
+        
+        # Main layout
+        main_layout = QVBoxLayout(central_widget)
+        main_layout.setContentsMargins(10, 10, 10, 10)
+        main_layout.setSpacing(10)
+        
+        # Create toolbar
+        self.createToolBar()
+        
+        # Header with app name and view selector
+        header_widget = QWidget()
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setContentsMargins(0, 0, 0, 10)
+        
+        # App logo/name
+        logo_layout = QHBoxLayout()
+        app_logo = QLabel("📋")
+        app_logo.setStyleSheet("font-size: 24px;")
+        app_name = QLabel(APP_NAME)
+        app_name.setStyleSheet("font-size: 24px; font-weight: bold;")
+        
+        logo_layout.addWidget(app_logo)
+        logo_layout.addWidget(app_name)
+        header_layout.addLayout(logo_layout)
+        
+        # View selector
+        view_selector = QComboBox()
+        view_selector.addItem("List View", ViewType.LIST)
+        view_selector.addItem("Board View", ViewType.BOARD)
+        view_selector.addItem("Calendar View", ViewType.CALENDAR)
+        view_selector.addItem("Statistics", ViewType.STATS)
+        view_selector.currentIndexChanged.connect(self.changeView)
+        
+        # Search bar
+        self.search_box = QLineEdit()
+        self.search_box.setPlaceholderText("Search tasks...")
+        self.search_box.textChanged.connect(self.filterTasks)
+        self.search_box.setClearButtonEnabled(True)
+        self.search_box.setMinimumWidth(200)
+        
+        header_right_layout = QHBoxLayout()
+        header_right_layout.addWidget(QLabel("View:"))
+        header_right_layout.addWidget(view_selector)
+        header_right_layout.addSpacing(20)
+        header_right_layout.addWidget(self.search_box)
+        
+        header_layout.addStretch()
+        header_layout.addLayout(header_right_layout)
+        
+        main_layout.addWidget(header_widget)
+        
+        # Filter bar
+        filter_widget = QWidget()
+        filter_layout = QHBoxLayout(filter_widget)
+        filter_layout.setContentsMargins(0, 0, 0, 10)
+        
+        # Filter by category
+        filter_layout.addWidget(QLabel("Category:"))
+        self.category_filter = QComboBox()
+        self.category_filter.addItem("All Categories", -1)
+        self.loadCategories()
+        self.category_filter.currentIndexChanged.connect(self.filterTasks)
+        filter_layout.addWidget(self.category_filter)
+        
+        # Filter by priority
+        filter_layout.addWidget(QLabel("Priority:"))
+        self.priority_filter = QComboBox()
+        self.priority_filter.addItem("All Priorities", -1)
+        self.priority_filter.addItem("None", 0)
+        self.priority_filter.addItem("Low", 1)
+        self.priority_filter.addItem("Medium", 2)
+        self.priority_filter.addItem("High", 3)
+        self.priority_filter.addItem("Critical", 4)
+        self.priority_filter.currentIndexChanged.connect(self.filterTasks)
+        filter_layout.addWidget(self.priority_filter)
+        
+        # Filter by status
+        filter_layout.addWidget(QLabel("Status:"))
+        self.status_filter = QComboBox()
+        self.status_filter.addItem("All Statuses", "all")
+        self.status_filter.addItem("To Do", "todo")
+        self.status_filter.addItem("In Progress", "in_progress")
+        self.status_filter.addItem("Review", "review")
+        self.status_filter.addItem("Done", "done")
+        self.status_filter.currentIndexChanged.connect(self.filterTasks)
+        filter_layout.addWidget(self.status_filter)
+        
+        # Filter by completion
+        filter_layout.addWidget(QLabel("Show:"))
+        self.completion_filter = QComboBox()
+        self.completion_filter.addItem("All Tasks", -1)
+        self.completion_filter.addItem("Active Only", 0)
+        self.completion_filter.addItem("Completed Only", 1)
+        self.completion_filter.currentIndexChanged.connect(self.filterTasks)
+        filter_layout.addWidget(self.completion_filter)
+        
+        # Filter by project
+        filter_layout.addWidget(QLabel("Project:"))
+        self.project_filter = QComboBox()
+        self.project_filter.addItem("All Projects", -1)
+        self.project_filter.addItem("No Project", 0)
+        self.loadProjects()
+        self.project_filter.currentIndexChanged.connect(self.filterTasks)
+        filter_layout.addWidget(self.project_filter)
+        
+        filter_layout.addStretch()
+        
+        main_layout.addWidget(filter_widget)
+        
+        # Stacked widget for different views
+        self.view_stack = QStackedWidget()
+        
+        # List view
+        self.list_view = QListWidget()
+        self.list_view.setSelectionMode(QListWidget.SingleSelection)
+        self.list_view.itemDoubleClicked.connect(self.onTaskDoubleClicked)
+        self.view_stack.addWidget(self.list_view)
+        
+        # Board view
+        self.board_view = BoardView()
+        self.board_view.editRequested.connect(self.editTask)
+        self.board_view.deleteRequested.connect(self.confirmDeleteTask)
+        self.board_view.statusChanged.connect(self.onTaskStatusChanged)
+        self.view_stack.addWidget(self.board_view)
+        
+        # Calendar view
+        self.calendar_view = CalendarWidget()
+        self.calendar_view.taskSelected.connect(self.editTask)
+        self.view_stack.addWidget(self.calendar_view)
+        
+        # Statistics view
+        self.stats_view = StatisticsWidget()
+        self.view_stack.addWidget(self.stats_view)
+        
+        main_layout.addWidget(self.view_stack)
+        
+        # Status bar
+        self.status_bar = QStatusBar()
+        self.setStatusBar(self.status_bar)
+        
+        # Project progress widget in status bar
+        self.project_progress = QLabel()
+        self.status_bar.addPermanentWidget(self.project_progress)
+        
+        # Task counter widget in status bar
+        self.task_counter = QLabel()
+        self.status_bar.addPermanentWidget(self.task_counter)
+        
+        # Update status bar
+        self.updateStatusBar()
+    
+    def createToolBar(self):
+        """Create the main toolbar."""
+        toolbar = QToolBar("Main Toolbar")
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setMovable(False)
+        self.addToolBar(Qt.TopToolBarArea, toolbar)
+        
+        # Add Task button
+        add_task_action = QAction("Add Task", self)
+        add_task_action.triggered.connect(self.showAddTaskDialog)
+        toolbar.addAction(add_task_action)
+        
+        # Add Category button
+        add_category_action = QAction("Add Category", self)
+        add_category_action.triggered.connect(self.showAddCategoryDialog)
+        toolbar.addAction(add_category_action)
+        
+        # Add Project button
+        add_project_action = QAction("Add Project", self)
+        add_project_action.triggered.connect(self.showAddProjectDialog)
+        toolbar.addAction(add_project_action)
+        
+        toolbar.addSeparator()
+        
+        # Pomodoro timer
+        pomodoro_action = QAction("Pomodoro Timer", self)
+        pomodoro_action.triggered.connect(self.startPomodoro)
+        toolbar.addAction(pomodoro_action)
+        
+        toolbar.addSeparator()
+        
+        # Settings
+        settings_action = QAction("Settings", self)
+        settings_action.triggered.connect(self.showSettings)
+        toolbar.addAction(settings_action)
+    
+    def loadCategories(self):
+        """Load categories into the filter dropdown."""
+        self.category_filter.clear()
+        self.category_filter.addItem("All Categories", -1)
+        
+        categories = CategoryModel.get_all_categories()
+        for category in categories:
+            self.category_filter.addItem(category[1], category[0])
+    
+    def loadProjects(self):
+        """Load projects into the filter dropdown."""
+        self.project_filter.clear()
+        self.project_filter.addItem("All Projects", -1)
+        self.project_filter.addItem("No Project", 0)
+        
+        projects = ProjectModel.get_all_projects()
+        for project in projects:
+            self.project_filter.addItem(project[1], project[0])
+    
+    def changeView(self, index):
+        """Change the current view."""
+        view_type = self.sender().itemData(index)
+        self.current_view = view_type
+        self.view_stack.setCurrentIndex(index)
+        
+        # Reload tasks for the current view
+        self.loadTasks()
+    
+    def loadTasks(self):
+        """Load tasks based on current view."""
+        if self.current_view == ViewType.BOARD:
+            self.board_view.loadTasks()
+        elif self.current_view == ViewType.CALENDAR:
+            tasks = TaskModel.get_all_tasks()
+            self.calendar_view.loadTasks(tasks)
+        elif self.current_view == ViewType.STATS:
+            tasks = TaskModel.get_all_tasks()
+            self.stats_view.updateStats(tasks)
+        else:  # Default to LIST view
+            self.loadListViewTasks()
+        
+        # Update status bar with counts
+        self.updateStatusBar()
+    
+    def loadListViewTasks(self):
+        """Load tasks into the list view."""
+        self.list_view.clear()
+        tasks = TaskModel.get_all_tasks()
+        
+        # Apply current filters
+        filtered_tasks = self.applyFilters(tasks)
+        
+        for task in filtered_tasks:
+            item = QListWidgetItem()
+            widget = TaskItemWidget(task)
+            
+            # Connect signals
+            widget.statusChanged.connect(self.onTaskCompletionChanged)
+            widget.editRequested.connect(self.editTask)
+            widget.deleteRequested.connect(self.confirmDeleteTask)
+            
+            item.setSizeHint(widget.sizeHint())
+            self.list_view.addItem(item)
+            self.list_view.setItemWidget(item, widget)
+    
+    def applyFilters(self, tasks):
+        """Apply all active filters to tasks."""
+        filtered_tasks = []
+        
+        search_text = self.search_box.text().lower()
+        category_id = self.category_filter.currentData()
+        priority = self.priority_filter.currentData()
+        status = self.status_filter.currentData()
+        completion = self.completion_filter.currentData()
+        project_id = self.project_filter.currentData()
+        
+        for task in tasks:
+            # Match search text
+            text_match = (not search_text or
+                          search_text in task[2].lower() or  # title
+                          (task[3] and search_text in task[3].lower()))  # description
+            
+            # Match category
+            category_match = (category_id == -1 or  # All categories
+                             category_id == task[18])
+            
+            # Match priority
+            priority_match = (priority == -1 or  # All priorities
+                             priority == task[4])
+            
+            # Match status
+            status_match = (status == "all" or  # All statuses
+                           status == task[17])
+            
+            # Match completion
+            completion_match = (completion == -1 or  # All tasks
+                               completion == int(task[7]))
+            
+            # Match project
+            project_match = (project_id == -1 or  # All projects
+                            (project_id == 0 and task[19] is None) or  # No project
+                            project_id == task[19])
+            
+            # Include task if it matches all filters
+            if (text_match and category_match and priority_match and
+                status_match and completion_match and project_match):
+                filtered_tasks.append(task)
+        
+        return filtered_tasks
+    
+    def filterTasks(self):
+        """Filter tasks based on current filter selections."""
+        if self.current_view == ViewType.LIST:
+            self.loadListViewTasks()
+        elif self.current_view == ViewType.BOARD:
+            # Board view handles its own tasks
+            self.board_view.loadTasks()
+        elif self.current_view == ViewType.CALENDAR:
+            # Calendar view shows all tasks
+            tasks = TaskModel.get_all_tasks()
+            self.calendar_view.loadTasks(tasks)
+        
+        self.updateStatusBar()
+    
+    def updateStatusBar(self):
+        """Update the status bar with task counts."""
+        tasks = TaskModel.get_all_tasks()
+        filtered_tasks = self.applyFilters(tasks)
+        
+        # Task counter
+        total_tasks = len(tasks)
+        visible_tasks = len(filtered_tasks)
+        completed_tasks = sum(1 for task in tasks if task[7])
+        
+        # Count overdue tasks
+        today = QDate.currentDate()
+        overdue = 0
+        for task in tasks:
+            if not task[7] and task[5]:  # Not completed and has due date
+                due_date = QDate.fromString(task[5], Qt.ISODate)
+                if due_date < today:
+                    overdue += 1
+        
+        self.task_counter.setText(
+            f"Showing {visible_tasks} of {total_tasks} tasks • "
+            f"Completed: {completed_tasks} • Overdue: {overdue}"
+        )
+        
+        # Project progress - show active project if filtered
+        project_id = self.project_filter.currentData()
+        if project_id not in (-1, 0) and self.project_filter.currentIndex() > 0:
+            project_name = self.project_filter.currentText()
+            project_tasks = [t for t in tasks if t[19] == project_id]
+            
+            if project_tasks:
+                total = len(project_tasks)
+                completed = sum(1 for t in project_tasks if t[7])
+                progress = int((completed / total) * 100) if total > 0 else 0
+                
+                self.project_progress.setText(
+                    f"Project '{project_name}': {completed}/{total} tasks ({progress}%)"
+                )
+                self.project_progress.setVisible(True)
+            else:
+                self.project_progress.setVisible(False)
+        else:
+            self.project_progress.setVisible(False)
+    
+    def showAddTaskDialog(self):
+        """Show dialog to add a new task."""
+        dialog = TaskDialog(self)
+        if dialog.exec():
+            task_data = dialog.getTaskData()
+            if task_data['title']:
+                # Add the task
+                task_id = TaskModel.add_task(
+                    task_data['title'],
+                    task_data['description'],
+                    task_data['priority'],
+                    task_data['due_date'],
+                    task_data['due_time'],
+                    task_data['reminder'],
+                    task_data['category_id'],
+                    task_data['project_id'],
+                    task_data['parent_id'],
+                    task_data['recurring'],
+                    task_data['recurring_interval'],
+                    task_data['energy_level'],
+                    task_data['start_date'],
+                    task_data['estimated_time'],
+                    task_data['status'],
+                    task_data['notes']
+                )
+                
+                # Add tags
+                for tag_id in task_data['tags']:
+                    TaskModel.add_tag_to_task(task_id, tag_id)
+                
+                # Reload tasks
+                self.loadTasks()
+    
+    def editTask(self, task_id):
+        """Show dialog to edit an existing task."""
+        dialog = TaskDialog(self, task_id)
+        if dialog.exec():
+            task_data = dialog.getTaskData()
+            if task_data['title']:
+                # Update the task
+                TaskModel.update_task(
+                    task_id,
+                    task_data['title'],
+                    task_data['description'],
+                    task_data['priority'],
+                    task_data['due_date'],
+                    task_data['due_time'],
+                    task_data['reminder'],
+                    1 if task_data['completed'] else 0,
+                    task_data['category_id'],
+                    task_data['project_id'],
+                    task_data['recurring'],
+                    task_data['recurring_interval'],
+                    task_data['energy_level'],
+                    task_data['status'],
+                    task_data['start_date'],
+                    task_data['estimated_time'],
+                    notes=task_data['notes']
+                )
+                
+                # Update tags - first remove all existing
+                current_tags = TaskModel.get_task_tags(task_id)
+                for tag in current_tags:
+                    TaskModel.remove_tag_from_task(task_id, tag[0])
+                
+                # Then add selected tags
+                for tag_id in task_data['tags']:
+                    TaskModel.add_tag_to_task(task_id, tag_id)
+                
+                # Reload tasks
+                self.loadTasks()
+    
+    def onTaskCompletionChanged(self, task_id, completed):
+        """Handle task completion status change."""
+        TaskModel.toggle_task_completion(task_id, completed)
+        self.loadTasks()
+    
+    def onTaskStatusChanged(self, task_id, new_status):
+        """Handle task status change (from board view)."""
+        TaskModel.change_task_status(task_id, new_status)
+        self.loadTasks()
+    
+    def confirmDeleteTask(self, task_id):
+        """Confirm and delete a task."""
+        confirm = QMessageBox.question(
+            self,
+            "Confirm Delete",
+            "Are you sure you want to delete this task? This will also delete all subtasks.",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if confirm == QMessageBox.Yes:
+            TaskModel.delete_task(task_id)
+            self.loadTasks()
+    
+    def onTaskDoubleClicked(self, item):
+        """Handle double-click on task in list view."""
+        task_widget = self.list_view.itemWidget(item)
+        if task_widget:
+            self.editTask(task_widget.task_id)
+    
+    def showAddCategoryDialog(self):
+        """Show dialog to add a new category."""
+        dialog = CategoryDialog(self)
+        if dialog.exec():
+            category_data = dialog.getCategoryData()
+            if category_data['name']:
+                CategoryModel.add_category(
+                    category_data['name'],
+                    category_data['color'],
+                    category_data['icon']
+                )
+                self.loadCategories()
+    
+    def showAddProjectDialog(self):
+        """Show dialog to add a new project."""
+        dialog = ProjectDialog(self)
+        if dialog.exec():
+            project_data = dialog.getProjectData()
+            if project_data['name']:
+                ProjectModel.add_project(
+                    project_data['name'],
+                    project_data['description'],
+                    project_data['color'],
+                    project_data['due_date']
+                )
+                self.loadProjects()
+    
+    def startPomodoro(self):
+        """Start a Pomodoro timer for the selected task."""
+        # If a task is selected in the list view, use that
+        selected_items = self.list_view.selectedItems()
+        task_id = None
+        
+        if selected_items:
+            task_widget = self.list_view.itemWidget(selected_items[0])
+            if task_widget:
+                task_id = task_widget.task_id
+        
+        # If no task is selected, ask user to choose one
+        if not task_id:
+            # Get active tasks
+            tasks = [t for t in TaskModel.get_all_tasks() if not t[7]]  # not completed
+            
+            if not tasks:
+                QMessageBox.information(self, "No Tasks", "There are no active tasks to work on.")
+                return
+                
+            task_list = []
+            for task in tasks:
+                task_list.append((task[0], f"{task[2]} (Priority: {task[4]})"))
+            
+            # Show dialog to select a task
+            task_select = QDialog(self)
+            task_select.setWindowTitle("Select Task for Pomodoro")
+            task_select.setMinimumWidth(400)
+            
+            layout = QVBoxLayout(task_select)
+            layout.addWidget(QLabel("Choose a task to work on:"))
+            
+            list_widget = QListWidget()
+            for t_id, t_name in task_list:
+                item = QListWidgetItem(t_name)
+                item.setData(Qt.UserRole, t_id)
+                list_widget.addItem(item)
+            
+            layout.addWidget(list_widget)
+            
+            buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+            buttons.accepted.connect(task_select.accept)
+            buttons.rejected.connect(task_select.reject)
+            layout.addWidget(buttons)
+            
+            if task_select.exec():
+                selected = list_widget.selectedItems()
+                if selected:
+                    task_id = selected[0].data(Qt.UserRole)
+                else:
+                    return
+            else:
+                return
+        
+        # Start the pomodoro timer
+        pomodoro = PomodoroTimer(self, task_id)
+        pomodoro.exec()
+    
+    def showSettings(self):
+        """Show settings dialog."""
+        dialog = SettingsDialog(self)
+        dialog.themeChanged.connect(self.applyTheme)
+        
+        result = dialog.exec()
+        if result:
+            # Reload after settings change
+            self.loadTasks()
+    
+    def applyTheme(self, theme_name):
+        """Apply the selected theme."""
+        # Re-apply theme to application
+        app = QApplication.instance()
+        ThemeManager.apply_theme(app)
+    
+    def setupTray(self):
+        """Set up system tray icon and menu."""
+        self.tray_icon = QSystemTrayIcon(self)
+        # Use a simple emoji as icon since we don't have an actual icon file
+        icon_pixmap = QPixmap(32, 32)
+        icon_pixmap.fill(Qt.transparent)
+        painter = QPainter(icon_pixmap)
+        painter.setFont(QFont("Segoe UI Emoji", 16))
+        painter.drawText(icon_pixmap.rect(), Qt.AlignCenter, "📋")
+        painter.end()
+        self.tray_icon.setIcon(QIcon(icon_pixmap))
+        
+        # Create tray menu
+        tray_menu = QMenu()
+        
+        show_action = QAction("Show", self)
+        show_action.triggered.connect(self.showNormal)
+        tray_menu.addAction(show_action)
+        
+        add_task_action = QAction("Add Task", self)
+        add_task_action.triggered.connect(self.showAddTaskDialog)
+        tray_menu.addAction(add_task_action)
+        
+        start_pomodoro_action = QAction("Start Pomodoro", self)
+        start_pomodoro_action.triggered.connect(self.startPomodoro)
+        tray_menu.addAction(start_pomodoro_action)
+        
+        tray_menu.addSeparator()
+        
+        quit_action = QAction("Quit", self)
+        quit_action.triggered.connect(self.close)
+        tray_menu.addAction(quit_action)
+        
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.activated.connect(self.trayActivated)
+        self.tray_icon.show()
+    
+    def trayActivated(self, reason):
+        """Handle tray icon activation."""
+        if reason == QSystemTrayIcon.DoubleClick:
+            self.showNormal()
+    
+    def checkDueTasks(self):
+        """Check for tasks that are due soon and show notifications."""
+        # Get all active tasks with due dates
+        tasks = [t for t in TaskModel.get_all_tasks() if not t[7] and t[5]]  # not completed and has due date
+        
+        now = QDateTime.currentDateTime()
+        
+        for task in tasks:
+            due_date = QDate.fromString(task[5], Qt.ISODate)
+            
+            # If also has time, use that
+            if task[6]:  # due_time
+                due_time = QTime.fromString(task[6], "hh:mm")
+                due_datetime = QDateTime(due_date, due_time)
+            else:
+                # Assume end of day if no time specified
+                due_datetime = QDateTime(due_date, QTime(23, 59, 59))
+            
+            # Get the reminder setting from task or default
+            reminder_minutes = int(SettingsModel.get_setting('reminder_time', '15'))
+            
+            # If task has a specific reminder, use that
+            if task[7]:  # reminder
+                reminder_map = {
+                    "at_time": 0,
+                    "5_min_before": 5,
+                    "15_min_before": 15,
+                    "30_min_before": 30,
+                    "1_hour_before": 60,
+                    "2_hours_before": 120,
+                    "1_day_before": 1440
+                }
+                if task[7] in reminder_map:
+                    reminder_minutes = reminder_map[task[7]]
+            
+            # Calculate when to show the reminder
+            reminder_datetime = due_datetime.addSecs(-reminder_minutes * 60)
+            
+            # Check if it's time to show a reminder
+            secs_to_reminder = now.secsTo(reminder_datetime)
+            if 0 <= secs_to_reminder <= 60:  # Within a minute of reminder time
+                self.showTaskReminder(task)
+    
+    def showTaskReminder(self, task):
+        """Show a notification for a task that is due soon."""
+        title = f"Task Reminder: {task[2]}"
+        
+        # Format due time information
+        due_date = QDate.fromString(task[5], Qt.ISODate)
+        today = QDate.currentDate()
+        
+        if due_date == today:
+            due_text = "today"
+        elif due_date == today.addDays(1):
+            due_text = "tomorrow"
+        else:
+            due_text = due_date.toString("MMM d")
+        
+        if task[6]:  # has time
+            due_time = QTime.fromString(task[6], "hh:mm")
+            due_text += f" at {due_time.toString('h:mm AP')}"
+        
+        message = f"Your task is due {due_text}."
+        
+        # Show system tray notification
+        self.tray_icon.showMessage(title, message, QSystemTrayIcon.Information, 10000)
+    
+    def closeEvent(self, event):
+        """Handle window close event."""
+        self.settings.setValue("geometry", self.saveGeometry())
+        self.settings.setValue("windowState", self.saveState())
+        
+        if self.tray_icon.isVisible():
+            # Minimize to tray instead of closing if tray is available
+            self.hide()
+            event.ignore()
+        else:
+            event.accept()
+
+
+def main():
+    """Main application entry point."""
+    try:
+        # Initialize the database
+        init_db()
+        
+        # Start the application
+        app = QApplication(sys.argv)
+        app.setApplicationName(APP_NAME)
+        app.setOrganizationName("TaskMaster")
+        
+        # Apply theme
+        ThemeManager.apply_theme(app)
+        
+        # Create and show the main window
+        window = MainWindow()
+        window.show()
+        
+        # Use a special exit code for restart
+        exit_code = app.exec()
+        if exit_code == 1001:
+            QProcess.startDetached(sys.executable, sys.argv)
+        
+        return exit_code
+    except Exception as e:
+        print(f"Error starting application: {e}")
+        import traceback
+        traceback.print_exc()
+        
+        # Show error dialog
+        if 'app' in locals():
+            QMessageBox.critical(None, "Error", 
+                              f"An error occurred while starting the application:\n\n{str(e)}")
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+```
+
+# TaskMaster Pro: Modern Task Management
+
+![TaskMaster Pro Banner](https://i.imgur.com/YourImgUrl.png)
+
+TaskMaster Pro is a full-featured, powerful task management application designed to help you organize your life with style and efficiency. Built with Python and PySide6, it offers a beautiful modern interface with multiple views, smart organization features, and productivity tools to keep you on track.
+
+## ✨ Features
+
+### 🎯 Comprehensive Task Management
+- **Rich Task Details**: Set priorities, due dates, categories, energy levels, estimated times, and more
+- **Subtasks**: Break complex tasks into manageable components
+- **Tags**: Flexible tagging system for easier filtering and organization
+- **Projects**: Group related tasks under project umbrellas
+- **Recurring Tasks**: Set up repeating tasks with various intervals (daily, weekly, monthly, etc.)
+- **Notes & Attachments**: Add detailed notes and file attachments to tasks
+
+### 👁️ Multiple Views
+- **List View**: Traditional task list with detailed information
+- **Kanban Board**: Drag-and-drop interface with customizable columns
+- **Calendar View**: Visualize your tasks based on due dates
+- **Statistics**: Analyze your productivity with beautiful charts and metrics
+
+### ⏰ Productivity Features
+- **Pomodoro Timer**: Built-in Pomodoro technique timer to boost productivity
+- **Smart Reminders**: Notification system for upcoming and overdue tasks
+- **Time Tracking**: Keep track of estimated versus actual time spent on tasks
+
+### 🎨 Modern UI
+- **Light & Dark Themes**: Choose the visual theme that works best for you
+- **Interactive Elements**: Dynamic cards, drag-and-drop support, and animated transitions
+- **System Tray Integration**: Quick access even when minimized
+
+## 📷 Screenshots
+
+![List View](https://i.imgur.com/YourImgUrl1.png)
+*List View with detailed task information*
+
+![Board View](https://i.imgur.com/YourImgUrl2.png)
+*Kanban Board View for visual task management*
+
+![Calendar View](https://i.imgur.com/YourImgUrl3.png)
+*Calendar View helps visualize your schedule*
+
+![Statistics](https://i.imgur.com/YourImgUrl4.png)
+*Statistics View shows your productivity metrics*
+
+## 🚀 Installation
+
+### Prerequisites
+- Python 3.8 or higher
+- PySide6
+- QtCharts (part of PySide6)
+- SQLite3 (included with Python)
+
+### Setup
+1. Clone this repository:
+```bash
+git clone https://github.com/yourusername/taskmaster-pro.git
+cd taskmaster-pro
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Run the application:
+```bash
+python main.py
+```
+
+## 📋 Usage Guide
+
+### Creating Tasks
+1. Click the "Add Task" button in the toolbar
+2. Fill in the task details (title, description, due date, etc.)
+3. Set additional properties like priority, category, and tags
+4. Click "Save" to create the task
+
+### Managing Tasks
+- **Complete a Task**: Click the checkbox next to the task
+- **Edit a Task**: Click the edit button or double-click the task
+- **Delete a Task**: Click the delete button in the task card
+- **Move Tasks** (Board View): Drag and drop tasks between columns
+- **Filter Tasks**: Use the filter bar to find specific tasks
+- **Search**: Use the search box to find tasks by title or description
+
+### Using the Pomodoro Timer
+1. Select a task to work on
+2. Click the "Pomodoro Timer" button in the toolbar
+3. Start the timer and focus on your task during work sessions
+4. Take breaks when the timer indicates
+
+## 🧰 Technical Details
+
+### Architecture
+- **MVC Pattern**: Separation of data models, views, and controllers
+- **SQLite Database**: Efficient local storage of all task data
+- **PySide6**: Modern Qt-based UI framework for Python
+- **Signals and Slots**: Event-driven programming for a responsive interface
+
+### Data Management
+- **Data Import/Export**: JSON export and import capabilities
+- **Database Backup**: Create backups of your task database
+- **Data Migration**: Automatic schema updates for new versions
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👏 Acknowledgements
+
+- [PySide6](https://wiki.qt.io/Qt_for_Python) for the amazing UI framework
+- [Qt Charts](https://doc.qt.io/qt-6/qtcharts-index.html) for the statistics visualizations
+- All the open-source contributors who inspire better software
+
+---
+
+<p align="center">Made with ❤️ for productive people everywhere</p>
