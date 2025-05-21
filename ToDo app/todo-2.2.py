@@ -14,7 +14,7 @@ import webbrowser
 from dataclasses import dataclass
 
 from PySide6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout,
+    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QGroupBox,
     QPushButton, QLabel, QLineEdit, QComboBox, QDateEdit, QTimeEdit, QTextEdit,
     QListWidget, QListWidgetItem, QDialog, QFormLayout, QCheckBox, QMessageBox,
     QFrame, QStatusBar, QColorDialog, QSizePolicy, QDialogButtonBox, QTabWidget,
@@ -25,7 +25,7 @@ from PySide6.QtWidgets import (
     QCompleter, QDockWidget, QTreeWidget, QTreeWidgetItem, QScrollBar, QStyleFactory
 )
 from PySide6.QtCore import (
-    Qt, QDate, QTime, QDateTime, QSettings, Signal, QTimer, QSortFilterProxyModel,
+    Qt, QDate, QTime, QDateTime, QSettings, Signal, QTimer, QSortFilterProxyModel, QProcess,
     QStringListModel, QModelIndex, QPoint, QSize, QRect, QEvent, QItemSelectionModel,
     QPropertyAnimation, QEasingCurve, QObject, QByteArray, QMimeData, QThread, QMutex,
     QUrl, QAbstractTableModel
