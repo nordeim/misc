@@ -447,4 +447,364 @@ class PythonASTVisitor(ast.NodeVisitor):
             line_end=node.end_lineno or node.lineno,
             file_path=self.file_path,
             parent=self.current_class,
-            docstring=ast.get_
+            docstring=ast.get_docstring(node)
+        )
+        
+        self.elements.append(element)
+        if not self.current_class:  # Only export top-level functions
+            self.exports.append(node.name)
+        
+        # Calculate complexity (simplified McCabe)
+        self.complexity_score += self._calculate_complexity(node)
+        self.generic_visit(node)
+    
+    def visit_Import(self, node: ast.Import):
+        for alias in node.names:
+            self.imports.append(alias.name)
+    
+    def visit_ImportFrom(self, node: ast.ImportFrom):
+        if node.module:
+            for alias in node.names:
+                import_name = f"{node.module}.{alias.name}"
+                self.imports.append(import_name)
+    
+    def _calculate_complexity(self, node: ast.FunctionDef) -> int:
+        """Calculate cyclomatic complexity"""
+        complexity = 1  # Base complexity
+        for child in ast.walk(node):
+            if isinstance(child, (ast.If, ast.While, ast.For, ast.Try, ast.With)):
+                complexity += 1
+            elif isinstance(child, ast.BoolOp):
+                complexity += len(child.values) - 1
+        return complexity
+```
+
+### 2.3 Dependency Mapper
+
+**File: `src/codenavigator/analysis/dependency_mapper.py`**
+
+```python
+from typing import Dict, List, Set, Tuple
+from pathlib import Path
+from dataclasses import dataclass
+from .parser import FileAnalysis, CodeElement
+
+@dataclass
+class DependencyGraph:
+    files: Dict[Path, FileAnalysis]
+    internal_dependencies: Dict[Path, Set[Path]]
+    external_dependencies: Dict[Path, Set[str]]
+    circular_dependencies: List[Tuple[Path, Path]]
+
+class DependencyMapper:
+    def __init__(self, project_root: Path):
+        self.project_root = project_root
+    
+    def build_dependency_graph(self, file_analyses: List[FileAnalysis]) -> DependencyGraph:
+        """Build comprehensive dependency graph"""
+        files = {analysis.file_path: analysis for analysis in file_analyses}
+        internal_deps = {}
+        external_deps = {}
+        
+        for analysis in file_analyses:
+            internal, external = self._analyze_file_dependencies(analysis, files)
+            internal_deps[analysis.file_path] = internal
+            external_deps[analysis.file_path] = external
+        
+        circular_deps = self._detect_circular_dependencies(internal_deps)
+        
+        return DependencyGraph(
+            files=files,
+            internal_dependencies=internal_deps,
+            external_dependencies=external_deps,
+            circular_dependencies=circular_deps
+        )
+    
+    def _analyze_file_dependencies(self, analysis: FileAnalysis, all_files: Dict[Path, FileAnalysis]) -> Tuple[Set[Path], Set[str]]:
+        """Analyze dependencies for a single file"""
+        internal_deps = set()
+        external_deps = set()
+        
+        for import_name in analysis.imports:
+            # Try to resolve to internal file
+            resolved_path = self._resolve_import_to_file(import_name, analysis.file_path, all_files)
+            if resolved_path:
+                internal_deps.add(resolved_path)
+            else:
+                external_deps.add(import_name)
+        
+        return internal_deps, external_deps
+    
+    def _resolve_import_to_file(self, import_name: str, current_file: Path, all_files: Dict[Path, FileAnalysis]) -> Path:
+        """Resolve import to actual file path"""
+        # Simplified resolution logic - would need to be more sophisticated
+        parts = import_name.split('.')
+        
+        # Try relative imports
+        current_dir = current_file.parent
+        for file_path in all_files.keys():
+            if file_path.stem == parts[-1] and file_path.parent == current_dir:
+                return file_path
+        
+        # Try absolute imports from project root
+        potential_path = self.project_root
+        for part in parts:
+            potential_path = potential_path / part
+        
+        potential_file = potential_path.with_suffix('.py')
+        if potential_file in all_files:
+            return potential_file
+        
+        return None
+    
+    def _detect_circular_dependencies(self, dependencies: Dict[Path, Set[Path]]) -> List[Tuple[Path, Path]]:
+        """Detect circular dependencies using DFS"""
+        circular = []
+        visited = set()
+        rec_stack = set()
+        
+        def dfs(node: Path, path: List[Path]):
+            if node in rec_stack:
+                # Found cycle
+                cycle_start = path.index(node)
+                cycle = path[cycle_start:] + [node]
+                for i in range(len(cycle) - 1):
+                    circular.append((cycle[i], cycle[i + 1]))
+                return
+            
+            if node in visited:
+                return
+            
+            visited.add(node)
+            rec_stack.add(node)
+            path.append(node)
+            
+            for dep in dependencies.get(node, set()):
+                dfs(dep, path.copy())
+            
+            rec_stack.remove(node)
+        
+        for file_path in dependencies:
+            if file_path not in visited:
+                dfs(file_path, [])
+        
+        return circular
+```
+
+## Phase 3: AI Integration Layer
+
+### 3.1 AI Client
+
+**File: `src/codenavigator/ai/client.py`**
+
+```python
+import asyncio
+from typing import Optional, Dict, Any, List
+import anthropic
+import openai
+from ..core.config import AIConfig
+from .prompts import CodeNavigatorPrompts
+from .response_parser import ResponseParser
+
+class AIClient:
+    def __init__(self, config: AIConfig):
+        self.config = config
+        self.prompts = CodeNavigatorPrompts()
+        self.parser = ResponseParser()
+        
+        if config.provider == "anthropic":
+            self.client = anthropic.Anthropic(api_key=config.api_key)
+        elif config.provider == "openai":
+            self.client = openai.OpenAI(api_key=config.api_key)
+        else:
+            raise ValueError(f"Unsupported AI provider: {config.provider}")
+    
+    async def analyze_codebase(self, codebase_context: Dict[str, Any]) -> Dict[str, Any]:
+        """Perform initial codebase analysis"""
+        prompt = self.prompts.build_analysis_prompt(codebase_context)
+        response = await self._make_request(prompt)
+        return self.parser.parse_analysis_response(response)
+    
+    async def diagnose_issue(self, issue_description: str, relevant_code: Dict[str, str], context: Dict[str, Any]) -> Dict[str, Any]:
+        """Diagnose a reported issue"""
+        prompt = self.prompts.build_diagnosis_prompt(issue_description, relevant_code, context)
+        response = await self._make_request(prompt)
+        return self.parser.parse_diagnosis_response(response)
+    
+    async def generate_solution(self, diagnosis: Dict[str, Any], constraints: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate solution based on diagnosis"""
+        prompt = self.prompts.build_solution_prompt(diagnosis, constraints)
+        response = await self._make_request(prompt)
+        return self.parser.parse_solution_response(response)
+    
+    async def chat_interaction(self, message: str, conversation_history: List[Dict[str, str]], context: Dict[str, Any]) -> str:
+        """Handle interactive chat"""
+        prompt = self.prompts.build_chat_prompt(message, conversation_history, context)
+        response = await self._make_request(prompt)
+        return response
+    
+    async def _make_request(self, prompt: str) -> str:
+        """Make API request to AI provider"""
+        if self.config.provider == "anthropic":
+            return await self._anthropic_request(prompt)
+        elif self.config.provider == "openai":
+            return await self._openai_request(prompt)
+    
+    async def _anthropic_request(self, prompt: str) -> str:
+        """Make request to Anthropic Claude"""
+        try:
+            response = await asyncio.to_thread(
+                self.client.messages.create,
+                model=self.config.model,
+                max_tokens=self.config.max_tokens,
+                temperature=self.config.temperature,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            return response.content[0].text
+        except Exception as e:
+            raise AIClientError(f"Anthropic API error: {e}")
+    
+    async def _openai_request(self, prompt: str) -> str:
+        """Make request to OpenAI"""
+        try:
+            response = await asyncio.to_thread(
+                self.client.chat.completions.create,
+                model=self.config.model,
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=self.config.max_tokens,
+                temperature=self.config.temperature
+            )
+            return response.choices[0].message.content
+        except Exception as e:
+            raise AIClientError(f"OpenAI API error: {e}")
+
+class AIClientError(Exception):
+    pass
+```
+
+## Phase 4: Interactive CLI Commands
+
+### 4.1 Chat Command
+
+**File: `src/codenavigator/cli/commands/chat.py`**
+
+```python
+import typer
+import asyncio
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.panel import Panel
+from typing import List, Dict
+from ...core.project import Project
+from ...ai.client import AIClient
+
+app = typer.Typer(help="Interactive chat with CodeNavigator")
+console = Console()
+
+@app.command()
+def start(
+    context: bool = typer.Option(True, "--context/--no-context", help="Include codebase context"),
+    file: str = typer.Option(None, "--file", help="Focus on specific file")
+):
+    """Start interactive chat session"""
+    asyncio.run(_chat_session(context, file))
+
+async def _chat_session(include_context: bool, focus_file: str):
+    """Main chat session loop"""
+    project = Project.load_current()
+    if not project:
+        console.print("❌ No CodeNavigator project found. Run 'codenavigator init' first.", style="red")
+        return
+    
+    ai_client = AIClient(project.config.ai)
+    conversation_history: List[Dict[str, str]] = []
+    
+    # Build context
+    context = {}
+    if include_context:
+        context = await _build_chat_context(project, focus_file)
+    
+    console.print(Panel.fit(
+        "🤖 CodeNavigator Chat Session Started\n"
+        "Type 'exit' to quit, 'help' for commands, 'context' to toggle context",
+        title="Chat Session",
+        style="blue"
+    ))
+    
+    while True:
+        try:
+            user_input = console.input("\n[bold blue]You:[/bold blue] ")
+            
+            if user_input.lower() in ['exit', 'quit']:
+                break
+            elif user_input.lower() == 'help':
+                _show_chat_help()
+                continue
+            elif user_input.lower() == 'context':
+                include_context = not include_context
+                if include_context:
+                    context = await _build_chat_context(project, focus_file)
+                else:
+                    context = {}
+                console.print(f"Context {'enabled' if include_context else 'disabled'}")
+                continue
+            
+            # Add user message to history
+            conversation_history.append({"role": "user", "content": user_input})
+            
+            # Get AI response
+            with console.status("🤔 Thinking..."):
+                response = await ai_client.chat_interaction(user_input, conversation_history, context)
+            
+            # Display response
+            console.print("\n[bold green]CodeNavigator:[/bold green]")
+            console.print(Markdown(response))
+            
+            # Add AI response to history
+            conversation_history.append({"role": "assistant", "content": response})
+            
+            # Keep conversation history manageable
+            if len(conversation_history) > 20:
+                conversation_history = conversation_history[-20:]
+                
+        except KeyboardInterrupt:
+            break
+        except Exception as e:
+            console.print(f"❌ Error: {e}", style="red")
+    
+    console.print("\n👋 Chat session ended.")
+
+async def _build_chat_context(project: Project, focus_file: str) -> Dict:
+    """Build context for chat session"""
+    context = {
+        "project_summary": project.get_summary(),
+        "recent_changes": project.get_recent_changes(),
+        "architecture_overview": project.get_architecture_overview()
+    }
+    
+    if focus_file:
+        file_analysis = project.get_file_analysis(focus_file)
+        if file_analysis:
+            context["focus_file"] = {
+                "path": focus_file,
+                "analysis": file_analysis,
+                "content": project.get_file_content(focus_file)
+            }
+    
+    return context
+
+def _show_chat_help():
+    """Show chat help"""
+    help_text = """
+**Available Commands:**
+- `exit` or `quit` - End chat session
+- `help` - Show this help
+- `context` - Toggle codebase context inclusion
+- `analyze <file>` - Analyze specific file
+- `diff <file>` - Show recent changes to file
+- `deps <file>` - Show file dependencies
+    """
+    console.print(Markdown(help_text))
+```
+
+---
