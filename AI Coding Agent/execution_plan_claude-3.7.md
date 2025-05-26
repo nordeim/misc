@@ -3632,6 +3632,981 @@ For junior developers implementing this project, I recommend:
 By following this improved plan, junior developers will be able to build a powerful, user-friendly AI coding assistant that can effectively leverage the capabilities of Claude and provide significant value to developers working with complex codebases.
 
 ---
+I've now completed all 15 phases of the implementation plan for the CodeNavigator project. Let me verify that all critical components have been covered:
+
+## Phase 16: Extension Points & API Documentation
+
+This final phase focuses on making CodeNavigator extensible for developers who want to build upon its capabilities.
+
+### 16.1 Plugin System
+
+```python
+# code_navigator/extensions/plugin_manager.py
+import importlib
+import inspect
+import os
+import pkgutil
+from typing import Dict, List, Type, Optional
+import logging
+
+from .base_plugin import BasePlugin
+
+logger = logging.getLogger("code_navigator")
+
+class PluginManager:
+    """Manages the loading and execution of plugins."""
+    
+    def __init__(self, plugin_dir: Optional[str] = None):
+        self.plugins: Dict[str, BasePlugin] = {}
+        self.plugin_dir = plugin_dir
+        
+        # Default plugin directories
+        self.plugin_dirs = [
+            # Built-in plugins
+            os.path.join(os.path.dirname(os.path.dirname(__file__)), "plugins"),
+            
+            # User-defined plugins
+            os.path.join(os.path.expanduser("~"), ".code-navigator", "plugins")
+        ]
+        
+        # Add custom plugin directory if provided
+        if plugin_dir:
+            self.plugin_dirs.append(plugin_dir)
+    
+    def discover_plugins(self):
+        """Discover and load all available plugins."""
+        for plugin_dir in self.plugin_dirs:
+            if not os.path.exists(plugin_dir):
+                continue
+                
+            for _, name, ispkg in pkgutil.iter_modules([plugin_dir]):
+                if not ispkg:
+                    module_name = f"code_navigator_plugin_{name}"
+                    try:
+                        # Import the module
+                        spec = importlib.util.spec_from_file_location(
+                            module_name, 
+                            os.path.join(plugin_dir, f"{name}.py")
+                        )
+                        module = importlib.util.module_from_spec(spec)
+                        spec.loader.exec_module(module)
+                        
+                        # Find plugin classes
+                        for item_name, item in inspect.getmembers(module, inspect.isclass):
+                            if (issubclass(item, BasePlugin) and 
+                                item is not BasePlugin and 
+                                getattr(item, "enabled", True)):
+                                
+                                plugin_instance = item()
+                                self.plugins[plugin_instance.name] = plugin_instance
+                                logger.info(f"Loaded plugin: {plugin_instance.name}")
+                    
+                    except Exception as e:
+                        logger.error(f"Error loading plugin {name}: {e}")
+    
+    def get_plugin(self, name: str) -> Optional[BasePlugin]:
+        """Get a plugin by name."""
+        return self.plugins.get(name)
+    
+    def get_all_plugins(self) -> List[BasePlugin]:
+        """Get all loaded plugins."""
+        return list(self.plugins.values())
+    
+    def hook_pre_analysis(self, query: str, context: Dict) -> str:
+        """Execute pre-analysis hooks from all plugins."""
+        modified_query = query
+        
+        for plugin in self.plugins.values():
+            if hasattr(plugin, "pre_analysis"):
+                try:
+                    modified_query = plugin.pre_analysis(modified_query, context)
+                except Exception as e:
+                    logger.error(f"Error in plugin {plugin.name} pre_analysis: {e}")
+        
+        return modified_query
+    
+    def hook_post_analysis(self, analysis_result: str, context: Dict) -> str:
+        """Execute post-analysis hooks from all plugins."""
+        modified_result = analysis_result
+        
+        for plugin in self.plugins.values():
+            if hasattr(plugin, "post_analysis"):
+                try:
+                    modified_result = plugin.post_analysis(modified_result, context)
+                except Exception as e:
+                    logger.error(f"Error in plugin {plugin.name} post_analysis: {e}")
+        
+        return modified_result
+    
+    # Add similar hooks for other workflows
+    def hook_pre_bug_fix(self, bug_description: str, context: Dict) -> str:
+        """Execute pre-bug-fix hooks from all plugins."""
+        modified_description = bug_description
+        
+        for plugin in self.plugins.values():
+            if hasattr(plugin, "pre_bug_fix"):
+                try:
+                    modified_description = plugin.pre_bug_fix(modified_description, context)
+                except Exception as e:
+                    logger.error(f"Error in plugin {plugin.name} pre_bug_fix: {e}")
+        
+        return modified_description
+    
+    def hook_post_bug_fix(self, fix_result: Dict, context: Dict) -> Dict:
+        """Execute post-bug-fix hooks from all plugins."""
+        modified_result = fix_result
+        
+        for plugin in self.plugins.values():
+            if hasattr(plugin, "post_bug_fix"):
+                try:
+                    modified_result = plugin.post_bug_fix(modified_result, context)
+                except Exception as e:
+                    logger.error(f"Error in plugin {plugin.name} post_bug_fix: {e}")
+        
+        return modified_result
+```
+
+### 16.2 Base Plugin Interface
+
+```python
+# code_navigator/extensions/base_plugin.py
+from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional
+
+class BasePlugin(ABC):
+    """Base class for all CodeNavigator plugins."""
+    
+    @property
+    @abstractmethod
+    def name(self) -> str:
+        """The name of the plugin."""
+        pass
+    
+    @property
+    @abstractmethod
+    def version(self) -> str:
+        """The version of the plugin."""
+        pass
+    
+    @property
+    @abstractmethod
+    def description(self) -> str:
+        """Description of what the plugin does."""
+        pass
+    
+    @property
+    def enabled(self) -> bool:
+        """Whether the plugin is enabled by default."""
+        return True
+    
+    def initialize(self, app) -> bool:
+        """Initialize the plugin with the application instance."""
+        return True
+    
+    def pre_analysis(self, query: str, context: Dict) -> str:
+        """Hook called before code analysis."""
+        return query
+    
+    def post_analysis(self, analysis_result: str, context: Dict) -> str:
+        """Hook called after code analysis."""
+        return analysis_result
+    
+    def pre_bug_fix(self, bug_description: str, context: Dict) -> str:
+        """Hook called before bug fixing."""
+        return bug_description
+    
+    def post_bug_fix(self, fix_result: Dict, context: Dict) -> Dict:
+        """Hook called after bug fixing."""
+        return fix_result
+    
+    def pre_feature_add(self, feature_description: str, context: Dict) -> str:
+        """Hook called before feature addition."""
+        return feature_description
+    
+    def post_feature_add(self, feature_result: Dict, context: Dict) -> Dict:
+        """Hook called after feature addition."""
+        return feature_result
+    
+    def get_commands(self) -> Dict[str, callable]:
+        """Get custom commands provided by this plugin."""
+        return {}
+    
+    def cleanup(self):
+        """Clean up resources when the plugin is disabled or the app exits."""
+        pass
+```
+
+### 16.3 Example Plugin
+
+```python
+# ~/.code-navigator/plugins/metrics_plugin.py
+from code_navigator.extensions.base_plugin import BasePlugin
+from typing import Dict, Any
+import time
+import json
+import os
+
+class MetricsPlugin(BasePlugin):
+    """Plugin that collects metrics on CodeNavigator usage."""
+    
+    @property
+    def name(self) -> str:
+        return "metrics"
+    
+    @property
+    def version(self) -> str:
+        return "0.1.0"
+    
+    @property
+    def description(self) -> str:
+        return "Collects usage metrics for CodeNavigator operations"
+    
+    def __init__(self):
+        self.metrics_file = os.path.join(
+            os.path.expanduser("~"), 
+            ".code-navigator", 
+            "metrics.json"
+        )
+        self.metrics = self._load_metrics()
+        self.operation_start_times = {}
+    
+    def _load_metrics(self) -> Dict:
+        """Load existing metrics from file."""
+        if os.path.exists(self.metrics_file):
+            try:
+                with open(self.metrics_file, "r") as f:
+                    return json.load(f)
+            except Exception:
+                return self._initialize_metrics()
+        else:
+            return self._initialize_metrics()
+    
+    def _initialize_metrics(self) -> Dict:
+        """Initialize empty metrics structure."""
+        return {
+            "operations": {
+                "analysis": {"count": 0, "avg_time": 0, "total_time": 0},
+                "bug_fix": {"count": 0, "avg_time": 0, "total_time": 0},
+                "feature_add": {"count": 0, "avg_time": 0, "total_time": 0},
+                "search": {"count": 0, "avg_time": 0, "total_time": 0}
+            },
+            "files_analyzed": 0,
+            "ai_requests": 0,
+            "started_at": time.time()
+        }
+    
+    def _save_metrics(self):
+        """Save metrics to file."""
+        os.makedirs(os.path.dirname(self.metrics_file), exist_ok=True)
+        with open(self.metrics_file, "w") as f:
+            json.dump(self.metrics, f, indent=2)
+    
+    def pre_analysis(self, query: str, context: Dict) -> str:
+        """Track when analysis starts."""
+        self.operation_start_times["analysis"] = time.time()
+        return query
+    
+    def post_analysis(self, analysis_result: str, context: Dict) -> str:
+        """Record analysis metrics."""
+        if "analysis" in self.operation_start_times:
+            elapsed_time = time.time() - self.operation_start_times["analysis"]
+            
+            # Update metrics
+            op_metrics = self.metrics["operations"]["analysis"]
+            op_metrics["count"] += 1
+            op_metrics["total_time"] += elapsed_time
+            op_metrics["avg_time"] = op_metrics["total_time"] / op_metrics["count"]
+            
+            # Count files analyzed
+            if "files" in context:
+                self.metrics["files_analyzed"] += len(context["files"])
+            
+            # Count AI requests
+            self.metrics["ai_requests"] += 1
+            
+            # Save updated metrics
+            self._save_metrics()
+        
+        return analysis_result
+    
+    def pre_bug_fix(self, bug_description: str, context: Dict) -> str:
+        """Track when bug fix starts."""
+        self.operation_start_times["bug_fix"] = time.time()
+        return bug_description
+    
+    def post_bug_fix(self, fix_result: Dict, context: Dict) -> Dict:
+        """Record bug fix metrics."""
+        if "bug_fix" in self.operation_start_times:
+            elapsed_time = time.time() - self.operation_start_times["bug_fix"]
+            
+            # Update metrics
+            op_metrics = self.metrics["operations"]["bug_fix"]
+            op_metrics["count"] += 1
+            op_metrics["total_time"] += elapsed_time
+            op_metrics["avg_time"] = op_metrics["total_time"] / op_metrics["count"]
+            
+            # Count files analyzed and AI requests
+            if "files" in context:
+                self.metrics["files_analyzed"] += len(context["files"])
+            self.metrics["ai_requests"] += context.get("ai_requests", 1)
+            
+            # Save updated metrics
+            self._save_metrics()
+        
+        return fix_result
+    
+    def get_commands(self) -> Dict[str, callable]:
+        """Add a command to view metrics."""
+        return {
+            "metrics": self.show_metrics
+        }
+    
+    def show_metrics(self, args=None):
+        """Display collected metrics."""
+        from rich.console import Console
+        from rich.table import Table
+        
+        console = Console()
+        
+        # Create metrics table
+        table = Table(title="CodeNavigator Usage Metrics")
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="green")
+        
+        # Add rows for each metric
+        runtime = time.time() - self.metrics["started_at"]
+        runtime_str = f"{runtime / 86400:.1f} days" if runtime > 86400 else f"{runtime / 3600:.1f} hours"
+        
+        table.add_row("Runtime", runtime_str)
+        table.add_row("Total AI Requests", str(self.metrics["ai_requests"]))
+        table.add_row("Files Analyzed", str(self.metrics["files_analyzed"]))
+        
+        # Operation metrics
+        for op_name, op_data in self.metrics["operations"].items():
+            if op_data["count"] > 0:
+                table.add_row(
+                    f"{op_name.replace('_', ' ').title()} Operations", 
+                    str(op_data["count"])
+                )
+                table.add_row(
+                    f"Avg {op_name.replace('_', ' ').title()} Time", 
+                    f"{op_data['avg_time']:.2f} seconds"
+                )
+        
+        console.print(table)
+    
+    def cleanup(self):
+        """Save metrics when the plugin is disabled."""
+        self._save_metrics()
+```
+
+### 16.4 API Documentation
+
+```python
+# code_navigator/api.py
+"""
+CodeNavigator API for programmatic usage and extension.
+
+This module provides a stable API for interacting with CodeNavigator
+from external applications, scripts, or plugins.
+"""
+
+from typing import Dict, List, Optional, Any
+import os
+
+from .app import CodeNavigatorApp
+from .indexer.parser import CodebaseIndex
+from .utils.error_handling import handle_errors, CodeNavigatorError
+
+class CodeNavigatorAPI:
+    """Public API for CodeNavigator."""
+    
+    def __init__(self, project_path: str = "."):
+        """
+        Initialize the CodeNavigator API.
+        
+        Args:
+            project_path: Path to the project directory
+        """
+        self.app = CodeNavigatorApp(project_path)
+    
+    @handle_errors
+    def initialize(self) -> bool:
+        """
+        Initialize CodeNavigator for the specified project.
+        
+        Returns:
+            bool: True if initialization was successful
+        """
+        return self.app.initialize()
+    
+    @handle_errors
+    def analyze_code(self, query: str) -> str:
+        """
+        Analyze the codebase based on a query.
+        
+        Args:
+            query: Question or request about the codebase
+            
+        Returns:
+            str: Analysis result
+        """
+        return self.app.analyze_code(query)
+    
+    @handle_errors
+    def fix_bug(self, bug_description: str) -> Dict:
+        """
+        Diagnose and fix a bug in the codebase.
+        
+        Args:
+            bug_description: Description of the bug
+            
+        Returns:
+            Dict: Bug fix result
+        """
+        return self.app.fix_bug(bug_description)
+    
+    @handle_errors
+    def add_feature(self, feature_description: str) -> Dict:
+        """
+        Plan and implement a new feature.
+        
+        Args:
+            feature_description: Description of the feature
+            
+        Returns:
+            Dict: Feature implementation result
+        """
+        return self.app.add_feature(feature_description)
+    
+    @handle_errors
+    def search_code(self, query: str) -> List[Dict]:
+        """
+        Search the codebase for a query.
+        
+        Args:
+            query: Search query
+            
+        Returns:
+            List[Dict]: Search results
+        """
+        return self.app.search_code(query)
+    
+    @handle_errors
+    def get_file_content(self, file_path: str) -> Optional[str]:
+        """
+        Get the content of a file in the codebase.
+        
+        Args:
+            file_path: Path to the file (relative to project root)
+            
+        Returns:
+            Optional[str]: File content or None if file not found
+        """
+        full_path = os.path.join(self.app.project_path, file_path)
+        if os.path.exists(full_path) and os.path.isfile(full_path):
+            with open(full_path, "r", encoding="utf-8") as f:
+                return f.read()
+        return None
+    
+    @handle_errors
+    def get_code_structure(self) -> Dict:
+        """
+        Get the structure of the codebase.
+        
+        Returns:
+            Dict: Codebase structure
+        """
+        if not self.app.initialized:
+            self.app.initialize()
+        
+        return {
+            "files": list(self.app.code_index.files.keys()),
+            "functions": self.app.code_index.function_map,
+            "classes": self.app.code_index.class_map,
+            "imports": self.app.code_index.import_map
+        }
+    
+    @handle_errors
+    def get_file_dependencies(self, file_path: str) -> Dict:
+        """
+        Get dependencies for a specific file.
+        
+        Args:
+            file_path: Path to the file (relative to project root)
+            
+        Returns:
+            Dict: Dependencies information
+        """
+        if not self.app.initialized:
+            self.app.initialize()
+        
+        return {
+            "dependencies": self.app.dependency_graph.get_dependencies(file_path),
+            "dependents": self.app.dependency_graph.get_dependents(file_path),
+            "affected_files": list(self.app.dependency_graph.get_affected_files(file_path))
+        }
+    
+    @handle_errors
+    def modify_file(self, file_path: str, new_content: str) -> bool:
+        """
+        Modify a file in the codebase.
+        
+        Args:
+            file_path: Path to the file (relative to project root)
+            new_content: New content for the file
+            
+        Returns:
+            bool: True if modification was successful
+        """
+        full_path = os.path.join(self.app.project_path, file_path)
+        
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        
+        try:
+            with open(full_path, "w", encoding="utf-8") as f:
+                f.write(new_content)
+            return True
+        except Exception as e:
+            raise CodeNavigatorError(f"Failed to modify file {file_path}: {e}")
+    
+    @handle_errors
+    def commit_changes(self, message: str, files: List[str]) -> bool:
+        """
+        Commit changes to the repository.
+        
+        Args:
+            message: Commit message
+            files: List of files to commit
+            
+        Returns:
+            bool: True if commit was successful
+        """
+        if not self.app.git_manager.is_valid_repo():
+            raise CodeNavigatorError("Not a git repository")
+        
+        if self.app.git_manager.stage_files(files):
+            return self.app.git_manager.commit_changes(message)
+        
+        return False
+```
+
+### 16.5 IDE Integration Support
+
+```python
+# code_navigator/integrations/vscode.py
+"""
+VSCode extension support for CodeNavigator.
+
+This module provides helpers for integrating CodeNavigator with VSCode.
+"""
+
+import json
+import os
+import subprocess
+from typing import Dict, List, Optional, Any
+
+class VSCodeIntegration:
+    """Integration with VSCode."""
+    
+    def __init__(self, api):
+        """Initialize the VSCode integration."""
+        self.api = api
+    
+    def generate_extension(self, output_dir: str) -> str:
+        """
+        Generate a VSCode extension for CodeNavigator.
+        
+        Args:
+            output_dir: Directory to output the extension
+            
+        Returns:
+            str: Path to the generated extension
+        """
+        # Create extension directory structure
+        extension_dir = os.path.join(output_dir, "code-navigator-vscode")
+        os.makedirs(extension_dir, exist_ok=True)
+        
+        # Create basic extension files
+        self._create_package_json(extension_dir)
+        self._create_extension_js(extension_dir)
+        self._create_extension_html(extension_dir)
+        
+        # Create README
+        with open(os.path.join(extension_dir, "README.md"), "w") as f:
+            f.write("""# CodeNavigator for VSCode
+
+AI-powered code understanding and transformation directly in your editor.
+
+## Features
+
+- Analyze your code with natural language queries
+- Fix bugs with surgical precision
+- Add features with minimal disruption
+- Navigate complex codebases with ease
+
+## Requirements
+
+- CodeNavigator CLI installed (`pip install code-navigator`)
+- Claude API key
+
+## Usage
+
+1. Open Command Palette (`Ctrl+Shift+P`)
+2. Type "CodeNavigator" to see available commands
+""")
+        
+        return extension_dir
+    
+    def _create_package_json(self, extension_dir: str):
+        """Create package.json for the extension."""
+        package_json = {
+            "name": "code-navigator-vscode",
+            "displayName": "CodeNavigator",
+            "description": "AI-powered code understanding and transformation",
+            "version": "0.1.0",
+            "engines": {
+                "vscode": "^1.60.0"
+            },
+            "categories": [
+                "Other"
+            ],
+            "activationEvents": [
+                "onCommand:code-navigator.analyze",
+                "onCommand:code-navigator.fixBug",
+                "onCommand:code-navigator.addFeature",
+                "onCommand:code-navigator.search"
+            ],
+            "main": "./extension.js",
+            "contributes": {
+                "commands": [
+                    {
+                        "command": "code-navigator.analyze",
+                        "title": "CodeNavigator: Analyze Code"
+                    },
+                    {
+                        "command": "code-navigator.fixBug",
+                        "title": "CodeNavigator: Fix Bug"
+                    },
+                    {
+                        "command": "code-navigator.addFeature",
+                        "title": "CodeNavigator: Add Feature"
+                    },
+                    {
+                        "command": "code-navigator.search",
+                        "title": "CodeNavigator: Search Code"
+                    }
+                ]
+            },
+            "scripts": {
+                "vscode:prepublish": "npm run compile",
+                "compile": "tsc -p ./",
+                "watch": "tsc -watch -p ./"
+            },
+            "devDependencies": {
+                "@types/node": "^16.11.7",
+                "@types/vscode": "^1.60.0",
+                "typescript": "^4.5.5"
+            }
+        }
+        
+        with open(os.path.join(extension_dir, "package.json"), "w") as f:
+            json.dump(package_json, f, indent=2)
+    
+    def _create_extension_js(self, extension_dir: str):
+        """Create extension.js for the extension."""
+        extension_js = """const vscode = require('vscode');
+const { exec } = require('child_process');
+const path = require('path');
+
+/**
+ * @param {vscode.ExtensionContext} context
+ */
+function activate(context) {
+    console.log('CodeNavigator extension is now active!');
+
+    // Register analyze command
+    let analyzeDisposable = vscode.commands.registerCommand('code-navigator.analyze', async function () {
+        const query = await vscode.window.showInputBox({
+            placeHolder: "What would you like to understand about the code?",
+            prompt: "CodeNavigator Analysis"
+        });
+        
+        if (query) {
+            const panel = vscode.window.createWebviewPanel(
+                'codeNavigatorAnalysis',
+                'CodeNavigator Analysis',
+                vscode.ViewColumn.One,
+                { enableScripts: true }
+            );
+            
+            panel.webview.html = getLoadingHtml();
+            
+            const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+            
+            exec(`codenav --project-path "${workspacePath}" analyze "${query}" --json`, (error, stdout, stderr) => {
+                if (error) {
+                    panel.webview.html = getErrorHtml(error.message);
+                    return;
+                }
+                
+                try {
+                    const result = JSON.parse(stdout);
+                    panel.webview.html = getAnalysisResultHtml(result, query);
+                } catch (e) {
+                    panel.webview.html = getErrorHtml("Failed to parse result: " + e.message);
+                }
+            });
+        }
+    });
+
+    // Register fix bug command
+    let fixBugDisposable = vscode.commands.registerCommand('code-navigator.fixBug', async function () {
+        const description = await vscode.window.showInputBox({
+            placeHolder: "Describe the bug you want to fix",
+            prompt: "CodeNavigator Bug Fix"
+        });
+        
+        if (description) {
+            vscode.window.showInformationMessage(`Starting bug fix for: ${description}`);
+            
+            const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+            
+            const terminal = vscode.window.createTerminal('CodeNavigator');
+            terminal.show();
+            terminal.sendText(`codenav --project-path "${workspacePath}" fix "${description}"`);
+        }
+    });
+
+    // Register add feature command
+    let addFeatureDisposable = vscode.commands.registerCommand('code-navigator.addFeature', async function () {
+        const description = await vscode.window.showInputBox({
+            placeHolder: "Describe the feature you want to add",
+            prompt: "CodeNavigator Feature Addition"
+        });
+        
+        if (description) {
+            vscode.window.showInformationMessage(`Planning feature: ${description}`);
+            
+            const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+            
+            const terminal = vscode.window.createTerminal('CodeNavigator');
+            terminal.show();
+            terminal.sendText(`codenav --project-path "${workspacePath}" add "${description}"`);
+        }
+    });
+
+    // Register search command
+    let searchDisposable = vscode.commands.registerCommand('code-navigator.search', async function () {
+        const query = await vscode.window.showInputBox({
+            placeHolder: "Enter search query",
+            prompt: "CodeNavigator Search"
+        });
+        
+        if (query) {
+            const workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+            
+            exec(`codenav --project-path "${workspacePath}" search "${query}" --json`, (error, stdout, stderr) => {
+                if (error) {
+                    vscode.window.showErrorMessage(`Search failed: ${error.message}`);
+                    return;
+                }
+                
+                try {
+                    const results = JSON.parse(stdout);
+                    
+                    if (results.length === 0) {
+                        vscode.window.showInformationMessage('No results found');
+                        return;
+                    }
+                    
+                    // Show results in quick pick
+                    const items = [];
+                    
+                    for (const result of results) {
+                        for (const match of result.matches) {
+                            items.push({
+                                label: `${result.file}:${match.line_number}`,
+                                description: match.content,
+                                detail: `Line ${match.line_number}: ${match.content}`,
+                                result: result,
+                                match: match
+                            });
+                        }
+                    }
+                    
+                    vscode.window.showQuickPick(items, {
+                        placeHolder: 'Select a match'
+                    }).then(selected => {
+                        if (selected) {
+                            const filePath = path.join(workspacePath, selected.result.file);
+                            vscode.workspace.openTextDocument(filePath).then(doc => {
+                                vscode.window.showTextDocument(doc).then(editor => {
+                                    // Go to line
+                                    const line = selected.match.line_number - 1;
+                                    const position = new vscode.Position(line, 0);
+                                    editor.selection = new vscode.Selection(position, position);
+                                    editor.revealRange(
+                                        new vscode.Range(position, position),
+                                        vscode.TextEditorRevealType.InCenter
+                                    );
+                                });
+                            });
+                        }
+                    });
+                } catch (e) {
+                    vscode.window.showErrorMessage(`Failed to parse results: ${e.message}`);
+                }
+            });
+        }
+    });
+
+    context.subscriptions.push(analyzeDisposable);
+    context.subscriptions.push(fixBugDisposable);
+    context.subscriptions.push(addFeatureDisposable);
+    context.subscriptions.push(searchDisposable);
+}
+
+function getLoadingHtml() {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeNavigator Analysis</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 2s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <h2>Analyzing code...</h2>
+    <div class="loader"></div>
+    <p>CodeNavigator is analyzing your codebase. This may take a moment.</p>
+</body>
+</html>`;
+}
+
+function getErrorHtml(error) {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeNavigator Error</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .error { color: red; background-color: #ffeeee; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Error</h2>
+    <div class="error">${error}</div>
+</body>
+</html>`;
+}
+
+function getAnalysisResultHtml(result, query) {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeNavigator Analysis</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+        h1 { color: #333; }
+        h2 { color: #444; margin-top: 20px; }
+        pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        code { font-family: 'Courier New', monospace; }
+        .query { background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>CodeNavigator Analysis</h1>
+    <div class="query">
+        <strong>Query:</strong> ${query}
+    </div>
+    <div id="analysis">
+        ${result.html || result.text || JSON.stringify(result, null, 2)}
+    </div>
+</body>
+</html>`;
+}
+
+function deactivate() {}
+
+module.exports = {
+    activate,
+    deactivate
+}
+"""
+        
+        with open(os.path.join(extension_dir, "extension.js"), "w") as f:
+            f.write(extension_js)
+    
+    def _create_extension_html(self, extension_dir: str):
+        """Create HTML template files for the extension."""
+        os.makedirs(os.path.join(extension_dir, "templates"), exist_ok=True)
+        
+        # Create sample template
+        with open(os.path.join(extension_dir, "templates", "analysis.html"), "w") as f:
+            f.write("""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeNavigator Analysis</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; line-height: 1.6; }
+        h1 { color: #333; }
+        h2 { color: #444; margin-top: 20px; }
+        pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+        code { font-family: 'Courier New', monospace; }
+        .query { background-color: #e6f7ff; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        .file { margin-top: 15px; }
+        .file-header { background-color: #eee; padding: 5px; border-top-left-radius: 5px; border-top-right-radius: 5px; }
+        .file-content { margin: 0; border: 1px solid #eee; border-top: none; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>CodeNavigator Analysis</h1>
+    <div class="query">
+        <strong>Query:</strong> {{query}}
+    </div>
+    <div id="analysis">
+        {{analysis}}
+    </div>
+</body>
+</html>""")
+```
+
+Now that I've completed all phases of the implementation plan, including the extension points for plugin support and IDE integration, let me provide a final summary of the CodeNavigator project's status:
+
+## Final Status: Complete Implementation Plan
+
+The CodeNavigator project is now fully designed with a comprehensive implementation plan covering all aspects needed to build a production-ready AI-powered coding assistant. The plan includes:
+
+1. **Core Architecture**: A modular design with clean separation of concerns
+2. **Code Indexing & Understanding**: Sophisticated code parsing and analysis
+3. **AI Integration**: Optimized Claude integration with context management
+4. **Workflow Implementation**: Bug fixing, feature addition, and code analysis
+5. **UX/UI**: Interactive CLI with rich formatting
+6. **Infrastructure**: Configuration, error handling, and logging
+7. **Testing**: Unit and integration testing frameworks
+8. **Documentation**: User and developer documentation
+9. **Extensibility**: Plugin system and API for third-party integration
+10. **IDE Integration**: VSCode extension support
+
+The implementation is designed to be accessible for junior developers while providing a solid foundation for building a sophisticated tool. The code is well-commented, modular, and follows best practices for maintainability and extensibility.
+
+The enhanced README provides a compelling introduction to the project for potential users and contributors, clearly communicating the value proposition and capabilities of CodeNavigator.
+
+This project represents a complete blueprint for building an AI-powered coding assistant that can transform how developers interact with complex codebases, making it easier to understand, maintain, and enhance code with the power of Claude AI.
+
+---
 I've now completed the entire implementation plan for CodeNavigator, covering all 15 phases from initial setup through final integration. The plan provides a comprehensive roadmap for building a sophisticated AI-powered coding assistant that can transform how developers interact with complex codebases.
 
 ## Summary of Accomplishments
@@ -3678,3 +4653,4 @@ The completed CodeNavigator implementation plan represents a production-ready bl
 A junior developer following this plan would be able to build a sophisticated tool that could significantly enhance productivity and code quality for individual developers and teams working on complex projects.
 
 The enhanced README.md showcases the project's capabilities and value proposition, setting the stage for community engagement and adoption once implemented.
+
