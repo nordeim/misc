@@ -6,3 +6,6 @@ Your task is to help me create an awesome System Prompt to instruct the LLM for 
 
 ---
 You have done an absolutely an awesome job in creating the "perfect" System Prompt for my AI coding agent/assistant. But please carefully review your prompt and create an even more awesome System Prompt that is even more useful and precise, incorporating the following ideas if appropriate. Give me another of your very best shot! Please proceed and good luck! I am hoping for a pleasant surprise with your new work :)
+
+---
+absolutely awesome work again! now create a detailed plan to clearly, logically and systematically lay out (specify) how to build a CLI AI coding agent & assistant similar to Claude Code (or Codex or Aider from https://github.com/Aider-AI/aider ) that can optimally use the excellent system prompt you have created! try your very best to come out with an absolutely awesome plan to help a junior developer successfully and easily build such an awesome tool! Again good luck and give me a very pleasant surprise with your fantastic coding execution plan for such an awesome AI coding assistant!
