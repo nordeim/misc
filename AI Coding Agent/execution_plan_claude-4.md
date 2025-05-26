@@ -1,7 +1,6 @@
-<think>
-This is a fascinating and complex request. The user wants me to help them build a CLI AI coding agent similar to Claude Code, Cursor, or Aider that can work with large codebases. They've provided a very detailed system prompt for "CodeNavigator" that outlines the capabilities they want.
+I want you to help me build a CLI AI coding agent similar to Claude Code, Cursor, or Aider that can work with large codebases. Refer to the provided detailed "System Prompt" for "CodeNavigator" that outlines the capabilities they want.
 
-Let me break down what they're asking for:
+Break down of what I want:
 
 1. A CLI tool that can analyze codebases (up to 30 files, ~1000 LOC each)
 2. The tool should understand code relationships, architecture, and dependencies
