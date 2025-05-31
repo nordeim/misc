@@ -1,3 +1,2038 @@
+CodeNavigator: Advanced AI Coding Assistant Implementation
+Thank you for the feedback! You're right - we can go much deeper. Let's create a truly exceptional implementation that pushes the boundaries of what's possible with an AI coding assistant.
+
+Enhanced Architecture Overview
+
+We'll implement a more sophisticated, modular system with these key improvements:
+
+Plugin-based architecture for extensibility
+Advanced code understanding with semantic analysis
+Multi-model AI orchestration for specialized tasks
+Persistent workspace management with versioning
+Interactive TUI with rich visualizations
+Memory management for contextual awareness across sessions
+Core Architectural Components
+1. Plugin System & Service Registry
+# core/registry.py
+from typing import Dict, Type, TypeVar, Generic, Optional, Any, List, Callable
+import inspect
+import importlib
+import pkgutil
+from pathlib import Path
+
+T = TypeVar('T')
+
+class ServiceRegistry(Generic[T]):
+    """A generic registry for services or plugins."""
+    
+    def __init__(self, base_type: Type[T]):
+        self.base_type = base_type
+        self.services: Dict[str, Type[T]] = {}
+        
+    def register(self, key: str, service_class: Type[T]) -> None:
+        """Register a service class under the given key."""
+        if not issubclass(service_class, self.base_type):
+            raise TypeError(f"Service class must be a subclass of {self.base_type.__name__}")
+        self.services[key] = service_class
+        
+    def get(self, key: str, *args, **kwargs) -> Optional[T]:
+        """Get an instance of the service for the given key."""
+        service_class = self.services.get(key)
+        if service_class:
+            return service_class(*args, **kwargs)
+        return None
+        
+    def get_all(self) -> Dict[str, Type[T]]:
+        """Get all registered services."""
+        return self.services.copy()
+        
+    def discover_plugins(self, package_name: str) -> None:
+        """Discover and register plugins from the given package."""
+        package = importlib.import_module(package_name)
+        package_path = getattr(package, '__path__', [])
+        
+        for _, name, is_pkg in pkgutil.iter_modules(package_path):
+            if not is_pkg:
+                module = importlib.import_module(f"{package_name}.{name}")
+                
+                for item_name, item in inspect.getmembers(module, inspect.isclass):
+                    if issubclass(item, self.base_type) and item != self.base_type:
+                        self.register(name, item)
+
+2. Advanced Code Understanding Engine
+# analysis/engine.py
+from typing import Dict, List, Set, Optional, Any, Union
+from pathlib import Path
+import threading
+import queue
+from dataclasses import dataclass, field
+import networkx as nx
+from abc import ABC, abstractmethod
+
+@dataclass
+class Symbol:
+    """Represents a code symbol (function, class, variable, etc.)."""
+    name: str
+    kind: str  # 'function', 'class', 'variable', etc.
+    location: Dict[str, Any]  # file, line, column
+    scope: Optional[str] = None
+    signature: Optional[str] = None
+    documentation: Optional[str] = None
+    references: List[Dict[str, Any]] = field(default_factory=list)
+
+@dataclass
+class CodeRelation:
+    """Represents a relation between code elements."""
+    source: str  # Symbol ID
+    target: str  # Symbol ID
+    kind: str    # 'calls', 'imports', 'inherits', 'uses', etc.
+    location: Dict[str, Any]
+    
+class LanguageAnalyzer(ABC):
+    """Base class for language-specific analyzers."""
+    
+    @abstractmethod
+    def analyze_file(self, file_path: Path, content: str) -> Dict[str, Any]:
+        """Analyze a single file and return its structure."""
+        pass
+        
+    @abstractmethod
+    def extract_symbols(self, file_analysis: Dict[str, Any]) -> List[Symbol]:
+        """Extract symbols from a file analysis."""
+        pass
+        
+    @abstractmethod
+    def extract_relations(self, file_analysis: Dict[str, Any], symbols: Dict[str, Symbol]) -> List[CodeRelation]:
+        """Extract relations between symbols."""
+        pass
+
+class CodeGraph:
+    """A graph representation of code symbols and their relationships."""
+    
+    def __init__(self):
+        self.symbol_graph = nx.DiGraph()
+        self.file_graph = nx.DiGraph()
+        self.symbols: Dict[str, Symbol] = {}
+        self.files: Dict[str, Dict[str, Any]] = {}
+        
+    def add_symbol(self, symbol: Symbol) -> str:
+        """Add a symbol to the graph."""
+        symbol_id = f"{symbol.scope or ''}.{symbol.name}" if symbol.scope else symbol.name
+        self.symbols[symbol_id] = symbol
+        self.symbol_graph.add_node(symbol_id, **{
+            'name': symbol.name,
+            'kind': symbol.kind,
+            'file': symbol.location['file'],
+            'line': symbol.location.get('line', 0)
+        })
+        return symbol_id
+        
+    def add_relation(self, relation: CodeRelation) -> None:
+        """Add a relation between symbols."""
+        self.symbol_graph.add_edge(
+            relation.source, 
+            relation.target, 
+            kind=relation.kind,
+            file=relation.location['file'],
+            line=relation.location.get('line', 0)
+        )
+        
+    def get_callgraph(self, symbol_id: str, depth: int = 2) -> nx.DiGraph:
+        """Get the call graph for a symbol up to a certain depth."""
+        if symbol_id not in self.symbol_graph:
+            return nx.DiGraph()
+            
+        callgraph = nx.DiGraph()
+        callgraph.add_node(symbol_id, **self.symbol_graph.nodes[symbol_id])
+        
+        # BFS to find calls within depth
+        current_depth = 0
+        current_nodes = {symbol_id}
+        
+        while current_depth < depth and current_nodes:
+            next_nodes = set()
+            
+            for node in current_nodes:
+                for successor in self.symbol_graph.successors(node):
+                    edge_data = self.symbol_graph.get_edge_data(node, successor)
+                    if edge_data.get('kind') == 'calls':
+                        callgraph.add_node(successor, **self.symbol_graph.nodes[successor])
+                        callgraph.add_edge(node, successor, **edge_data)
+                        next_nodes.add(successor)
+            
+            current_nodes = next_nodes
+            current_depth += 1
+            
+        return callgraph
+        
+    def find_code_paths(self, source: str, target: str, max_depth: int = 5) -> List[List[str]]:
+        """Find paths in the code from source to target symbols."""
+        if source not in self.symbol_graph or target not in self.symbol_graph:
+            return []
+            
+        paths = []
+        for path in nx.all_simple_paths(self.symbol_graph, source, target, cutoff=max_depth):
+            paths.append(path)
+            
+        return paths
+
+class AnalysisEngine:
+    """Main engine for code analysis."""
+    
+    def __init__(self):
+        self.analyzers: Dict[str, LanguageAnalyzer] = {}
+        self.code_graph = CodeGraph()
+        self._analysis_queue = queue.Queue()
+        self._analysis_thread = None
+        self._stop_requested = threading.Event()
+        
+    def register_analyzer(self, extension: str, analyzer: LanguageAnalyzer) -> None:
+        """Register a language analyzer for a file extension."""
+        self.analyzers[extension] = analyzer
+        
+    def analyze_file(self, file_path: Path) -> None:
+        """Queue a file for analysis."""
+        self._analysis_queue.put(file_path)
+        
+        # Start analysis thread if not running
+        if not self._analysis_thread or not self._analysis_thread.is_alive():
+            self._stop_requested.clear()
+            self._analysis_thread = threading.Thread(target=self._analysis_worker)
+            self._analysis_thread.daemon = True
+            self._analysis_thread.start()
+    
+    def analyze_files(self, file_paths: List[Path]) -> None:
+        """Queue multiple files for analysis."""
+        for file_path in file_paths:
+            self.analyze_file(file_path)
+    
+    def _analysis_worker(self) -> None:
+        """Worker thread for file analysis."""
+        while not self._stop_requested.is_set():
+            try:
+                file_path = self._analysis_queue.get(timeout=1.0)
+            except queue.Empty:
+                continue
+                
+            try:
+                self._analyze_file_now(file_path)
+            except Exception as e:
+                print(f"Error analyzing {file_path}: {e}")
+            finally:
+                self._analysis_queue.task_done()
+                
+    def _analyze_file_now(self, file_path: Path) -> None:
+        """Analyze a file immediately."""
+        extension = file_path.suffix.lower()
+        
+        if extension not in self.analyzers:
+            return  # No analyzer for this file type
+            
+        analyzer = self.analyzers[extension]
+        
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+                
+            # Analyze the file
+            analysis = analyzer.analyze_file(file_path, content)
+            
+            # Extract symbols and relations
+            symbols = analyzer.extract_symbols(analysis)
+            
+            # Add symbols to the graph
+            symbol_ids = {}
+            for symbol in symbols:
+                symbol_id = self.code_graph.add_symbol(symbol)
+                symbol_ids[symbol.name] = symbol_id
+                
+            # Extract and add relations
+            relations = analyzer.extract_relations(analysis, symbol_ids)
+            for relation in relations:
+                self.code_graph.add_relation(relation)
+                
+        except Exception as e:
+            print(f"Error analyzing {file_path}: {e}")
+            
+    def find_symbol(self, name: str, kind: Optional[str] = None) -> List[Symbol]:
+        """Find symbols by name and optionally kind."""
+        results = []
+        
+        for symbol_id, symbol in self.code_graph.symbols.items():
+            if symbol.name == name and (kind is None or symbol.kind == kind):
+                results.append(symbol)
+                
+        return results
+        
+    def find_references(self, symbol_id: str) -> List[Dict[str, Any]]:
+        """Find all references to a symbol."""
+        if symbol_id not in self.code_graph.symbols:
+            return []
+            
+        return self.code_graph.symbols[symbol_id].references
+        
+    def get_relevant_files(self, issue_description: str, focus_file: Optional[Path] = None) -> List[Path]:
+        """Find files relevant to an issue based on code relationships."""
+        # This would use the graph to find related files
+        # For now, returning a simple implementation
+        relevant_files = []
+        
+        if focus_file:
+            relevant_files.append(focus_file)
+            
+            # Add files that import or are imported by the focus file
+            focus_path_str = str(focus_file)
+            for file_path, file_data in self.code_graph.files.items():
+                if file_path == focus_path_str:
+                    continue
+                    
+                if focus_path_str in file_data.get('imports', []) or file_path in self.code_graph.files.get(focus_path_str, {}).get('imports', []):
+                    relevant_files.append(Path(file_path))
+        
+        # Add files that might be relevant based on keywords in the issue
+        keywords = set(issue_description.lower().split())
+        for symbol_id, symbol in self.code_graph.symbols.items():
+            if any(keyword in symbol.name.lower() for keyword in keywords):
+                file_path = symbol.location['file']
+                relevant_files.append(Path(file_path))
+                
+        return list(set(relevant_files))[:10]  # Limit to 10 unique files
+
+3. Python Language Analyzer Implementation
+# analysis/python_analyzer.py
+import ast
+from typing import Dict, List, Set, Optional, Any, Union
+from pathlib import Path
+import symtable
+import builtins
+
+from .engine import LanguageAnalyzer, Symbol, CodeRelation
+
+class PythonSymbolVisitor(ast.NodeVisitor):
+    """AST visitor to extract symbols from Python code."""
+    
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+        self.symbols: List[Symbol] = []
+        self.current_scope: List[str] = []
+        self.imports: Dict[str, str] = {}  # alias -> module
+        
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        """Visit a class definition."""
+        # Create a symbol for the class
+        scope = ".".join(self.current_scope) if self.current_scope else None
+        
+        bases = []
+        for base in node.bases:
+            if isinstance(base, ast.Name):
+                bases.append(base.id)
+            elif isinstance(base, ast.Attribute):
+                bases.append(f"{base.value.id}.{base.attr}" if hasattr(base.value, 'id') else base.attr)
+                
+        self.symbols.append(Symbol(
+            name=node.name,
+            kind='class',
+            location={
+                'file': self.file_path,
+                'line': node.lineno,
+                'column': node.col_offset
+            },
+            scope=scope,
+            signature=f"class {node.name}({', '.join(bases)})",
+            documentation=ast.get_docstring(node)
+        ))
+        
+        # Visit class body with updated scope
+        self.current_scope.append(node.name)
+        for item in node.body:
+            self.visit(item)
+        self.current_scope.pop()
+        
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        """Visit a function definition."""
+        # Create a symbol for the function
+        scope = ".".join(self.current_scope) if self.current_scope else None
+        
+        # Build function signature
+        args_parts = []
+        for arg in node.args.args:
+            args_parts.append(arg.arg)
+        
+        if node.args.vararg:
+            args_parts.append(f"*{node.args.vararg.arg}")
+            
+        if node.args.kwarg:
+            args_parts.append(f"**{node.args.kwarg.arg}")
+            
+        self.symbols.append(Symbol(
+            name=node.name,
+            kind='function',
+            location={
+                'file': self.file_path,
+                'line': node.lineno,
+                'column': node.col_offset
+            },
+            scope=scope,
+            signature=f"def {node.name}({', '.join(args_parts)})",
+            documentation=ast.get_docstring(node)
+        ))
+        
+        # Visit function body with updated scope
+        self.current_scope.append(node.name)
+        for item in node.body:
+            self.visit(item)
+        self.current_scope.pop()
+        
+    def visit_Import(self, node: ast.Import) -> None:
+        """Visit an import statement."""
+        for name in node.names:
+            alias = name.asname or name.name
+            self.imports[alias] = name.name
+            
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        """Visit a from-import statement."""
+        module = node.module or ""
+        for name in node.names:
+            alias = name.asname or name.name
+            self.imports[alias] = f"{module}.{name.name}" if module else name.name
+
+class PythonRelationVisitor(ast.NodeVisitor):
+    """AST visitor to extract relations from Python code."""
+    
+    def __init__(self, file_path: str, symbols: Dict[str, str], imports: Dict[str, str]):
+        self.file_path = file_path
+        self.symbols = symbols
+        self.imports = imports
+        self.relations: List[CodeRelation] = []
+        self.current_scope: List[str] = []
+        
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        """Visit a class definition."""
+        class_name = node.name
+        scope = ".".join(self.current_scope) if self.current_scope else None
+        class_id = f"{scope}.{class_name}" if scope else class_name
+        
+        # Add inheritance relations
+        for base in node.bases:
+            if isinstance(base, ast.Name):
+                base_name = base.id
+                if base_name in self.symbols:
+                    self.relations.append(CodeRelation(
+                        source=class_id,
+                        target=self.symbols[base_name],
+                        kind='inherits',
+                        location={
+                            'file': self.file_path,
+                            'line': base.lineno,
+                            'column': base.col_offset
+                        }
+                    ))
+        
+        # Visit class body with updated scope
+        self.current_scope.append(class_name)
+        for item in node.body:
+            self.visit(item)
+        self.current_scope.pop()
+        
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        """Visit a function definition."""
+        self.current_scope.append(node.name)
+        for item in node.body:
+            self.visit(item)
+        self.current_scope.pop()
+        
+    def visit_Call(self, node: ast.Call) -> None:
+        """Visit a function call."""
+        scope = ".".join(self.current_scope) if self.current_scope else None
+        source_id = scope
+        
+        # Determine the called function
+        if isinstance(node.func, ast.Name):
+            func_name = node.func.id
+            if func_name in self.symbols:
+                self.relations.append(CodeRelation(
+                    source=source_id,
+                    target=self.symbols[func_name],
+                    kind='calls',
+                    location={
+                        'file': self.file_path,
+                        'line': node.lineno,
+                        'column': node.col_offset
+                    }
+                ))
+        elif isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+            # Handle method calls like obj.method()
+            obj_name = node.func.value.id
+            method_name = node.func.attr
+            
+            if obj_name in self.imports:
+                # This might be an imported module
+                module_path = self.imports[obj_name]
+                full_name = f"{module_path}.{method_name}"
+                
+                if full_name in self.symbols:
+                    self.relations.append(CodeRelation(
+                        source=source_id,
+                        target=self.symbols[full_name],
+                        kind='calls',
+                        location={
+                            'file': self.file_path,
+                            'line': node.lineno,
+                            'column': node.col_offset
+                        }
+                    ))
+        
+        # Visit arguments
+        for arg in node.args:
+            self.visit(arg)
+        for keyword in node.keywords:
+            self.visit(keyword.value)
+
+class PythonAnalyzer(LanguageAnalyzer):
+    """Analyzer for Python code."""
+    
+    def analyze_file(self, file_path: Path, content: str) -> Dict[str, Any]:
+        """Analyze a Python file."""
+        try:
+            tree = ast.parse(content)
+            
+            # Extract symbols
+            symbol_visitor = PythonSymbolVisitor(str(file_path))
+            symbol_visitor.visit(tree)
+            
+            return {
+                'ast': tree,
+                'symbols': symbol_visitor.symbols,
+                'imports': symbol_visitor.imports
+            }
+        except SyntaxError as e:
+            print(f"Syntax error in {file_path}: {e}")
+            return {
+                'ast': None,
+                'symbols': [],
+                'imports': {}
+            }
+        
+    def extract_symbols(self, file_analysis: Dict[str, Any]) -> List[Symbol]:
+        """Extract symbols from a file analysis."""
+        return file_analysis.get('symbols', [])
+        
+    def extract_relations(self, file_analysis: Dict[str, Any], symbols: Dict[str, str]) -> List[CodeRelation]:
+        """Extract relations between symbols."""
+        if not file_analysis.get('ast'):
+            return []
+            
+        ast_tree = file_analysis['ast']
+        imports = file_analysis.get('imports', {})
+        file_path = file_analysis.get('symbols', [{}])[0].get('location', {}).get('file', '')
+        
+        relation_visitor = PythonRelationVisitor(file_path, symbols, imports)
+        relation_visitor.visit(ast_tree)
+        
+        return relation_visitor.relations
+
+4. Multi-Model AI Orchestration
+# ai/orchestrator.py
+from typing import Dict, List, Any, Optional, Union, Callable
+from dataclasses import dataclass
+import asyncio
+from pathlib import Path
+import json
+import time
+import os
+from enum import Enum, auto
+
+@dataclass
+class AIRequest:
+    """A request to be processed by an AI model."""
+    prompt: str
+    system_message: str
+    model: str
+    temperature: float = 0.2
+    max_tokens: int = 4000
+    context_files: List[str] = None
+    
+@dataclass
+class AIResponse:
+    """A response from an AI model."""
+    content: str
+    model: str
+    tokens_used: int
+    timing: float
+    error: Optional[str] = None
+
+class AITaskType(Enum):
+    """Types of AI tasks for specialized handling."""
+    CODE_UNDERSTANDING = auto()
+    BUG_DIAGNOSIS = auto()
+    SOLUTION_GENERATION = auto()
+    CODE_EXPLANATION = auto()
+    TEST_GENERATION = auto()
+    DEPENDENCY_ANALYSIS = auto()
+
+class AIOrchestrator:
+    """Orchestrates AI interactions, managing multiple models and request routing."""
+    
+    def __init__(self):
+        self.providers: Dict[str, Any] = {}
+        self.model_capabilities: Dict[str, List[AITaskType]] = {}
+        self.default_models: Dict[AITaskType, str] = {}
+        self.conversations: Dict[str, List[Dict[str, Any]]] = {}
+        
+    def register_provider(self, name: str, provider: Any) -> None:
+        """Register an AI provider."""
+        self.providers[name] = provider
+        
+    def register_model(self, model_name: str, provider: str, capabilities: List[AITaskType]) -> None:
+        """Register a model with its capabilities."""
+        self.model_capabilities[model_name] = capabilities
+        
+        # Set as default for capabilities if not already set
+        for capability in capabilities:
+            if capability not in self.default_models:
+                self.default_models[capability] = model_name
+                
+    def set_default_model(self, task_type: AITaskType, model_name: str) -> None:
+        """Set the default model for a task type."""
+        if model_name not in self.model_capabilities:
+            raise ValueError(f"Unknown model: {model_name}")
+            
+        if task_type not in self.model_capabilities[model_name]:
+            raise ValueError(f"Model {model_name} does not support task type {task_type}")
+            
+        self.default_models[task_type] = model_name
+        
+    def get_provider_for_model(self, model_name: str) -> Any:
+        """Get the provider for a model."""
+        for provider_name, provider in self.providers.items():
+            if provider.supports_model(model_name):
+                return provider
+                
+        raise ValueError(f"No provider supports model: {model_name}")
+        
+    async def execute_request(self, request: AIRequest) -> AIResponse:
+        """Execute an AI request."""
+        model = request.model
+        provider = self.get_provider_for_model(model)
+        
+        start_time = time.time()
+        try:
+            response_data = await provider.generate_async(
+                prompt=request.prompt,
+                system_message=request.system_message,
+                model=model,
+                temperature=request.temperature,
+                max_tokens=request.max_tokens
+            )
+            
+            return AIResponse(
+                content=response_data.get('content', ''),
+                model=model,
+                tokens_used=response_data.get('tokens_used', 0),
+                timing=time.time() - start_time
+            )
+        except Exception as e:
+            return AIResponse(
+                content='',
+                model=model,
+                tokens_used=0,
+                timing=time.time() - start_time,
+                error=str(e)
+            )
+            
+    async def execute_task(
+        self, 
+        task_type: AITaskType, 
+        prompt: str, 
+        system_message: str,
+        context_files: List[str] = None,
+        model: Optional[str] = None
+    ) -> AIResponse:
+        """Execute a task using the appropriate model."""
+        if model is None:
+            model = self.default_models.get(task_type)
+            if not model:
+                raise ValueError(f"No default model for task type: {task_type}")
+                
+        request = AIRequest(
+            prompt=prompt,
+            system_message=system_message,
+            model=model,
+            context_files=context_files
+        )
+        
+        return await self.execute_request(request)
+        
+    def create_conversation(self, id: Optional[str] = None) -> str:
+        """Create a new conversation."""
+        if id is None:
+            id = f"conv_{int(time.time())}"
+            
+        self.conversations[id] = []
+        return id
+        
+    async def add_to_conversation(
+        self, 
+        conversation_id: str, 
+        user_message: str, 
+        system_message: str,
+        model: Optional[str] = None,
+        task_type: Optional[AITaskType] = None
+    ) -> AIResponse:
+        """Add a message to a conversation and get a response."""
+        if conversation_id not in self.conversations:
+            self.create_conversation(conversation_id)
+            
+        # Determine model to use
+        if model is None and task_type is not None:
+            model = self.default_models.get(task_type)
+            
+        if model is None:
+            model = next(iter(self.model_capabilities.keys()))  # Use first registered model
+            
+        # Construct conversation history
+        conversation = self.conversations[conversation_id]
+        
+        # Build prompt with conversation history
+        full_prompt = ""
+        for message in conversation:
+            if message['role'] == 'user':
+                full_prompt += f"Human: {message['content']}\n\n"
+            else:
+                full_prompt += f"Assistant: {message['content']}\n\n"
+                
+        full_prompt += f"Human: {user_message}\n\nAssistant: "
+        
+        # Create request
+        request = AIRequest(
+            prompt=full_prompt,
+            system_message=system_message,
+            model=model
+        )
+        
+        # Execute request
+        response = await self.execute_request(request)
+        
+        # Add to conversation history
+        conversation.append({'role': 'user', 'content': user_message})
+        conversation.append({'role': 'assistant', 'content': response.content})
+        
+        return response
+
+5. Advanced AI Provider Implementations
+# ai/providers.py
+from typing import Dict, List, Any, Optional, Set
+import aiohttp
+import os
+import json
+import time
+from abc import ABC, abstractmethod
+
+class AIProvider(ABC):
+    """Base class for AI providers."""
+    
+    @abstractmethod
+    async def generate_async(
+        self, 
+        prompt: str, 
+        system_message: str, 
+        model: str, 
+        temperature: float = 0.2,
+        max_tokens: int = 4000
+    ) -> Dict[str, Any]:
+        """Generate a response asynchronously."""
+        pass
+        
+    @abstractmethod
+    def supports_model(self, model: str) -> bool:
+        """Check if this provider supports the given model."""
+        pass
+
+class AnthropicProvider(AIProvider):
+    """Provider for Anthropic's Claude models."""
+    
+    def __init__(self, api_key: Optional[str] = None):
+        self.api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
+        if not self.api_key:
+            raise ValueError("Anthropic API key is required")
+            
+        self.supported_models = {
+            "claude-3-opus-20240229",
+            "claude-3-sonnet-20240229",
+            "claude-3-haiku-20240307",
+            "claude-2.1",
+            "claude-2.0",
+            "claude-instant-1.2"
+        }
+        
+    async def generate_async(
+        self, 
+        prompt: str, 
+        system_message: str, 
+        model: str, 
+        temperature: float = 0.2,
+        max_tokens: int = 4000
+    ) -> Dict[str, Any]:
+        """Generate a response using Anthropic's API asynchronously."""
+        if not self.supports_model(model):
+            raise ValueError(f"Model {model} not supported by Anthropic")
+            
+        url = "https://api.anthropic.com/v1/messages"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "X-Api-Key": self.api_key,
+            "anthropic-version": "2023-06-01"
+        }
+        
+        data = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+            "system": system_message,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, headers=headers, json=data) as response:
+                if response.status != 200:
+                    error_text = await response.text()
+                    raise ValueError(f"Anthropic API error ({response.status}): {error_text}")
+                    
+                result = await response.json()
+                
+                return {
+                    "content": result["content"][0]["text"],
+                    "tokens_used": result.get("usage", {}).get("output_tokens", 0),
+                    "model": model
+                }
+                
+    def supports_model(self, model: str) -> bool:
+        """Check if this provider supports the given model."""
+        return model in self.supported_models
+
+class OpenAIProvider(AIProvider):
+    """Provider for OpenAI models."""
+    
+    def __init__(self, api_key: Optional[str] = None):
+        self.api_key = api_key or os.environ.get("OPENAI_API_KEY")
+        if not self.api_key:
+            raise ValueError("OpenAI API key is required")
+            
+        self.supported_models = {
+            "gpt-4o",
+            "gpt-4-turbo",
+            "gpt-4",
+            "gpt-3.5-turbo"
+        }
+        
+    async def generate_async(
+        self, 
+        prompt: str, 
+        system_message: str, 
+        model: str, 
+        temperature: float = 0.2,
+        max_tokens: int = 4000
+    ) -> Dict[str, Any]:
+        """Generate a response using OpenAI's API asynchronously."""
+        if not self.supports_model(model):
+            raise ValueError(f"Model {model} not supported by OpenAI")
+            
+        url = "https://api.openai.com/v1/chat/completions"
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}"
+        }
+        
+        messages = [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": prompt}
+        ]
+        
+        data = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": temperature
+        }
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, headers=headers, json=data) as response:
+                if response.status != 200:
+                    error_text = await response.text()
+                    raise ValueError(f"OpenAI API error ({response.status}): {error_text}")
+                    
+                result = await response.json()
+                
+                return {
+                    "content": result["choices"][0]["message"]["content"],
+                    "tokens_used": result.get("usage", {}).get("completion_tokens", 0),
+                    "model": model
+                }
+                
+    def supports_model(self, model: str) -> bool:
+        """Check if this provider supports the given model."""
+        return model in self.supported_models
+
+6. Workspace & Project Management
+# workspace/manager.py
+from typing import Dict, List, Optional, Set, Any
+from pathlib import Path
+import json
+import os
+import shutil
+import time
+import tempfile
+import git
+from dataclasses import dataclass, field
+import subprocess
+
+@dataclass
+class CodeSnapshot:
+    """A snapshot of code at a point in time."""
+    id: str
+    timestamp: float
+    description: str
+    files: Dict[str, str]  # path -> content
+    parent_id: Optional[str] = None
+
+@dataclass
+class Project:
+    """Represents a code project."""
+    name: str
+    root_path: Path
+    git_repo: Optional[git.Repo] = None
+    snapshots: Dict[str, CodeSnapshot] = field(default_factory=dict)
+    current_snapshot_id: Optional[str] = None
+    ignored_patterns: List[str] = field(default_factory=lambda: ['.git', '__pycache__', '*.pyc', 'node_modules'])
+    metadata: Dict[str, Any] = field(default_factory=dict)
+
+class WorkspaceManager:
+    """Manages code projects and their snapshots."""
+    
+    def __init__(self, workspace_dir: Path):
+        self.workspace_dir = workspace_dir
+        self.projects: Dict[str, Project] = {}
+        self.workspace_dir.mkdir(parents=True, exist_ok=True)
+        self._load_projects()
+        
+    def _load_projects(self) -> None:
+        """Load projects from the workspace directory."""
+        for project_dir in self.workspace_dir.iterdir():
+            if project_dir.is_dir():
+                project_file = project_dir / ".code_navigator" / "project.json"
+                if project_file.exists():
+                    try:
+                        with open(project_file, 'r') as f:
+                            project_data = json.load(f)
+                            
+                        project = Project(
+                            name=project_data['name'],
+                            root_path=project_dir,
+                            ignored_patterns=project_data.get('ignored_patterns', []),
+                            metadata=project_data.get('metadata', {})
+                        )
+                        
+                        # Try to load git repo if it exists
+                        try:
+                            project.git_repo = git.Repo(project_dir)
+                        except git.InvalidGitRepositoryError:
+                            pass
+                            
+                        # Load snapshots
+                        snapshots_dir = project_dir / ".code_navigator" / "snapshots"
+                        if snapshots_dir.exists():
+                            for snapshot_file in snapshots_dir.glob("*.json"):
+                                with open(snapshot_file, 'r') as f:
+                                    snapshot_data = json.load(f)
+                                    
+                                snapshot = CodeSnapshot(
+                                    id=snapshot_data['id'],
+                                    timestamp=snapshot_data['timestamp'],
+                                    description=snapshot_data['description'],
+                                    files=snapshot_data['files'],
+                                    parent_id=snapshot_data.get('parent_id')
+                                )
+                                
+                                project.snapshots[snapshot.id] = snapshot
+                                
+                            # Set current snapshot
+                            project.current_snapshot_id = project_data.get('current_snapshot_id')
+                            
+                        self.projects[project.name] = project
+                    except Exception as e:
+                        print(f"Error loading project {project_dir}: {e}")
+                        
+    def create_project(self, name: str, path: Path) -> Project:
+        """Create a new project."""
+        if name in self.projects:
+            raise ValueError(f"Project {name} already exists")
+            
+        project_dir = self.workspace_dir / name
+        project_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize project structure
+        code_nav_dir = project_dir / ".code_navigator"
+        code_nav_dir.mkdir(exist_ok=True)
+        (code_nav_dir / "snapshots").mkdir(exist_ok=True)
+        
+        # Create project metadata
+        project = Project(
+            name=name,
+            root_path=project_dir
+        )
+        
+        # Copy code from path if provided
+        if path and path.exists():
+            self._copy_code(path, project_dir, project.ignored_patterns)
+            
+            # Check if it's a git repo
+            try:
+                project.git_repo = git.Repo(path)
+            except git.InvalidGitRepositoryError:
+                pass
+        
+        # Save project metadata
+        self._save_project(project)
+        
+        self.projects[name] = project
+        return project
+        
+    def _copy_code(self, source: Path, dest: Path, ignored_patterns: List[str]) -> None:
+        """Copy code from source to destination, respecting ignored patterns."""
+        def should_ignore(path: Path) -> bool:
+            """Check if path should be ignored."""
+            path_str = str(path)
+            return any(pat in path_str for pat in ignored_patterns)
+        
+        for item in source.iterdir():
+            if item.is_dir():
+                if not should_ignore(item):
+                    dest_dir = dest / item.name
+                    dest_dir.mkdir(exist_ok=True)
+                    self._copy_code(item, dest_dir, ignored_patterns)
+            else:
+                if not should_ignore(item):
+                    shutil.copy2(item, dest / item.name)
+                    
+    def _save_project(self, project: Project) -> None:
+        """Save project metadata."""
+        project_file = project.root_path / ".code_navigator" / "project.json"
+        
+        project_data = {
+            'name': project.name,
+            'ignored_patterns': project.ignored_patterns,
+            'current_snapshot_id': project.current_snapshot_id,
+            'metadata': project.metadata
+        }
+        
+        with open(project_file, 'w') as f:
+            json.dump(project_data, f, indent=2)
+            
+    def create_snapshot(self, project_name: str, description: str) -> CodeSnapshot:
+        """Create a snapshot of the current project state."""
+        if project_name not in self.projects:
+            raise ValueError(f"Project {project_name} does not exist")
+            
+        project = self.projects[project_name]
+        
+        # Generate snapshot ID
+        snapshot_id = f"snapshot_{int(time.time())}"
+        
+        # Collect file contents
+        files = {}
+        for file_path in self._list_code_files(project.root_path, project.ignored_patterns):
+            rel_path = str(file_path.relative_to(project.root_path))
+            try:
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                files[rel_path] = content
+            except Exception as e:
+                print(f"Error reading {file_path}: {e}")
+                
+        # Create snapshot
+        snapshot = CodeSnapshot(
+            id=snapshot_id,
+            timestamp=time.time(),
+            description=description,
+            files=files,
+            parent_id=project.current_snapshot_id
+        )
+        
+        # Save snapshot
+        snapshot_file = project.root_path / ".code_navigator" / "snapshots" / f"{snapshot_id}.json"
+        with open(snapshot_file, 'w') as f:
+            json.dump({
+                'id': snapshot.id,
+                'timestamp': snapshot.timestamp,
+                'description': snapshot.description,
+                'parent_id': snapshot.parent_id,
+                'files': snapshot.files
+            }, f)
+            
+        # Update project
+        project.snapshots[snapshot_id] = snapshot
+        project.current_snapshot_id = snapshot_id
+        self._save_project(project)
+        
+        return snapshot
+        
+    def restore_snapshot(self, project_name: str, snapshot_id: str) -> None:
+        """Restore a project to a previous snapshot."""
+        if project_name not in self.projects:
+            raise ValueError(f"Project {project_name} does not exist")
+            
+        project = self.projects[project_name]
+        
+        if snapshot_id not in project.snapshots:
+            raise ValueError(f"Snapshot {snapshot_id} does not exist")
+            
+        snapshot = project.snapshots[snapshot_id]
+        
+        # Backup current state first
+        backup_snapshot = self.create_snapshot(project_name, f"Backup before restoring {snapshot_id}")
+        
+        # Restore files
+        for rel_path, content in snapshot.files.items():
+            file_path = project.root_path / rel_path
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+                
+        # Update project
+        project.current_snapshot_id = snapshot_id
+        self._save_project(project)
+        
+    def _list_code_files(self, directory: Path, ignored_patterns: List[str]) -> List[Path]:
+        """List all code files in a directory, respecting ignored patterns."""
+        code_files = []
+        
+        for item in directory.iterdir():
+            # Check if item should be ignored
+            if any(pat in str(item) for pat in ignored_patterns):
+                continue
+                
+            if item.is_dir():
+                code_files.extend(self._list_code_files(item, ignored_patterns))
+            else:
+                # Simple heuristic for code files - could be improved
+                if item.suffix.lower() in ['.py', '.js', '.ts', '.java', '.cpp', '.c', '.h', '.go', '.rb', '.php']:
+                    code_files.append(item)
+                    
+        return code_files
+        
+    def get_git_history(self, project_name: str, max_commits: int = 20) -> List[Dict[str, Any]]:
+        """Get git history for a project."""
+        if project_name not in self.projects:
+            raise ValueError(f"Project {project_name} does not exist")
+            
+        project = self.projects[project_name]
+        
+        if not project.git_repo:
+            return []
+            
+        commits = []
+        for commit in project.git_repo.iter_commits(max_count=max_commits):
+            commits.append({
+                'hash': commit.hexsha,
+                'message': commit.message,
+                'author': commit.author.name,
+                'date': commit.committed_datetime.isoformat(),
+                'files': [item.a_path for item in commit.diff(commit.parents[0])] if commit.parents else []
+            })
+            
+        return commits
+        
+    def run_command(self, project_name: str, command: List[str]) -> Dict[str, Any]:
+        """Run a command in the project directory."""
+        if project_name not in self.projects:
+            raise ValueError(f"Project {project_name} does not exist")
+            
+        project = self.projects[project_name]
+        
+        try:
+            result = subprocess.run(
+                command,
+                cwd=project.root_path,
+                capture_output=True,
+                text=True,
+                timeout=60  # 1 minute timeout
+            )
+            
+            return {
+                'success': result.returncode == 0,
+                'returncode': result.returncode,
+                'stdout': result.stdout,
+                'stderr': result.stderr
+            }
+        except subprocess.TimeoutExpired:
+            return {
+                'success': False,
+                'error': 'Command timed out'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+7. Terminal UI with Rich
+# ui/terminal.py
+from typing import Dict, List, Optional, Any, Callable
+import asyncio
+from pathlib import Path
+import os
+from datetime import datetime
+import threading
+import queue
+import signal
+import sys
+from enum import Enum, auto
+import re
+
+from textual.app import App, ComposeResult
+from textual.containers import Container, Horizontal, Vertical
+from textual.widgets import Header, Footer, Button, Static, Input, TextArea, TreeControl, Tree, Label
+from textual.reactive import reactive
+from textual.message import Message
+from textual import events
+from textual.binding import Binding
+
+from ..core.navigator import CodeNavigator
+from ..workspace.manager import WorkspaceManager, Project
+from ..ai.orchestrator import AIOrchestrator, AITaskType
+
+class TabType(Enum):
+    CODE = auto()
+    CHAT = auto()
+    ANALYSIS = auto()
+
+class Tab:
+    """Represents a tab in the UI."""
+    
+    def __init__(self, title: str, type: TabType, content: Any):
+        self.title = title
+        self.type = type
+        self.content = content
+        
+class CodeTab(Tab):
+    """A tab for viewing/editing code."""
+    
+    def __init__(self, title: str, file_path: Path, content: str):
+        super().__init__(title, TabType.CODE, content)
+        self.file_path = file_path
+        self.unsaved_changes = False
+        
+class ChatTab(Tab):
+    """A tab for AI chat interactions."""
+    
+    def __init__(self, title: str, conversation_id: str):
+        super().__init__(title, TabType.CHAT, [])
+        self.conversation_id = conversation_id
+        
+class AnalysisTab(Tab):
+    """A tab for code analysis results."""
+    
+    def __init__(self, title: str, analysis_type: str, analysis_data: Any):
+        super().__init__(title, TabType.ANALYSIS, analysis_data)
+        self.analysis_type = analysis_type
+
+class CodeFileTree(TreeControl):
+    """A tree view for code files."""
+    
+    def __init__(self, root_path: Path, navigator: CodeNavigator):
+        super().__init__("Project", {})
+        self.root_path = root_path
+        self.navigator = navigator
+        
+    async def on_mount(self) -> None:
+        """Load the file tree when mounted."""
+        await self.load_directory(self.root_path, self.root)
+        await self.root.expand()
+        
+    async def load_directory(self, path: Path, node) -> None:
+        """Load a directory into the tree."""
+        for item in sorted(path.iterdir(), key=lambda p: (p.is_file(), p.name)):
+            # Skip hidden files and directories
+            if item.name.startswith('.'):
+                continue
+                
+            if item.is_dir():
+                dir_node = await self.add(node, item.name, {"path": item, "is_dir": True})
+                await self.load_directory(item, dir_node)
+            else:
+                await self.add(node, item.name, {"path": item, "is_dir": False})
+                
+    async def on_tree_node_selected(self, event) -> None:
+        """Handle node selection."""
+        node = event.node
+        data = node.data
+        
+        if not data.get("is_dir", True):
+            # It's a file, open it
+            await self.emit(OpenFileRequest(data["path"]))
+
+class OpenFileRequest(Message):
+    """Message to request opening a file."""
+    
+    def __init__(self, file_path: Path):
+        super().__init__()
+        self.file_path = file_path
+
+class CodeNavigatorApp(App):
+    """Main application for the CodeNavigator TUI."""
+    
+    TITLE = "CodeNavigator"
+    CSS_PATH = "styles.css"
+    
+    BINDINGS = [
+        Binding("ctrl+q", "quit", "Quit"),
+        Binding("ctrl+o", "open_file", "Open File"),
+        Binding("ctrl+s", "save_file", "Save"),
+        Binding("ctrl+n", "new_tab", "New Tab"),
+        Binding("ctrl+w", "close_tab", "Close Tab"),
+        Binding("f5", "analyze", "Analyze"),
+        Binding("f1", "help", "Help")
+    ]
+    
+    def __init__(self, navigator: CodeNavigator, workspace: WorkspaceManager, project: Project):
+        super().__init__()
+        self.navigator = navigator
+        self.workspace = workspace
+        self.project = project
+        self.tabs: List[Tab] = []
+        self.current_tab_index = 0
+        self.ai_orchestrator = AIOrchestrator()
+        
+    def compose(self) -> ComposeResult:
+        """Compose the app layout."""
+        yield Header()
+        
+        with Horizontal():
+            with Container(id="sidebar"):
+                yield Static("Project Explorer", id="explorer-header")
+                yield CodeFileTree(self.project.root_path, self.navigator)
+                
+            with Container(id="main-panel"):
+                with Container(id="tab-bar"):
+                    yield Button("+ New Tab", id="new-tab-btn")
+                
+                with Container(id="tab-content"):
+                    yield TextArea("Welcome to CodeNavigator!", language="markdown")
+                    
+                with Container(id="status-bar"):
+                    yield Label("Ready", id="status")
+                    
+        yield Footer()
+        
+    def on_mount(self) -> None:
+        """Handle app mount."""
+        # Create a welcome tab
+        welcome_content = """
+# Welcome to CodeNavigator
+
+CodeNavigator is an AI-powered coding assistant that helps you understand, debug, and improve your codebase.
+
+## Getting Started
+
+1. Browse your project files in the sidebar
+2. Click on a file to open it
+3. Use the AI to analyze issues or suggest improvements
+
+## Keyboard Shortcuts
+
+- Ctrl+O: Open file
+- Ctrl+S: Save current file
+- Ctrl+N: New tab
+- Ctrl+W: Close current tab
+- F5: Analyze current file/selection
+- F1: Show help
+        """
+        
+        welcome_tab = Tab("Welcome", TabType.ANALYSIS, welcome_content)
+        self.tabs.append(welcome_tab)
+        self.update_tabs()
+        
+    def update_tabs(self) -> None:
+        """Update the tab display."""
+        tab_bar = self.query_one("#tab-bar")
+        tab_bar.remove_children()
+        
+        for i, tab in enumerate(self.tabs):
+            btn = Button(
+                tab.title + (" *" if getattr(tab, "unsaved_changes", False) else ""),
+                classes=("active" if i == self.current_tab_index else "")
+            )
+            btn.data = i  # Store tab index
+            tab_bar.mount(btn)
+            
+        tab_bar.mount(Button("+ New Tab", id="new-tab-btn"))
+        
+        # Update content
+        self.update_content()
+        
+    def update_content(self) -> None:
+        """Update the content area based on current tab."""
+        if not self.tabs:
+            return
+            
+        content_area = self.query_one("#tab-content")
+        content_area.remove_children()
+        
+        current_tab = self.tabs[self.current_tab_index]
+        
+        if current_tab.type == TabType.CODE:
+            editor = TextArea(
+                current_tab.content,
+                language=self._get_language(current_tab.file_path)
+            )
+            content_area.mount(editor)
+        elif current_tab.type == TabType.CHAT:
+            chat_container = Vertical()
+            
+            # Add messages
+            for message in current_tab.content:
+                if message['role'] == 'user':
+                    label = Label(f"You: {message['content']}", classes=("user-message",))
+                else:
+                    label = Label(f"AI: {message['content']}", classes=("ai-message",))
+                chat_container.mount(label)
+                
+            # Add input
+            input_box = Input(placeholder="Type your message...", id="chat-input")
+            chat_container.mount(input_box)
+            
+            content_area.mount(chat_container)
+        elif current_tab.type == TabType.ANALYSIS:
+            text_area = TextArea(current_tab.content, language="markdown")
+            content_area.mount(text_area)
+            
+    def _get_language(self, file_path: Path) -> str:
+        """Get the language for syntax highlighting based on file extension."""
+        ext = file_path.suffix.lower()
+        language_map = {
+            '.py': 'python',
+            '.js': 'javascript',
+            '.ts': 'typescript',
+            '.html': 'html',
+            '.css': 'css',
+            '.json': 'json',
+            '.md': 'markdown',
+            '.java': 'java',
+            '.c': 'c',
+            '.cpp': 'cpp',
+            '.go': 'go',
+            '.rb': 'ruby',
+            '.php': 'php'
+        }
+        return language_map.get(ext, 'text')
+        
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle button presses."""
+        button = event.button
+        
+        if button.id == "new-tab-btn":
+            await self.action_new_tab()
+        elif hasattr(button, "data") and isinstance(button.data, int):
+            # Tab button
+            self.current_tab_index = button.data
+            self.update_tabs()
+            
+    async def on_open_file_request(self, event: OpenFileRequest) -> None:
+        """Handle request to open a file."""
+        file_path = event.file_path
+        
+        # Check if file is already open
+        for i, tab in enumerate(self.tabs):
+            if isinstance(tab, CodeTab) and tab.file_path == file_path:
+                self.current_tab_index = i
+                self.update_tabs()
+                return
+                
+        # Open the file
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                content = f.read()
+                
+            tab = CodeTab(file_path.name, file_path, content)
+            self.tabs.append(tab)
+            self.current_tab_index = len(self.tabs) - 1
+            self.update_tabs()
+        except Exception as e:
+            self.notify(f"Error opening file: {e}", severity="error")
+            
+    async def action_open_file(self) -> None:
+        """Action to open a file."""
+        # This would normally show a file picker
+        # For now, just print a message
+        self.notify("Use the file tree to open files")
+        
+    async def action_save_file(self) -> None:
+        """Action to save the current file."""
+        if not self.tabs or self.current_tab_index >= len(self.tabs):
+            return
+            
+        current_tab = self.tabs[self.current_tab_index]
+        
+        if not isinstance(current_tab, CodeTab):
+            return
+            
+        # Get content from editor
+        editor = self.query_one(TextArea)
+        content = editor.text
+        
+        try:
+            with open(current_tab.file_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+                
+            current_tab.content = content
+            current_tab.unsaved_changes = False
+            self.update_tabs()
+            self.notify(f"Saved {current_tab.file_path.name}")
+        except Exception as e:
+            self.notify(f"Error saving file: {e}", severity="error")
+            
+    async def action_new_tab(self) -> None:
+        """Action to create a new tab."""
+        # Create a chat tab
+        conversation_id = f"chat_{int(datetime.now().timestamp())}"
+        tab = ChatTab("New Chat", conversation_id)
+        self.tabs.append(tab)
+        self.current_tab_index = len(self.tabs) - 1
+        self.update_tabs()
+        
+    async def action_close_tab(self) -> None:
+        """Action to close the current tab."""
+        if not self.tabs:
+            return
+            
+        current_tab = self.tabs[self.current_tab_index]
+        
+        # Check for unsaved changes
+        if isinstance(current_tab, CodeTab) and current_tab.unsaved_changes:
+            # Would normally show a confirmation dialog
+            # For now, just notify
+            self.notify("Tab has unsaved changes", severity="warning")
+            return
+            
+        # Remove tab
+        self.tabs.pop(self.current_tab_index)
+        
+        # Update current tab index
+        if self.tabs:
+            self.current_tab_index = min(self.current_tab_index, len(self.tabs) - 1)
+        else:
+            self.current_tab_index = 0
+            
+        self.update_tabs()
+        
+    async def action_analyze(self) -> None:
+        """Action to analyze the current file or selection."""
+        if not self.tabs:
+            return
+            
+        current_tab = self.tabs[self.current_tab_index]
+        
+        if isinstance(current_tab, CodeTab):
+            # Get content from editor
+            editor = self.query_one(TextArea)
+            content = editor.text
+            
+            # Create analysis task
+            self.notify("Analyzing code...")
+            
+            # This would normally be done asynchronously
+            # For now, just create a simple analysis tab
+            analysis = f"""
+# Analysis of {current_tab.file_path.name}
+
+## Overview
+This file contains approximately {len(content.splitlines())} lines of code.
+
+## Structure
+- Functions: {len(re.findall(r'def\s+\w+\s*\(', content))}
+- Classes: {len(re.findall(r'class\s+\w+\s*(\(|:)', content))}
+- Imports: {len(re.findall(r'import\s+\w+', content))}
+
+## Suggestions
+1. Consider adding more documentation
+2. Review error handling
+3. Add unit tests for key functionality
+            """
+            
+            tab = AnalysisTab(f"Analysis: {current_tab.file_path.name}", "code_analysis", analysis)
+            self.tabs.append(tab)
+            self.current_tab_index = len(self.tabs) - 1
+            self.update_tabs()
+        
+    async def on_input_submitted(self, event: Input.Submitted) -> None:
+        """Handle input submission."""
+        if event.input.id == "chat-input":
+            message = event.value
+            
+            if not message.strip():
+                return
+                
+            current_tab = self.tabs[self.current_tab_index]
+            
+            if isinstance(current_tab, ChatTab):
+                # Add user message
+                current_tab.content.append({
+                    'role': 'user',
+                    'content': message
+                })
+                
+                # Clear input
+                event.input.value = ""
+                
+                # Update display
+                self.update_content()
+                
+                # Get AI response (would normally be async)
+                self.notify("AI is thinking...")
+                
+                # Simulate AI response
+                response = "I'll analyze this code for you. It looks like there might be an issue with the error handling in the function. Let me suggest a better approach..."
+                
+                current_tab.content.append({
+                    'role': 'assistant',
+                    'content': response
+                })
+                
+                # Update display again
+                self.update_content()
+
+8. Enhanced CLI Interface with Rich
+# cli/enhanced_cli.py
+import typer
+from rich.console import Console
+from rich.markdown import Markdown
+from rich.syntax import Syntax
+from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
+from rich import print as rprint
+from pathlib import Path
+from typing import Optional, List, Dict, Any
+import os
+import asyncio
+import sys
+from enum import Enum
+
+from ..core.navigator import CodeNavigator
+from ..workspace.manager import WorkspaceManager
+from ..ai.orchestrator import AIOrchestrator, AITaskType
+from ..ai.providers import AnthropicProvider, OpenAIProvider
+
+console = Console()
+app = typer.Typer(help="CodeNavigator: AI-powered code assistant")
+
+# State
+state = {
+    "navigator": None,
+    "workspace": None,
+    "project": None,
+    "ai_orchestrator": None
+}
+
+class ProviderType(str, Enum):
+    ANTHROPIC = "anthropic"
+    OPENAI = "openai"
+
+def init_navigator(project_path: Path) -> CodeNavigator:
+    """Initialize or get the navigator."""
+    if state["navigator"] is None or state["project"] is None or str(state["project"].root_path) != str(project_path):
+        # Initialize workspace if needed
+        if state["workspace"] is None:
+            workspace_dir = Path.home() / ".code_navigator" / "workspace"
+            state["workspace"] = WorkspaceManager(workspace_dir)
+            
+        # Get or create project
+        project_name = project_path.name
+        
+        if project_name in state["workspace"].projects:
+            state["project"] = state["workspace"].projects[project_name]
+        else:
+            state["project"] = state["workspace"].create_project(project_name, project_path)
+            
+        # Create navigator
+        state["navigator"] = CodeNavigator(project_path)
+        
+        # Initialize AI orchestrator if needed
+        if state["ai_orchestrator"] is None:
+            state["ai_orchestrator"] = AIOrchestrator()
+            
+            # Register providers
+            try:
+                state["ai_orchestrator"].register_provider("anthropic", AnthropicProvider())
+            except ValueError:
+                console.print("[yellow]Anthropic API key not found. Claude models unavailable.[/yellow]")
+                
+            try:
+                state["ai_orchestrator"].register_provider("openai", OpenAIProvider())
+            except ValueError:
+                console.print("[yellow]OpenAI API key not found. GPT models unavailable.[/yellow]")
+                
+            # Register models
+            try:
+                state["ai_orchestrator"].register_model(
+                    "claude-3-opus-20240229", 
+                    "anthropic", 
+                    [AITaskType.CODE_UNDERSTANDING, AITaskType.BUG_DIAGNOSIS, AITaskType.SOLUTION_GENERATION]
+                )
+                state["ai_orchestrator"].register_model(
+                    "gpt-4o", 
+                    "openai", 
+                    [AITaskType.CODE_UNDERSTANDING, AITaskType.BUG_DIAGNOSIS, AITaskType.SOLUTION_GENERATION]
+                )
+            except:
+                pass
+    
+    return state["navigator"]
+
+@app.command()
+def init(
+    path: Path = typer.Argument(
+        Path("."), help="Path to the codebase to analyze"
+    ),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
+    reindex: bool = typer.Option(False, "--reindex", "-r", help="Force reindexing")
+):
+    """Initialize and index a codebase."""
+    path = path.absolute()
+    
+    if not path.exists():
+        console.print(f"[red]Error: Path {path} does not exist[/red]")
+        return
+        
+    navigator = init_navigator(path)
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]{task.description}"),
+        console=console
+    ) as progress:
+        task = progress.add_task("[bold blue]Indexing codebase...", total=None)
+        
+        # Initialize or reindex
+        navigator.initialize(verbose=verbose, force_reindex=reindex)
+        
+        progress.update(task, completed=True)
+        
+    console.print(f"[bold green]✓ Codebase successfully indexed![/bold green]")
+    console.print(f"Found {len(navigator.index.files)} files")
+    
+    # Display basic stats
+    languages = {}
+    for file_path, file_info in navigator.index.files.items():
+        ext = Path(file_path).suffix
+        languages[ext] = languages.get(ext, 0) + 1
+        
+    if languages:
+        table = Table(title="Language Distribution")
+        table.add_column("Language", style="cyan")
+        table.add_column("Files", style="magenta")
+        
+        for ext, count in sorted(languages.items(), key=lambda x: x[1], reverse=True):
+            lang = ext[1:] if ext.startswith('.') else ext
+            table.add_row(lang, str(count))
+            
+        console.print(table)
+
+@app.command()
+def diagnose(
+    issue: str = typer.Argument(..., help="Description of the issue to diagnose"),
+    file: Optional[Path] = typer.Option(None, "--file", "-f", help="Focus on a specific file"),
+    path: Path = typer.Option(
+        Path("."), "--path", "-p", help="Path to the codebase"
+    ),
+    provider: ProviderType = typer.Option(
+        ProviderType.ANTHROPIC, "--provider", help="AI provider to use"
+    )
+):
+    """Diagnose an issue in the codebase."""
+    path = path.absolute()
+    
+    if not path.exists():
+        console.print(f"[red]Error: Path {path} does not exist[/red]")
+        return
+        
+    navigator = init_navigator(path)
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]{task.description}"),
+        console=console
+    ) as progress:
+        task = progress.add_task("[bold blue]Analyzing issue...", total=None)
+        
+        # Handle file path
+        if file:
+            file = path / file if not file.is_absolute() else file
+        
+        # Diagnose issue
+        response = navigator.diagnose_issue(
+            issue_description=issue, 
+            focus_file=file,
+            provider=provider.value
+        )
+        
+        progress.update(task, completed=True)
+    
+    # Display response
+    console.print("\n[bold]AI Analysis:[/bold]")
+    console.print(Markdown(response))
+    
+    # Extract changes if any
+    changes = navigator.change_manager.extract_changes_from_response(response)
+    
+    if changes:
+        console.print("\n[bold]Proposed Changes:[/bold]")
+        for line in navigator.change_manager.preview_changes(changes):
+            console.print(line)
+        
+        if typer.confirm("Apply these changes?"):
+            applied_files = navigator.change_manager.apply_changes(changes)
+            console.print(f"[green]Applied changes to {len(applied_files)} files[/green]")
+            
+            # Create a snapshot
+            if state["workspace"] and state["project"]:
+                snapshot = state["workspace"].create_snapshot(
+                    state["project"].name,
+                    f"Changes from AI diagnosis: {issue[:50]}..."
+                )
+                console.print(f"[green]Created snapshot: {snapshot.id}[/green]")
+
+@app.command()
+def improve(
+    description: str = typer.Argument(..., help="Description of the improvement to make"),
+    file: Optional[Path] = typer.Option(None, "--file", "-f", help="Focus on a specific file"),
+    path: Path = typer.Option(
+        Path("."), "--path", "-p", help="Path to the codebase"
+    ),
+    provider: ProviderType = typer.Option(
+        ProviderType.ANTHROPIC, "--provider", help="AI provider to use"
+    )
+):
+    """Suggest improvements to the codebase."""
+    path = path.absolute()
+    
+    if not path.exists():
+        console.print(f"[red]Error: Path {path} does not exist[/red]")
+        return
+        
+    navigator = init_navigator(path)
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]{task.description}"),
+        console=console
+    ) as progress:
+        task = progress.add_task("[bold blue]Analyzing improvement opportunity...", total=None)
+        
+        # Handle file path
+        if file:
+            file = path / file if not file.is_absolute() else file
+        
+        # Get improvement suggestions
+        response = navigator.suggest_improvements(
+            description=description, 
+            focus_file=file,
+            provider=provider.value
+        )
+        
+        progress.update(task, completed=True)
+    
+    # Display response
+    console.print("\n[bold]AI Suggestions:[/bold]")
+    console.print(Markdown(response))
+    
+    # Extract changes if any
+    changes = navigator.change_manager.extract_changes_from_response(response)
+    
+    if changes:
+        console.print("\n[bold]Proposed Changes:[/bold]")
+        for line in navigator.change_manager.preview_changes(changes):
+            console.print(line)
+        
+        if typer.confirm("Apply these changes?"):
+            applied_files = navigator.change_manager.apply_changes(changes)
+            console.print(f"[green]Applied changes to {len(applied_files)} files[/green]")
+            
+            # Create a snapshot
+            if state["workspace"] and state["project"]:
+                snapshot = state["workspace"].create_snapshot(
+                    state["project"].name,
+                    f"Improvements: {description[:50]}..."
+                )
+                console.print(f"[green]Created snapshot: {snapshot.id}[/green]")
+
+@app.command()
+def analyze(
+    file: Path = typer.Argument(..., help="File to analyze"),
+    path: Path = typer.Option(
+        Path("."), "--path", "-p", help="Path to the codebase"
+    ),
+    provider: ProviderType = typer.Option(
+        ProviderType.ANTHROPIC, "--provider", help="AI provider to use"
+    )
+):
+    """Analyze a specific file for potential issues and improvements."""
+    path = path.absolute()
+    
+    if not path.exists():
+        console.print(f"[red]Error: Path {path} does not exist[/red]")
+        return
+        
+    file_path = path / file if not file.is_absolute() else file
+    
+    if not file_path.exists():
+        console.print(f"[red]Error: File {file_path} does not exist[/red]")
+        return
+        
+    navigator = init_navigator(path)
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]{task.description}"),
+        console=console
+    ) as progress:
+        task = progress.add_task("[bold blue]Analyzing file...", total=None)
+        
+        # Analyze file
+        analysis = navigator.analyze_file(
+            file_path=file_path,
+            provider=provider.value
+        )
+        
+        progress.update(task, completed=True)
+    
+    # Display analysis
+    console.print("\n[bold]File Analysis:[/bold]")
+    console.print(Markdown(analysis))
+
+@app.command()
+def visualize(
+    file: Optional[Path] = typer.Option(None, "--file", "-f", help="Focus on a specific file"),
+    path: Path = typer.Option(
+        Path("."), "--path", "-p", help="Path to the codebase"
+    ),
+    output: Path = typer.Option(
+        Path("codebase_graph.html"), "--output", "-o", help="Output file for visualization"
+    )
+):
+    """Generate a visualization of the codebase structure."""
+    path = path.absolute()
+    
+    if not path.exists():
+        console.print(f"[red]Error: Path {path} does not exist[/red]")
+        return
+        
+    navigator = init_navigator(path)
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[bold blue]{task.description}"),
+        console=console
+    ) as progress:
+        task = progress.add_task("[bold blue]Generating visualization...", total=None)
+        
+        # Handle file path
+        if file:
+            file = path / file if not file.is_absolute() else file
+        
+        # Generate visualization
+        visualization_path = navigator.generate_visualization(
+            output_path=output,
+            focus_file=file
+        )
+        
+        progress.update(task, completed=True)
+    
+    console.print(f"[green]Visualization generated: {visualization_path}[/green]")
+    console.print("Open this file in a web browser to view the interactive visualization.")
+
+@app.command()
+def chat(
+    path: Path = typer.Option(
+        Path("."), "--path", "-p", help="Path to the codebase"
+    ),
+    provider: ProviderType = typer.Option(
+        ProviderType.ANTHROPIC, "--provider", help="AI provider to use"
+    )
+):
+    """Start an interactive chat session with the AI assistant."""
+    path = path.absolute()
+    
+    if not path.exists():
+        console.print(f"[red]Error: Path {path} does not exist[/red]")
+        return
+        
+    navigator = init_navigator(path)
+    
+    console.print("[bold]CodeNavigator Chat[/bold]")
+    console.print("Type your questions about the codebase. Type 'exit' to quit.")
+    
+    conversation_id = f"cli_chat_{int(time.time())}"
+    
+    while True:
+        try:
+            user_input = typer.prompt("\nYou")
+            
+            if user_input.lower() in ('exit', 'quit'):
+                break
+                
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[bold blue]{task.description}"),
+                console=console
+            ) as progress:
+                task = progress.add_task("[bold blue]AI is thinking...", total=None)
+                
+                # Get AI response
+                response = navigator.chat(
+                    message=user_input,
+                    conversation_id=conversation_id,
+                    provider=provider.value
+                )
+                
+                progress.update(task, completed=True)
+            
+            console.print("\n[bold cyan]AI:[/bold cyan]")
+            console.print(Markdown(response))
+            
+        except KeyboardInterrupt:
+            console.print("\n[yellow]Chat session ended.[/yellow]")
+            break
+            
+        except Exception as e:
+            console.print(f"[red]Error: {e}[/red]")
+
+@app.command()
+def ui(
+    path: Path = typer.Argument(
+        Path("."), help="Path to the codebase"
+    )
+):
+    """Launch the terminal UI."""
+    path = path.absolute()
+    
+    if not path.exists():
+        console.print(f"[red]Error: Path {path} does not exist[/red]")
+        return
+        
+    navigator = init_navigator(path)
+    
+    try:
+        from ..ui.terminal import CodeNavigatorApp
+        
+        # Initialize the UI
+        app = CodeNavigatorApp(
+            navigator=navigator,
+            
+---
 Ultra-Advanced CodeNavigator: A Next-Generation AI Coding Assistant
 After deeper consideration, I'll present a significantly more advanced architecture for CodeNavigator that transforms it from a simple assistant to an intelligent coding partner with deep code understanding and sophisticated reasoning capabilities.
 
