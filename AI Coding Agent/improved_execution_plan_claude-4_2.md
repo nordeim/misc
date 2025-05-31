@@ -363,4 +363,421 @@ class RefactorAgent:
                 impact=suggestion['impact'],
                 effort=suggestion['effort']
             )
-            opportunities.append(
+            opportunities.append(opportunity)
+        
+        return self.prioritize_opportunities(opportunities)
+    
+    async def execute_refactoring(self, 
+                                 opportunity: RefactoringOpportunity,
+                                 safe_mode: bool = True) -> RefactoringResult:
+        """Execute a specific refactoring"""
+        
+        # 1. Create AST representation
+        tree = cst.parse_module(self.code_engine.get_file_content(opportunity.file))
+        
+        # 2. Build transformation
+        transformer = self.build_transformer(opportunity)
+        
+        # 3. Apply transformation
+        modified_tree = tree.visit(transformer)
+        
+        # 4. Validate transformation
+        if safe_mode:
+            validation = await self.validate_refactoring(
+                original=tree,
+                modified=modified_tree,
+                opportunity=opportunity
+            )
+            
+            if not validation.is_safe:
+                return RefactoringResult(
+                    success=False,
+                    reason=validation.issues,
+                    rollback_available=True
+                )
+        
+        # 5. Generate comprehensive diff
+        diff = self.generate_semantic_diff(tree, modified_tree)
+        
+        # 6. Create refactoring result
+        return RefactoringResult(
+            success=True,
+            changes=diff,
+            metrics_improvement={
+                'complexity': self.calculate_complexity_change(tree, modified_tree),
+                'readability': await self.estimate_readability_change(tree, modified_tree),
+                'performance': await self.estimate_performance_change(tree, modified_tree)
+            },
+            tests_required=await self.identify_required_tests(diff)
+        )
+    
+    def build_transformer(self, opportunity: RefactoringOpportunity) -> cst.CSTTransformer:
+        """Build appropriate CST transformer for refactoring type"""
+        
+        transformers = {
+            'extract_method': ExtractMethodTransformer,
+            'inline_variable': InlineVariableTransformer,
+            'rename_symbol': RenameSymbolTransformer,
+            'extract_class': ExtractClassTransformer,
+            'introduce_parameter_object': ParameterObjectTransformer,
+            'replace_conditional_with_polymorphism': PolymorphismTransformer,
+            'remove_dead_code': DeadCodeRemovalTransformer,
+            'simplify_conditional': ConditionalSimplifierTransformer
+        }
+        
+        transformer_class = transformers.get(opportunity.type)
+        return transformer_class(opportunity.params)
+```
+
+### 4. The Security Agent
+**Purpose**: Security vulnerability detection and remediation
+
+```python
+# src/agents/security_agent.py
+from typing import List, Dict, Set
+import re
+from dataclasses import dataclass
+
+@dataclass
+class SecurityVulnerability:
+    type: str  # SQL injection, XSS, etc.
+    severity: str  # Critical, High, Medium, Low
+    location: CodeLocation
+    description: str
+    cwe_id: str
+    fix_suggestion: str
+    proof_of_concept: Optional[str]
+
+class SecurityAgent:
+    def __init__(self, llm_manager, code_engine):
+        self.llm = llm_manager
+        self.code_engine = code_engine
+        self.vulnerability_db = VulnerabilityDatabase()
+        self.taint_analyzer = TaintAnalyzer()
+        
+    async def security_scan(self, codebase) -> SecurityReport:
+        """Comprehensive security analysis"""
+        
+        vulnerabilities = []
+        
+        # 1. Static Application Security Testing (SAST)
+        sast_results = await self.run_sast(codebase)
+        vulnerabilities.extend(sast_results)
+        
+        # 2. Dependency vulnerability check
+        dep_vulns = await self.check_dependencies(codebase)
+        vulnerabilities.extend(dep_vulns)
+        
+        # 3. Taint analysis
+        taint_results = self.taint_analyzer.analyze(codebase)
+        vulnerabilities.extend(self.convert_taint_to_vulns(taint_results))
+        
+        # 4. LLM-powered semantic analysis
+        semantic_vulns = await self.semantic_security_analysis(codebase)
+        vulnerabilities.extend(semantic_vulns)
+        
+        # 5. Configuration security check
+        config_issues = await self.check_configuration_security(codebase)
+        vulnerabilities.extend(config_issues)
+        
+        # 6. Generate remediation plan
+        remediation_plan = await self.generate_remediation_plan(vulnerabilities)
+        
+        return SecurityReport(
+            vulnerabilities=vulnerabilities,
+            risk_score=self.calculate_risk_score(vulnerabilities),
+            remediation_plan=remediation_plan,
+            compliance_status=self.check_compliance(vulnerabilities)
+        )
+    
+    async def run_sast(self, codebase) -> List[SecurityVulnerability]:
+        """Static security analysis"""
+        vulnerabilities = []
+        
+        # Pattern-based detection
+        patterns = {
+            'sql_injection': [
+                r'query\s*\(\s*["\'].*\+.*["\']',
+                r'execute\s*\(\s*["\'].*%s.*["\'].*%',
+            ],
+            'xss': [
+                r'innerHTML\s*=\s*[^"\']',
+                r'document\.write\s*\([^)]*\+[^)]*\)',
+            ],
+            'path_traversal': [
+                r'\.\./',
+                r'os\.path\.join\s*\([^,]*,\s*user_input',
+            ],
+            'command_injection': [
+                r'os\.system\s*\(',
+                r'subprocess\.\w+\s*\([^,]*shell\s*=\s*True',
+            ]
+        }
+        
+        for file in codebase.files:
+            content = file.content
+            
+            for vuln_type, pattern_list in patterns.items():
+                for pattern in pattern_list:
+                    matches = re.finditer(pattern, content, re.MULTILINE)
+                    
+                    for match in matches:
+                        # Get context around match
+                        context = self.get_code_context(content, match.span())
+                        
+                        # Verify with LLM
+                        is_vulnerable = await self.llm.verify_vulnerability(
+                            code=context,
+                            vuln_type=vuln_type
+                        )
+                        
+                        if is_vulnerable:
+                            vulnerabilities.append(SecurityVulnerability(
+                                type=vuln_type,
+                                severity=self.assess_severity(vuln_type, context),
+                                location=CodeLocation(file.path, match.start()),
+                                description=is_vulnerable['description'],
+                                cwe_id=self.get_cwe_id(vuln_type),
+                                fix_suggestion=is_vulnerable['fix'],
+                                proof_of_concept=is_vulnerable.get('poc')
+                            ))
+        
+        return vulnerabilities
+    
+    async def semantic_security_analysis(self, codebase) -> List[SecurityVulnerability]:
+        """LLM-powered semantic vulnerability detection"""
+        
+        vulnerabilities = []
+        
+        # Analyze authentication/authorization logic
+        auth_files = self.find_auth_related_files(codebase)
+        for file in auth_files:
+            auth_issues = await self.llm.analyze_auth_security(file.content)
+            vulnerabilities.extend(auth_issues)
+        
+        # Analyze data validation
+        input_handlers = self.find_input_handlers(codebase)
+        for handler in input_handlers:
+            validation_issues = await self.llm.analyze_input_validation(handler)
+            vulnerabilities.extend(validation_issues)
+        
+        # Analyze cryptographic usage
+        crypto_usage = self.find_crypto_usage(codebase)
+        for usage in crypto_usage:
+            crypto_issues = await self.llm.analyze_crypto_security(usage)
+            vulnerabilities.extend(crypto_issues)
+        
+        return vulnerabilities
+```
+
+### 5. The Performance Agent
+**Purpose**: Performance analysis and optimization
+
+```python
+# src/agents/performance_agent.py
+from typing import List, Dict, Any
+import cProfile
+import memory_profiler
+
+@dataclass
+class PerformanceIssue:
+    type: str  # CPU, Memory, I/O, Database
+    location: CodeLocation
+    impact: float  # 0-1 scale
+    description: str
+    optimization_suggestion: str
+    expected_improvement: float
+
+class PerformanceAgent:
+    def __init__(self, llm_manager, code_engine):
+        self.llm = llm_manager
+        self.code_engine = code_engine
+        self.profiler = AdvancedProfiler()
+        self.complexity_analyzer = ComplexityAnalyzer()
+        
+    async def analyze_performance(self, codebase, 
+                                 profile_data: Optional[Dict] = None) -> PerformanceReport:
+        """Comprehensive performance analysis"""
+        
+        issues = []
+        
+        # 1. Static performance analysis
+        static_issues = await self.static_performance_analysis(codebase)
+        issues.extend(static_issues)
+        
+        # 2. Algorithmic complexity analysis
+        complexity_issues = self.analyze_algorithmic_complexity(codebase)
+        issues.extend(complexity_issues)
+        
+        # 3. Database query analysis
+        db_issues = await self.analyze_database_performance(codebase)
+        issues.extend(db_issues)
+        
+        # 4. Memory usage patterns
+        memory_issues = self.analyze_memory_patterns(codebase)
+        issues.extend(memory_issues)
+        
+        # 5. Concurrency and parallelism opportunities
+        concurrency_opps = await self.find_parallelization_opportunities(codebase)
+        
+        # 6. LLM-powered optimization suggestions
+        llm_suggestions = await self.llm.suggest_optimizations(
+            codebase=codebase,
+            issues=issues,
+            profile_data=profile_data
+        )
+        
+        # 7. Generate optimization plan
+        optimization_plan = self.create_optimization_plan(issues, llm_suggestions)
+        
+        return PerformanceReport(
+            issues=issues,
+            bottlenecks=self.identify_bottlenecks(issues),
+            optimization_plan=optimization_plan,
+            expected_improvements=self.calculate_expected_improvements(optimization_plan),
+            benchmarks=await self.generate_benchmarks(optimization_plan)
+        )
+    
+    def analyze_algorithmic_complexity(self, codebase) -> List[PerformanceIssue]:
+        """Analyze time and space complexity"""
+        issues = []
+        
+        for file in codebase.files:
+            # Parse functions
+            functions = self.code_engine.extract_functions(file)
+            
+            for func in functions:
+                # Analyze loops and recursion
+                complexity = self.complexity_analyzer.analyze(func)
+                
+                if complexity.time_complexity > 'O(n^2)':
+                    issues.append(PerformanceIssue(
+                        type='algorithmic_complexity',
+                        location=func.location,
+                        impact=self.assess_impact(complexity),
+                        description=f"Function has {complexity.time_complexity} time complexity",
+                        optimization_suggestion=self.suggest_algorithm_improvement(func, complexity),
+                        expected_improvement=self.estimate_improvement(complexity)
+                    ))
+        
+        return issues
+    
+    async def find_parallelization_opportunities(self, codebase) -> List[ParallelizationOpportunity]:
+        """Identify code that can be parallelized"""
+        opportunities = []
+        
+        for file in codebase.files:
+            # Find loops without dependencies
+            independent_loops = self.find_independent_loops(file)
+            
+            for loop in independent_loops:
+                # Check if parallelization is worth it
+                if self.is_parallelization_beneficial(loop):
+                    opportunity = ParallelizationOpportunity(
+                        location=loop.location,
+                        type='loop_parallelization',
+                        current_execution_time=loop.estimated_time,
+                        parallel_execution_time=loop.estimated_time / loop.iteration_count,
+                        implementation=await self.generate_parallel_implementation(loop)
+                    )
+                    opportunities.append(opportunity)
+            
+            # Find map/reduce patterns
+            map_reduce_patterns = self.find_map_reduce_patterns(file)
+            opportunities.extend(map_reduce_patterns)
+        
+        return opportunities
+```
+
+---
+
+## 🧪 Advanced Testing Framework
+
+### Intelligent Test Generation
+
+```python
+# src/agents/test_agent.py
+from typing import List, Dict, Any
+import hypothesis
+from hypothesis import strategies as st
+
+class TestAgent:
+    def __init__(self, llm_manager, code_engine):
+        self.llm = llm_manager
+        self.code_engine = code_engine
+        self.coverage_analyzer = CoverageAnalyzer()
+        self.mutation_tester = MutationTester()
+        
+    async def generate_comprehensive_tests(self, 
+                                         function: Function,
+                                         existing_tests: List[Test] = None) -> TestSuite:
+        """Generate comprehensive test suite"""
+        
+        # 1. Analyze function signature and behavior
+        behavior_analysis = await self.analyze_function_behavior(function)
+        
+        # 2. Generate test cases for different categories
+        test_cases = []
+        
+        # Happy path tests
+        happy_path_tests = await self.generate_happy_path_tests(function, behavior_analysis)
+        test_cases.extend(happy_path_tests)
+        
+        # Edge case tests
+        edge_cases = await self.generate_edge_case_tests(function, behavior_analysis)
+        test_cases.extend(edge_cases)
+        
+        # Error case tests
+        error_cases = await self.generate_error_case_tests(function, behavior_analysis)
+        test_cases.extend(error_cases)
+        
+        # Property-based tests
+        property_tests = self.generate_property_tests(function, behavior_analysis)
+        test_cases.extend(property_tests)
+        
+        # Regression tests
+        if existing_tests:
+            regression_tests = await self.enhance_regression_coverage(function, existing_tests)
+            test_cases.extend(regression_tests)
+        
+        # 3. Generate test implementation
+        test_suite = TestSuite(
+            test_cases=test_cases,
+            setup_code=await self.generate_setup_code(function),
+            teardown_code=await self.generate_teardown_code(function),
+            fixtures=await self.generate_fixtures(function)
+        )
+        
+        # 4. Validate test quality
+        quality_report = await self.validate_test_quality(test_suite, function)
+        
+        return test_suite
+    
+    def generate_property_tests(self, function: Function, analysis: Dict) -> List[PropertyTest]:
+        """Generate property-based tests using Hypothesis"""
+        property_tests = []
+        
+        # Analyze function properties
+        properties = self.identify_function_properties(function, analysis)
+        
+        for prop in properties:
+            if prop.type == 'idempotent':
+                test = self.generate_idempotency_test(function)
+            elif prop.type == 'commutative':
+                test = self.generate_commutativity_test(function)
+            elif prop.type == 'associative':
+                test = self.generate_associativity_test(function)
+            elif prop.type == 'invariant':
+                test = self.generate_invariant_test(function, prop.invariant)
+            
+            property_tests.append(test)
+        
+        return property_tests
+    
+    async def generate_mutation_tests(self, function: Function, test_suite: TestSuite) -> MutationReport:
+        """Generate and run mutation tests"""
+        
+        # 1. Generate mutants
+        mutants = self.mutation_tester.generate_mutants(function)
+        
+        # 2. Run tests
