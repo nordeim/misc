@@ -1,3 +1,1806 @@
+Building an Advanced AI Coding Assistant: Enhanced Implementation Plan
+Thank you for the encouragement! You're right - we can create something far more sophisticated and powerful. Let's elevate this implementation to create a truly exceptional AI coding assistant that would impress even senior developers.
+
+Reimagined Architecture
+
+Core Design Principles
+Event-driven microkernel architecture - Highly decoupled components communicating through events
+Progressive intelligence - Multi-stage analysis pipeline with increasing semantic understanding
+Bidirectional AI collaboration - AI both receives context and contributes to context building
+Multi-model orchestration - Leverage different AI models for specialized tasks
+Self-improving system - Track effectiveness of changes and learn from successes/failures
+Phase 1: Core Engine Foundation (Days 1-8)
+1.1 Enhanced Project Structure with Domain-Driven Design
+mkdir -p code_navigator/{core/{domain,application,infrastructure,interfaces},plugins,ai/{orchestration,models,prompts,strategies},analysis/{static,semantic,runtime},indexing,changes,ui,utils}
+
+1.2 Powerful Event System for Component Communication
+# core/infrastructure/events.py
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum, auto
+from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Generic, Callable
+import uuid
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+class EventType(Enum):
+    # Codebase events
+    CODEBASE_INDEXED = auto()
+    FILE_ANALYZED = auto()
+    CODE_CHANGED = auto()
+    
+    # AI interaction events
+    CONTEXT_BUILT = auto()
+    PROMPT_GENERATED = auto()
+    AI_RESPONSE_RECEIVED = auto()
+    
+    # User interaction events
+    TASK_REQUESTED = auto()
+    CHANGE_APPROVED = auto()
+    
+    # System events
+    ERROR_OCCURRED = auto()
+    PLUGIN_LOADED = auto()
+
+@dataclass
+class Event:
+    """Base event class for the event-driven architecture."""
+    type: EventType
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    timestamp: datetime = field(default_factory=datetime.now)
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    payload: Dict[str, Any] = field(default_factory=dict)
+
+T = TypeVar('T')
+
+class EventBus:
+    """Advanced event bus with async support and subscriber filtering."""
+    
+    def __init__(self):
+        self._subscribers: Dict[EventType, List[Callable[[Event], Any]]] = {}
+        self._async_subscribers: Dict[EventType, List[Callable[[Event], Any]]] = {}
+        self._executor = ThreadPoolExecutor(max_workers=10)
+        self._loop = asyncio.get_event_loop()
+        
+    def subscribe(self, event_type: EventType, callback: Callable[[Event], Any], is_async: bool = False) -> None:
+        """Subscribe to an event type."""
+        if is_async:
+            if event_type not in self._async_subscribers:
+                self._async_subscribers[event_type] = []
+            self._async_subscribers[event_type].append(callback)
+        else:
+            if event_type not in self._subscribers:
+                self._subscribers[event_type] = []
+            self._subscribers[event_type].append(callback)
+    
+    def publish(self, event: Event) -> None:
+        """Publish an event to all subscribers."""
+        # Handle synchronous subscribers
+        subscribers = self._subscribers.get(event.type, [])
+        for subscriber in subscribers:
+            try:
+                subscriber(event)
+            except Exception as e:
+                self._handle_subscriber_error(e, event, subscriber)
+        
+        # Handle asynchronous subscribers
+        async_subscribers = self._async_subscribers.get(event.type, [])
+        for subscriber in async_subscribers:
+            self._loop.create_task(self._call_async_subscriber(subscriber, event))
+    
+    async def _call_async_subscriber(self, subscriber: Callable, event: Event) -> None:
+        """Call an async subscriber with proper error handling."""
+        try:
+            await subscriber(event)
+        except Exception as e:
+            self._handle_subscriber_error(e, event, subscriber)
+    
+    def _handle_subscriber_error(self, error: Exception, event: Event, subscriber: Callable) -> None:
+        """Handle errors in event subscribers."""
+        error_event = Event(
+            type=EventType.ERROR_OCCURRED,
+            metadata={"source": "event_bus", "subscriber": str(subscriber)},
+            payload={"error": str(error), "original_event": event}
+        )
+        # Directly call subscribers to avoid infinite recursion
+        for error_subscriber in self._subscribers.get(EventType.ERROR_OCCURRED, []):
+            if error_subscriber != subscriber:  # Avoid calling the failing subscriber
+                try:
+                    error_subscriber(error_event)
+                except:
+                    pass  # Suppress errors in error handlers
+
+# Global event bus instance
+event_bus = EventBus()
+
+1.3 Advanced Dependency Injection Container
+# core/infrastructure/container.py
+from typing import Any, Callable, Dict, Type, TypeVar, Optional, cast
+import inspect
+
+T = TypeVar('T')
+
+class ServiceContainer:
+    """Advanced dependency injection container with lifecycle management."""
+    
+    def __init__(self):
+        self._services: Dict[str, Any] = {}
+        self._factories: Dict[str, Callable[..., Any]] = {}
+        self._singletons: Dict[str, bool] = {}
+    
+    def register(self, interface: Type[T], implementation: Type[T], singleton: bool = True) -> None:
+        """Register a service with its implementation."""
+        interface_name = self._get_type_name(interface)
+        self._factories[interface_name] = self._create_factory(implementation)
+        self._singletons[interface_name] = singleton
+    
+    def register_instance(self, interface: Type[T], instance: T) -> None:
+        """Register an existing instance."""
+        interface_name = self._get_type_name(interface)
+        self._services[interface_name] = instance
+        self._singletons[interface_name] = True
+    
+    def register_factory(self, interface: Type[T], factory: Callable[..., T], singleton: bool = True) -> None:
+        """Register a factory function that creates the service."""
+        interface_name = self._get_type_name(interface)
+        self._factories[interface_name] = factory
+        self._singletons[interface_name] = singleton
+    
+    def resolve(self, interface: Type[T]) -> T:
+        """Resolve a service implementation."""
+        interface_name = self._get_type_name(interface)
+        
+        # Return existing instance if already created (for singletons)
+        if interface_name in self._services:
+            return cast(T, self._services[interface_name])
+        
+        # Check if we have a factory for this type
+        if interface_name not in self._factories:
+            raise KeyError(f"No registration found for {interface_name}")
+        
+        # Create the instance
+        factory = self._factories[interface_name]
+        instance = factory()
+        
+        # Store if it's a singleton
+        if self._singletons.get(interface_name, False):
+            self._services[interface_name] = instance
+        
+        return cast(T, instance)
+    
+    def _create_factory(self, implementation: Type[T]) -> Callable[[], T]:
+        """Create a factory function that resolves dependencies."""
+        def factory() -> T:
+            # Get constructor parameters
+            signature = inspect.signature(implementation.__init__)
+            parameters = {}
+            
+            for param_name, param in signature.parameters.items():
+                if param_name == 'self':
+                    continue
+                
+                # Try to resolve the parameter type
+                if param.annotation != inspect.Parameter.empty:
+                    parameters[param_name] = self.resolve(param.annotation)
+            
+            # Create the instance with resolved dependencies
+            return implementation(**parameters)
+        
+        return factory
+    
+    def _get_type_name(self, type_: Type) -> str:
+        """Get a unique name for a type."""
+        module = type_.__module__
+        name = type_.__qualname__
+        return f"{module}.{name}"
+
+# Global container instance
+container = ServiceContainer()
+
+1.4 Advanced Configuration System
+# core/infrastructure/config.py
+from typing import Any, Dict, List, Optional, Set, Union
+import os
+import json
+from pathlib import Path
+import yaml
+from pydantic import BaseModel, Field
+
+class AIConfig(BaseModel):
+    """Configuration for AI providers."""
+    provider: str = "anthropic"
+    model: str = "claude-3-opus-20240229"
+    temperature: float = 0.2
+    max_tokens: int = 4000
+    timeout_seconds: int = 60
+    system_prompt_path: Optional[Path] = None
+    
+class IndexingConfig(BaseModel):
+    """Configuration for code indexing."""
+    ignored_patterns: List[str] = [".git", "__pycache__", "node_modules", "dist", "build"]
+    max_file_size_kb: int = 1000
+    indexing_depth: int = 3  # How deep to analyze relationships
+    incremental: bool = True  # Use incremental indexing
+    
+class AnalysisConfig(BaseModel):
+    """Configuration for code analysis."""
+    static_analysis: bool = True
+    semantic_analysis: bool = True
+    complexity_metrics: bool = True
+    security_scan: bool = False
+    type_inference: bool = True
+    
+class UIConfig(BaseModel):
+    """Configuration for user interface."""
+    color_scheme: str = "default"
+    use_emoji: bool = True
+    verbose_output: bool = False
+    show_progress: bool = True
+    
+class CodeNavigatorConfig(BaseModel):
+    """Root configuration for the CodeNavigator application."""
+    ai: AIConfig = Field(default_factory=AIConfig)
+    indexing: IndexingConfig = Field(default_factory=IndexingConfig)
+    analysis: AnalysisConfig = Field(default_factory=AnalysisConfig)
+    ui: UIConfig = Field(default_factory=UIConfig)
+    plugins_enabled: List[str] = []
+    
+class ConfigManager:
+    """Manages application configuration from multiple sources."""
+    
+    def __init__(self):
+        self.config = CodeNavigatorConfig()
+        self.config_paths: List[Path] = []
+        
+    def load_config(self, project_path: Path) -> CodeNavigatorConfig:
+        """Load configuration from multiple sources with proper precedence."""
+        # Default config is already loaded
+        
+        # Load from global config if exists
+        user_config_path = Path.home() / ".code_navigator" / "config.json"
+        if user_config_path.exists():
+            self._merge_config_file(user_config_path)
+            self.config_paths.append(user_config_path)
+        
+        # Load from project config files with increasing precedence
+        project_config_files = [
+            project_path / ".code-navigator.json",
+            project_path / ".code-navigator.yaml",
+            project_path / ".code-navigator.yml",
+        ]
+        
+        for config_path in project_config_files:
+            if config_path.exists():
+                self._merge_config_file(config_path)
+                self.config_paths.append(config_path)
+        
+        # Load from environment variables
+        self._merge_env_vars()
+        
+        return self.config
+    
+    def _merge_config_file(self, config_path: Path) -> None:
+        """Merge configuration from a file."""
+        try:
+            if config_path.suffix in ['.yaml', '.yml']:
+                with open(config_path, 'r') as f:
+                    config_data = yaml.safe_load(f)
+            else:  # Default to JSON
+                with open(config_path, 'r') as f:
+                    config_data = json.load(f)
+            
+            # Update our config with the loaded data
+            if config_data:
+                self.config = CodeNavigatorConfig(**{**self.config.dict(), **config_data})
+                
+        except Exception as e:
+            print(f"Error loading config from {config_path}: {e}")
+    
+    def _merge_env_vars(self) -> None:
+        """Merge configuration from environment variables."""
+        # Handle AI provider config
+        if provider := os.environ.get("CODENAVIGATOR_AI_PROVIDER"):
+            self.config.ai.provider = provider
+            
+        if model := os.environ.get("CODENAVIGATOR_AI_MODEL"):
+            self.config.ai.model = model
+        
+        # Handle other env vars as needed
+        if temp := os.environ.get("CODENAVIGATOR_AI_TEMPERATURE"):
+            try:
+                self.config.ai.temperature = float(temp)
+            except ValueError:
+                pass
+
+# Global config manager instance
+config_manager = ConfigManager()
+
+Phase 2: Advanced Code Analysis Engine (Days 9-18)
+2.1 Modular Language Analyzer System
+# analysis/static/language_analyzers.py
+from abc import ABC, abstractmethod
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Union, Any
+import ast
+import re
+import os
+
+from ...core.domain.models import CodeFile, CodeEntity, CodeRelation, RelationType
+
+class LanguageAnalyzer(ABC):
+    """Base class for language-specific analyzers."""
+    
+    @property
+    @abstractmethod
+    def supported_extensions(self) -> List[str]:
+        """Extensions supported by this analyzer."""
+        pass
+    
+    @abstractmethod
+    def analyze_file(self, file_path: Path, content: str) -> CodeFile:
+        """Analyze a file and extract its structure."""
+        pass
+    
+    @abstractmethod
+    def analyze_imports(self, code_file: CodeFile) -> Set[CodeRelation]:
+        """Analyze imports and dependencies."""
+        pass
+    
+    @abstractmethod
+    def get_language_name(self) -> str:
+        """Get the name of the language this analyzer handles."""
+        pass
+
+class PythonAnalyzer(LanguageAnalyzer):
+    """Advanced Python code analyzer."""
+    
+    @property
+    def supported_extensions(self) -> List[str]:
+        return ['.py']
+    
+    def get_language_name(self) -> str:
+        return "Python"
+    
+    def analyze_file(self, file_path: Path, content: str) -> CodeFile:
+        """Analyze a Python file using AST."""
+        try:
+            tree = ast.parse(content)
+            
+            # Create the CodeFile object
+            code_file = CodeFile(
+                path=file_path,
+                language="python",
+                content=content,
+                entities=[],
+                complexity=self._calculate_complexity(tree)
+            )
+            
+            # Extract entities (classes, functions, etc.)
+            self._extract_entities(tree, code_file)
+            
+            return code_file
+            
+        except SyntaxError as e:
+            # Handle syntax errors gracefully
+            return CodeFile(
+                path=file_path,
+                language="python",
+                content=content,
+                entities=[],
+                complexity=0,
+                errors=[f"SyntaxError: {str(e)}"]
+            )
+    
+    def analyze_imports(self, code_file: CodeFile) -> Set[CodeRelation]:
+        """Analyze imports in a Python file."""
+        relations = set()
+        
+        try:
+            tree = ast.parse(code_file.content)
+            
+            for node in ast.walk(tree):
+                # Handle direct imports (import x, import x.y)
+                if isinstance(node, ast.Import):
+                    for name in node.names:
+                        relation = CodeRelation(
+                            source=code_file.path,
+                            target=name.name,
+                            type=RelationType.IMPORTS,
+                            metadata={"alias": name.asname}
+                        )
+                        relations.add(relation)
+                
+                # Handle from imports (from x import y)
+                elif isinstance(node, ast.ImportFrom) and node.module:
+                    for name in node.names:
+                        relation = CodeRelation(
+                            source=code_file.path,
+                            target=f"{node.module}.{name.name}",
+                            type=RelationType.IMPORTS,
+                            metadata={"alias": name.asname, "is_from_import": True}
+                        )
+                        relations.add(relation)
+            
+            return relations
+            
+        except SyntaxError:
+            return set()
+    
+    def _extract_entities(self, tree: ast.AST, code_file: CodeFile) -> None:
+        """Extract all code entities from the AST."""
+        for node in ast.walk(tree):
+            # Extract classes
+            if isinstance(node, ast.ClassDef):
+                class_entity = CodeEntity(
+                    name=node.name,
+                    type="class",
+                    start_line=node.lineno,
+                    end_line=self._get_end_line(node),
+                    docstring=ast.get_docstring(node) or "",
+                    metadata={
+                        "bases": [self._get_name(base) for base in node.bases],
+                        "decorators": [self._get_name(d) for d in node.decorator_list]
+                    }
+                )
+                code_file.entities.append(class_entity)
+                
+                # Extract methods within the class
+                for item in node.body:
+                    if isinstance(item, ast.FunctionDef):
+                        method_entity = CodeEntity(
+                            name=f"{node.name}.{item.name}",
+                            type="method",
+                            start_line=item.lineno,
+                            end_line=self._get_end_line(item),
+                            parent=node.name,
+                            docstring=ast.get_docstring(item) or "",
+                            metadata={
+                                "decorators": [self._get_name(d) for d in item.decorator_list],
+                                "args": self._extract_function_args(item)
+                            }
+                        )
+                        code_file.entities.append(method_entity)
+            
+            # Extract top-level functions
+            elif isinstance(node, ast.FunctionDef) and isinstance(node.parent, ast.Module):
+                function_entity = CodeEntity(
+                    name=node.name,
+                    type="function",
+                    start_line=node.lineno,
+                    end_line=self._get_end_line(node),
+                    docstring=ast.get_docstring(node) or "",
+                    metadata={
+                        "decorators": [self._get_name(d) for d in node.decorator_list],
+                        "args": self._extract_function_args(node)
+                    }
+                )
+                code_file.entities.append(function_entity)
+    
+    def _get_end_line(self, node: ast.AST) -> int:
+        """Get the ending line number of a node."""
+        return max(getattr(node, 'lineno', 0), getattr(node, 'end_lineno', 0)) or 0
+    
+    def _get_name(self, node: ast.AST) -> str:
+        """Get a string representation of a name node."""
+        if isinstance(node, ast.Name):
+            return node.id
+        elif isinstance(node, ast.Attribute):
+            return f"{self._get_name(node.value)}.{node.attr}"
+        elif isinstance(node, ast.Call):
+            return self._get_name(node.func)
+        return str(node)
+    
+    def _extract_function_args(self, func_node: ast.FunctionDef) -> Dict[str, Any]:
+        """Extract function arguments with type annotations."""
+        args_info = {"args": [], "defaults": [], "kwonlyargs": [], "annotations": {}}
+        
+        # Process positional arguments
+        for arg in func_node.args.args:
+            args_info["args"].append(arg.arg)
+            if arg.annotation:
+                args_info["annotations"][arg.arg] = self._get_name(arg.annotation)
+        
+        # Process defaults for positional arguments
+        for default in func_node.args.defaults:
+            if isinstance(default, ast.Constant):
+                args_info["defaults"].append(default.value)
+            else:
+                args_info["defaults"].append(self._get_name(default))
+        
+        # Process keyword-only arguments
+        for arg in func_node.args.kwonlyargs:
+            args_info["kwonlyargs"].append(arg.arg)
+            if arg.annotation:
+                args_info["annotations"][arg.arg] = self._get_name(arg.annotation)
+        
+        # Process return annotation
+        if func_node.returns:
+            args_info["return_annotation"] = self._get_name(func_node.returns)
+        
+        return args_info
+    
+    def _calculate_complexity(self, tree: ast.AST) -> int:
+        """Calculate cyclomatic complexity of code."""
+        complexity = 1  # Base complexity
+        
+        for node in ast.walk(tree):
+            # Increment complexity for control flow statements
+            if isinstance(node, (ast.If, ast.While, ast.For, ast.Try, ast.ExceptHandler)):
+                complexity += 1
+            elif isinstance(node, ast.BoolOp) and isinstance(node.op, (ast.And, ast.Or)):
+                complexity += len(node.values) - 1
+            
+        return complexity
+
+# Add more language analyzers for JavaScript, Java, etc.
+
+2.2 Advanced Semantic Code Analyzer
+# analysis/semantic/semantic_analyzer.py
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
+import networkx as nx
+
+from ...core.domain.models import CodeFile, CodeEntity, CodeRelation, SemanticModel
+from ...core.infrastructure.events import EventBus, Event, EventType
+from ..static.language_analyzers import LanguageAnalyzer
+
+class SemanticAnalyzer:
+    """Analyzes code at a semantic level beyond syntax."""
+    
+    def __init__(self, event_bus: EventBus, language_analyzers: Dict[str, LanguageAnalyzer]):
+        self.event_bus = event_bus
+        self.language_analyzers = language_analyzers
+        self.call_graph = nx.DiGraph()
+        self.inheritance_graph = nx.DiGraph()
+        self.dependency_graph = nx.DiGraph()
+        
+        # Subscribe to events
+        self.event_bus.subscribe(EventType.FILE_ANALYZED, self._handle_file_analyzed)
+    
+    def analyze_codebase(self, code_files: Dict[str, CodeFile]) -> SemanticModel:
+        """Build a semantic model of the entire codebase."""
+        self._build_graphs(code_files)
+        
+        return SemanticModel(
+            call_graph=self.call_graph,
+            inheritance_graph=self.inheritance_graph,
+            dependency_graph=self.dependency_graph,
+            central_entities=self._find_central_entities(),
+            complexity_hotspots=self._find_complexity_hotspots(code_files),
+            cohesive_modules=self._identify_cohesive_modules()
+        )
+    
+    def _build_graphs(self, code_files: Dict[str, CodeFile]) -> None:
+        """Build various relationship graphs from code files."""
+        # Reset graphs
+        self.call_graph = nx.DiGraph()
+        self.inheritance_graph = nx.DiGraph()
+        self.dependency_graph = nx.DiGraph()
+        
+        # Build dependency graph from imports
+        for file_path, code_file in code_files.items():
+            # Add file node
+            self.dependency_graph.add_node(file_path, type="file")
+            
+            # Get the appropriate language analyzer
+            ext = Path(file_path).suffix
+            analyzer = self._get_analyzer_for_extension(ext)
+            
+            if analyzer:
+                # Analyze imports
+                relations = analyzer.analyze_imports(code_file)
+                
+                for relation in relations:
+                    self.dependency_graph.add_edge(
+                        relation.source, 
+                        relation.target,
+                        type=relation.type.name,
+                        **relation.metadata
+                    )
+        
+        # Build inheritance graph from class definitions
+        for file_path, code_file in code_files.items():
+            for entity in code_file.entities:
+                if entity.type == "class":
+                    self.inheritance_graph.add_node(entity.name, file=file_path)
+                    
+                    # Add inheritance edges
+                    for base in entity.metadata.get("bases", []):
+                        self.inheritance_graph.add_edge(entity.name, base, type="inherits")
+        
+        # Build call graph from function calls (more complex, would require deeper analysis)
+        # This is a simplified version
+        for file_path, code_file in code_files.items():
+            for entity in code_file.entities:
+                if entity.type in ["function", "method"]:
+                    self.call_graph.add_node(entity.name, file=file_path)
+    
+    def _find_central_entities(self) -> List[str]:
+        """Find central entities in the codebase using graph centrality."""
+        if not self.dependency_graph:
+            return []
+            
+        # Calculate betweenness centrality
+        centrality = nx.betweenness_centrality(self.dependency_graph)
+        
+        # Sort by centrality score
+        central_entities = sorted(centrality.items(), key=lambda x: x[1], reverse=True)
+        
+        # Return top 10 most central entities
+        return [entity for entity, _ in central_entities[:10]]
+    
+    def _find_complexity_hotspots(self, code_files: Dict[str, CodeFile]) -> List[Tuple[str, int]]:
+        """Find complexity hotspots in the codebase."""
+        complexity_scores = []
+        
+        for file_path, code_file in code_files.items():
+            complexity_scores.append((file_path, code_file.complexity))
+        
+        # Sort by complexity score
+        return sorted(complexity_scores, key=lambda x: x[1], reverse=True)
+    
+    def _identify_cohesive_modules(self) -> List[Set[str]]:
+        """Identify cohesive modules using community detection."""
+        if not self.dependency_graph or len(self.dependency_graph) < 3:
+            return []
+            
+        try:
+            # Use Louvain community detection
+            communities = nx.community.louvain_communities(self.dependency_graph)
+            return [set(community) for community in communities]
+        except:
+            # Fallback if community detection fails
+            return []
+    
+    def _handle_file_analyzed(self, event: Event) -> None:
+        """Handle a file analyzed event."""
+        # This would be expanded to update the semantic model incrementally
+        pass
+    
+    def _get_analyzer_for_extension(self, extension: str) -> Optional[LanguageAnalyzer]:
+        """Get the appropriate language analyzer for a file extension."""
+        for analyzer in self.language_analyzers.values():
+            if extension in analyzer.supported_extensions:
+                return analyzer
+        return None
+
+2.3 Powerful Code Indexer with Incremental Updates
+# indexing/indexer.py
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Any
+import time
+import hashlib
+import pickle
+import os
+from concurrent.futures import ThreadPoolExecutor
+
+from ..core.domain.models import CodeFile, IndexingStats
+from ..core.infrastructure.events import EventBus, Event, EventType
+from ..analysis.static.language_analyzers import LanguageAnalyzer
+from ..core.infrastructure.config import IndexingConfig
+
+class CodebaseIndexer:
+    """Advanced codebase indexer with incremental updates and parallel processing."""
+    
+    def __init__(
+        self, 
+        event_bus: EventBus, 
+        config: IndexingConfig,
+        language_analyzers: Dict[str, LanguageAnalyzer]
+    ):
+        self.event_bus = event_bus
+        self.config = config
+        self.language_analyzers = language_analyzers
+        self.file_hashes: Dict[str, str] = {}
+        self.code_files: Dict[str, CodeFile] = {}
+        self.index_path: Optional[Path] = None
+    
+    def index_codebase(self, root_path: Path) -> IndexingStats:
+        """Index a codebase, with support for incremental updates."""
+        start_time = time.time()
+        self.index_path = root_path / ".code_navigator" / "index"
+        
+        # Ensure index directory exists
+        os.makedirs(self.index_path, exist_ok=True)
+        
+        # Load previous index if incremental indexing is enabled
+        if self.config.incremental and (self.index_path / "file_hashes.pkl").exists():
+            with open(self.index_path / "file_hashes.pkl", "rb") as f:
+                self.file_hashes = pickle.load(f)
+            
+            with open(self.index_path / "code_files.pkl", "rb") as f:
+                self.code_files = pickle.load(f)
+        
+        # Scan for code files
+        code_file_paths = self._scan_code_files(root_path)
+        
+        # Track statistics
+        stats = IndexingStats(
+            total_files=len(code_file_paths),
+            new_files=0,
+            updated_files=0,
+            unchanged_files=0,
+            duration_seconds=0
+        )
+        
+        # Process files in parallel
+        with ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as executor:
+            # Use a list to keep track of futures
+            futures = [
+                executor.submit(self._process_file, root_path, file_path)
+                for file_path in code_file_paths
+            ]
+            
+            # Process results as they complete
+            for future in futures:
+                result = future.result()
+                if result:
+                    file_path, status, code_file = result
+                    
+                    # Update statistics
+                    if status == "new":
+                        stats.new_files += 1
+                    elif status == "updated":
+                        stats.updated_files += 1
+                    else:
+                        stats.unchanged_files += 1
+                    
+                    # Store the indexed file
+                    if code_file:
+                        relative_path = str(file_path.relative_to(root_path))
+                        self.code_files[relative_path] = code_file
+                        
+                        # Publish event
+                        self.event_bus.publish(Event(
+                            type=EventType.FILE_ANALYZED,
+                            payload={"file_path": relative_path, "code_file": code_file}
+                        ))
+        
+        # Save the index
+        self._save_index()
+        
+        # Update stats
+        stats.duration_seconds = time.time() - start_time
+        
+        # Publish indexing complete event
+        self.event_bus.publish(Event(
+            type=EventType.CODEBASE_INDEXED,
+            payload={"stats": stats, "code_files": self.code_files}
+        ))
+        
+        return stats
+    
+    def _scan_code_files(self, root_path: Path) -> List[Path]:
+        """Scan for code files in the codebase."""
+        code_files = []
+        
+        for path in root_path.rglob("*"):
+            # Skip directories and ignored patterns
+            if path.is_dir() or any(ignored in str(path) for ignored in self.config.ignored_patterns):
+                continue
+            
+            # Skip files that are too large
+            if path.stat().st_size > self.config.max_file_size_kb * 1024:
+                continue
+            
+            # Check if we have a language analyzer for this file
+            if self._get_analyzer_for_file(path):
+                code_files.append(path)
+        
+        return code_files
+    
+    def _process_file(self, root_path: Path, file_path: Path) -> Optional[tuple]:
+        """Process a single code file."""
+        try:
+            # Calculate file hash
+            with open(file_path, "rb") as f:
+                content_bytes = f.read()
+                current_hash = hashlib.md5(content_bytes).hexdigest()
+            
+            relative_path = str(file_path.relative_to(root_path))
+            
+            # Check if file has changed (or is new)
+            if relative_path not in self.file_hashes:
+                status = "new"
+            elif self.file_hashes[relative_path] != current_hash:
+                status = "updated"
+            else:
+                status = "unchanged"
+            
+            # Only process new or updated files
+            if status in ["new", "updated"]:
+                # Get the appropriate analyzer
+                analyzer = self._get_analyzer_for_file(file_path)
+                
+                if analyzer:
+                    # Decode content for analysis
+                    content = content_bytes.decode("utf-8", errors="ignore")
+                    
+                    # Analyze the file
+                    code_file = analyzer.analyze_file(file_path, content)
+                    
+                    # Update hash
+                    self.file_hashes[relative_path] = current_hash
+                    
+                    return relative_path, status, code_file
+            
+            return relative_path, status, None
+                
+        except Exception as e:
+            # Log error and continue
+            self.event_bus.publish(Event(
+                type=EventType.ERROR_OCCURRED,
+                payload={"error": str(e), "file": str(file_path)}
+            ))
+            return None
+    
+    def _save_index(self) -> None:
+        """Save the index to disk."""
+        if not self.index_path:
+            return
+            
+        with open(self.index_path / "file_hashes.pkl", "wb") as f:
+            pickle.dump(self.file_hashes, f)
+        
+        with open(self.index_path / "code_files.pkl", "wb") as f:
+            pickle.dump(self.code_files, f)
+    
+    def _get_analyzer_for_file(self, file_path: Path) -> Optional[LanguageAnalyzer]:
+        """Get the appropriate language analyzer for a file."""
+        extension = file_path.suffix
+        
+        for analyzer in self.language_analyzers.values():
+            if extension in analyzer.supported_extensions:
+                return analyzer
+        
+        return None
+
+Phase 3: Advanced AI Orchestration System (Days 19-28)
+3.1 Multi-Stage Context Builder
+# ai/context.py
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Any
+import networkx as nx
+
+from ..core.domain.models import CodeFile, SemanticModel
+from ..core.infrastructure.events import EventBus, Event, EventType
+from ..core.infrastructure.config import AIConfig
+
+class ContextBuilder:
+    """Builds rich context for AI prompts with multiple intelligence layers."""
+    
+    def __init__(
+        self, 
+        event_bus: EventBus, 
+        config: AIConfig
+    ):
+        self.event_bus = event_bus
+        self.config = config
+        self.max_tokens = 100000  # Approximate maximum context size
+        
+    def build_diagnostic_context(
+        self,
+        code_files: Dict[str, CodeFile],
+        semantic_model: SemanticModel,
+        issue_description: str,
+        focus_file: Optional[Path] = None
+    ) -> Dict[str, Any]:
+        """Build comprehensive context for issue diagnosis."""
+        # Start with basic project information
+        context = {
+            "project_overview": self._build_project_overview(code_files, semantic_model),
+            "relevant_files": {},
+            "architectural_patterns": self._identify_architectural_patterns(semantic_model),
+            "issue_description": issue_description
+        }
+        
+        # Find most relevant files
+        relevant_files = self._find_relevant_files(
+            code_files, 
+            semantic_model, 
+            issue_description, 
+            focus_file
+        )
+        
+        # Add relevant file content
+        token_budget = self.max_tokens - self._estimate_tokens(context)
+        context["relevant_files"] = self._add_file_content(
+            code_files, 
+            relevant_files, 
+            token_budget
+        )
+        
+        # Add call paths and data flows if space permits
+        if focus_file:
+            token_budget = self.max_tokens - self._estimate_tokens(context)
+            if token_budget > 1000:
+                context["call_paths"] = self._find_relevant_call_paths(
+                    semantic_model, 
+                    str(focus_file)
+                )
+        
+        # Publish context built event
+        self.event_bus.publish(Event(
+            type=EventType.CONTEXT_BUILT,
+            payload={"context_type": "diagnostic", "size": self._estimate_tokens(context)}
+        ))
+        
+        return context
+    
+    def _build_project_overview(
+        self, 
+        code_files: Dict[str, CodeFile], 
+        semantic_model: SemanticModel
+    ) -> Dict[str, Any]:
+        """Build a high-level overview of the project."""
+        # Count files by language
+        languages = {}
+        for file in code_files.values():
+            languages[file.language] = languages.get(file.language, 0) + 1
+        
+        # Get top-level directories
+        directories = set()
+        for path in code_files.keys():
+            top_dir = path.split("/")[0] if "/" in path else path
+            directories.add(top_dir)
+        
+        # Get central components
+        central_components = semantic_model.central_entities[:5] if semantic_model.central_entities else []
+        
+        # Get complexity hotspots
+        complexity_hotspots = semantic_model.complexity_hotspots[:3] if semantic_model.complexity_hotspots else []
+        
+        return {
+            "file_count": len(code_files),
+            "languages": languages,
+            "top_level_directories": list(directories),
+            "central_components": central_components,
+            "complexity_hotspots": complexity_hotspots
+        }
+    
+    def _find_relevant_files(
+        self, 
+        code_files: Dict[str, CodeFile], 
+        semantic_model: SemanticModel, 
+        issue_description: str, 
+        focus_file: Optional[Path] = None
+    ) -> List[str]:
+        """Find files most relevant to the issue."""
+        relevant_files = []
+        
+        # If focus file is provided, start with it
+        if focus_file:
+            focus_path = str(focus_file)
+            if focus_path in code_files:
+                relevant_files.append(focus_path)
+        
+        # Add direct dependencies of focus file
+        if focus_file and semantic_model.dependency_graph:
+            focus_path = str(focus_file)
+            if focus_path in semantic_model.dependency_graph:
+                # Get neighbors in dependency graph
+                for neighbor in semantic_model.dependency_graph.neighbors(focus_path):
+                    if neighbor in code_files and neighbor not in relevant_files:
+                        relevant_files.append(neighbor)
+        
+        # If we still need more files, add central entities
+        if len(relevant_files) < 5 and semantic_model.central_entities:
+            for entity in semantic_model.central_entities:
+                if entity in code_files and entity not in relevant_files:
+                    relevant_files.append(entity)
+                    if len(relevant_files) >= 5:
+                        break
+        
+        # If we still need more files, add complexity hotspots
+        if len(relevant_files) < 5 and semantic_model.complexity_hotspots:
+            for file_path, _ in semantic_model.complexity_hotspots:
+                if file_path in code_files and file_path not in relevant_files:
+                    relevant_files.append(file_path)
+                    if len(relevant_files) >= 5:
+                        break
+        
+        # If we still don't have enough files, add some random ones
+        if len(relevant_files) < 5:
+            for file_path in code_files:
+                if file_path not in relevant_files:
+                    relevant_files.append(file_path)
+                    if len(relevant_files) >= 5:
+                        break
+        
+        return relevant_files
+    
+    def _add_file_content(
+        self, 
+        code_files: Dict[str, CodeFile], 
+        file_paths: List[str], 
+        token_budget: int
+    ) -> Dict[str, str]:
+        """Add file content for relevant files within token budget."""
+        result = {}
+        tokens_used = 0
+        
+        for file_path in file_paths:
+            if file_path in code_files:
+                file = code_files[file_path]
+                # Estimate tokens for this file
+                file_tokens = len(file.content) // 4  # Rough approximation
+                
+                if tokens_used + file_tokens <= token_budget:
+                    # Add the entire file
+                    result[file_path] = file.content
+                    tokens_used += file_tokens
+                else:
+                    # Add a truncated version
+                    max_chars = (token_budget - tokens_used) * 4
+                    result[file_path] = file.content[:max_chars] + "\n... [truncated]"
+                    tokens_used = token_budget
+                    break
+        
+        return result
+    
+    def _find_relevant_call_paths(self, semantic_model: SemanticModel, focus_file: str) -> List[List[str]]:
+        """Find relevant call paths involving the focus file."""
+        call_paths = []
+        
+        if not semantic_model.call_graph:
+            return call_paths
+            
+        # Find functions in the focus file
+        functions_in_file = [
+            node for node, attrs in semantic_model.call_graph.nodes(data=True)
+            if attrs.get("file") == focus_file
+        ]
+        
+        # For each function, find paths to/from it
+        for function in functions_in_file:
+            # Find paths to this function (who calls it)
+            callers = []
+            for node in semantic_model.call_graph:
+                if node != function and semantic_model.call_graph.has_edge(node, function):
+                    callers.append([node, function])
+            
+            # Find paths from this function (what it calls)
+            callees = []
+            for node in semantic_model.call_graph:
+                if node != function and semantic_model.call_graph.has_edge(function, node):
+                    callees.append([function, node])
+            
+            # Add to results
+            call_paths.extend(callers[:3])  # Limit to 3 paths
+            call_paths.extend(callees[:3])  # Limit to 3 paths
+        
+        return call_paths[:10]  # Return at most 10 paths
+    
+    def _identify_architectural_patterns(self, semantic_model: SemanticModel) -> List[str]:
+        """Identify architectural patterns in the codebase."""
+        patterns = []
+        
+        # This would be a more complex implementation in reality
+        # For now, just returning placeholder
+        
+        return patterns
+    
+    def _estimate_tokens(self, obj: Any) -> int:
+        """Estimate the number of tokens in an object."""
+        if isinstance(obj, str):
+            return len(obj) // 4  # Rough approximation
+        elif isinstance(obj, dict):
+            return sum(self._estimate_tokens(k) + self._estimate_tokens(v) for k, v in obj.items())
+        elif isinstance(obj, list):
+            return sum(self._estimate_tokens(item) for item in obj)
+        else:
+            return len(str(obj)) // 4  # Rough approximation
+
+3.2 Advanced Prompt Engineering Framework
+# ai/prompts.py
+from pathlib import Path
+from typing import Dict, List, Optional, Any
+import json
+import os
+
+from ..core.infrastructure.config import AIConfig
+
+class PromptTemplate:
+    """A template for generating AI prompts."""
+    
+    def __init__(self, template_text: str):
+        self.template_text = template_text
+    
+    def format(self, **kwargs) -> str:
+        """Format the template with provided arguments."""
+        return self.template_text.format(**kwargs)
+
+class PromptLibrary:
+    """Library of prompt templates for different purposes."""
+    
+    def __init__(self, config: AIConfig):
+        self.config = config
+        self.templates: Dict[str, PromptTemplate] = {}
+        self._load_templates()
+    
+    def _load_templates(self) -> None:
+        """Load prompt templates from files."""
+        template_dir = Path(__file__).parent / "templates"
+        
+        for template_file in template_dir.glob("*.txt"):
+            template_name = template_file.stem
+            with open(template_file, "r") as f:
+                template_text = f.read()
+                self.templates[template_name] = PromptTemplate(template_text)
+    
+    def get_system_prompt(self) -> str:
+        """Get the system prompt."""
+        if self.config.system_prompt_path and os.path.exists(self.config.system_prompt_path):
+            with open(self.config.system_prompt_path, "r") as f:
+                return f.read()
+        
+        # Use default system prompt
+        template = self.templates.get("system", PromptTemplate(""))
+        return template.format()
+
+class PromptGenerator:
+    """Generates sophisticated prompts for AI interaction."""
+    
+    def __init__(self, prompt_library: PromptLibrary):
+        self.prompt_library = prompt_library
+    
+    def generate_diagnostic_prompt(self, context: Dict[str, Any]) -> str:
+        """Generate a prompt for diagnosing issues."""
+        # Get the diagnostic template
+        template = self.prompt_library.templates.get("diagnostic")
+        
+        if not template:
+            # Fallback to a simple template
+            return f"""
+Please analyze the following code and diagnose the issue:
+
+Issue description:
+{context.get('issue_description', 'No description provided')}
+
+Relevant files:
+{json.dumps(context.get('relevant_files', {}), indent=2)}
+
+Provide a detailed diagnosis and suggest a solution.
+"""
+        
+        # Format project overview
+        project_overview = context.get('project_overview', {})
+        overview_text = f"""
+Project Overview:
+- {project_overview.get('file_count', 0)} files
+- Languages: {', '.join(f"{lang} ({count})" for lang, count in project_overview.get('languages', {}).items())}
+- Main directories: {', '.join(project_overview.get('top_level_directories', []))}
+- Central components: {', '.join(project_overview.get('central_components', []))}
+"""
+        
+        # Format relevant files
+        relevant_files = context.get('relevant_files', {})
+        files_text = ""
+        
+        for file_path, content in relevant_files.items():
+            files_text += f"\n--- {file_path} ---\n\n{content}\n\n"
+        
+        # Format call paths if available
+        call_paths = context.get('call_paths', [])
+        call_paths_text = ""
+        
+        if call_paths:
+            call_paths_text = "\nRelevant call paths:\n"
+            for path in call_paths:
+                call_paths_text += f"- {' -> '.join(path)}\n"
+        
+        # Format the full prompt
+        return template.format(
+            issue_description=context.get('issue_description', 'No description provided'),
+            project_overview=overview_text,
+            relevant_files=files_text,
+            call_paths=call_paths_text
+        )
+    
+    def generate_improvement_prompt(self, context: Dict[str, Any]) -> str:
+        """Generate a prompt for code improvement suggestions."""
+        # Similar to diagnostic prompt but focused on improvements
+        template = self.prompt_library.templates.get("improvement")
+        
+        if not template:
+            # Fallback
+            return f"""
+Please analyze the following code and suggest improvements:
+
+Improvement request:
+{context.get('improvement_description', 'No description provided')}
+
+Relevant files:
+{json.dumps(context.get('relevant_files', {}), indent=2)}
+
+Provide detailed improvement suggestions with specific code changes.
+"""
+        
+        # Similar formatting to diagnostic prompt...
+        return template.format(
+            improvement_description=context.get('improvement_description', 'No description provided'),
+            # Other formatting similar to diagnostic prompt
+        )
+
+3.3 Multi-Model AI Orchestrator
+# ai/orchestration/orchestrator.py
+from typing import Dict, List, Optional, Any
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+from ...core.infrastructure.events import EventBus, Event, EventType
+from ...core.infrastructure.config import AIConfig
+from ..prompts import PromptGenerator
+from ..models.provider import AIProvider
+
+class AIOrchestrator:
+    """Orchestrates complex AI interactions using multiple models and strategies."""
+    
+    def __init__(
+        self, 
+        event_bus: EventBus, 
+        config: AIConfig,
+        prompt_generator: PromptGenerator,
+        primary_provider: AIProvider,
+        secondary_providers: Optional[Dict[str, AIProvider]] = None
+    ):
+        self.event_bus = event_bus
+        self.config = config
+        self.prompt_generator = prompt_generator
+        self.primary_provider = primary_provider
+        self.secondary_providers = secondary_providers or {}
+        self.executor = ThreadPoolExecutor(max_workers=5)
+    
+    async def diagnose_issue(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Diagnose an issue using multi-stage AI reasoning."""
+        # Generate the diagnostic prompt
+        prompt = self.prompt_generator.generate_diagnostic_prompt(context)
+        system_prompt = self.prompt_generator.prompt_library.get_system_prompt()
+        
+        # Stage 1: Initial analysis
+        initial_response = await self._get_ai_response(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            provider=self.primary_provider,
+            options={"temperature": 0.2}
+        )
+        
+        # Publish event for the initial response
+        self.event_bus.publish(Event(
+            type=EventType.AI_RESPONSE_RECEIVED,
+            metadata={"stage": "initial_analysis"},
+            payload={"response": initial_response}
+        ))
+        
+        # Stage 2: Solution refinement (if needed)
+        # For complex issues, we might want to refine the solution
+        if self._needs_refinement(initial_response, context):
+            refinement_prompt = self._create_refinement_prompt(initial_response, context)
+            
+            refined_response = await self._get_ai_response(
+                prompt=refinement_prompt,
+                system_prompt=system_prompt,
+                provider=self.primary_provider,
+                options={"temperature": 0.1}
+            )
+            
+            self.event_bus.publish(Event(
+                type=EventType.AI_RESPONSE_RECEIVED,
+                metadata={"stage": "solution_refinement"},
+                payload={"response": refined_response}
+            ))
+            
+            # Merge responses
+            final_response = self._merge_responses(initial_response, refined_response)
+        else:
+            final_response = initial_response
+        
+        # Stage 3: Code validation (optional)
+        # We could have a code validator to check if the suggested changes compile
+        
+        return {
+            "diagnosis": final_response,
+            "context": context,
+            "prompt": prompt
+        }
+    
+    async def suggest_improvements(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Suggest code improvements using AI."""
+        # Similar to diagnose_issue but for improvements
+        prompt = self.prompt_generator.generate_improvement_prompt(context)
+        system_prompt = self.prompt_generator.prompt_library.get_system_prompt()
+        
+        response = await self._get_ai_response(
+            prompt=prompt,
+            system_prompt=system_prompt,
+            provider=self.primary_provider,
+            options={"temperature": 0.3}  # Slightly higher temperature for creativity
+        )
+        
+        self.event_bus.publish(Event(
+            type=EventType.AI_RESPONSE_RECEIVED,
+            metadata={"stage": "improvement_suggestion"},
+            payload={"response": response}
+        ))
+        
+        return {
+            "improvements": response,
+            "context": context,
+            "prompt": prompt
+        }
+    
+    async def _get_ai_response(
+        self, 
+        prompt: str, 
+        system_prompt: str, 
+        provider: AIProvider,
+        options: Optional[Dict[str, Any]] = None
+    ) -> str:
+        """Get a response from an AI provider."""
+        # Run in a thread pool to avoid blocking the event loop
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            self.executor,
+            lambda: provider.generate_response(prompt, system_prompt, options or {})
+        )
+    
+    def _needs_refinement(self, response: str, context: Dict[str, Any]) -> bool:
+        """Determine if a response needs refinement."""
+        # This would be a more sophisticated implementation
+        # For now, a simple heuristic
+        return "uncertain" in response.lower() or "need more information" in response.lower()
+    
+    def _create_refinement_prompt(self, initial_response: str, context: Dict[str, Any]) -> str:
+        """Create a prompt for refining a response."""
+        return f"""
+I previously analyzed this code issue and provided the following analysis:
+
+{initial_response}
+
+However, I'd like to refine my solution. Please provide a more specific and detailed solution
+with exact code changes needed. Be sure to address any uncertainties mentioned in my previous analysis.
+
+Issue description:
+{context.get('issue_description', 'No description provided')}
+"""
+    
+    def _merge_responses(self, initial_response: str, refined_response: str) -> str:
+        """Merge initial and refined responses."""
+        # For now, just use the refined response
+        # A more sophisticated implementation might combine them intelligently
+        return refined_response
+
+Phase 4: Enhanced Code Change Management (Days 29-35)
+4.1 AST-Based Code Transformer
+# changes/transformer.py
+from typing import Dict, List, Optional, Union, Any
+import ast
+from pathlib import Path
+import astor  # For Python AST manipulation
+import difflib
+import re
+
+class CodeChange:
+    """Represents a change to a code file."""
+    file_path: str
+    change_type: str  # 'modify', 'add', 'delete'
+    content: Optional[str] = None
+    ast_changes: Optional[List[Dict[str, Any]]] = None
+    line_changes: Optional[List[Dict[str, Any]]] = None
+
+class ASTTransformer:
+    """Transforms code by modifying the AST rather than text."""
+    
+    def apply_changes(self, file_path: Path, original_content: str, changes: List[Dict[str, Any]]) -> str:
+        """Apply AST-level changes to Python code."""
+        try:
+            # Parse the original code into an AST
+            tree = ast.parse(original_content)
+            
+            # Apply each change
+            for change in changes:
+                change_type = change.get('type')
+                
+                if change_type == 'replace_function':
+                    self._replace_function(tree, change)
+                elif change_type == 'add_method':
+                    self._add_method(tree, change)
+                elif change_type == 'modify_function_body':
+                    self._modify_function_body(tree, change)
+                # Add more change types as needed
+            
+            # Convert the modified AST back to source code
+            return astor.to_source(tree)
+            
+        except SyntaxError:
+            # Fallback to text-based changes if the file has syntax errors
+            return self._apply_text_changes(original_content, changes)
+    
+    def _replace_function(self, tree: ast.AST, change: Dict[str, Any]) -> None:
+        """Replace a function with a new implementation."""
+        function_name = change.get('function_name')
+        new_code = change.get('new_code', '')
+        
+        # Parse the new code
+        try:
+            new_tree = ast.parse(new_code)
+            
+            # Find the function in the original tree
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and node.name == function_name:
+                    # Replace the function
+                    for new_node in ast.walk(new_tree):
+                        if isinstance(new_node, ast.FunctionDef):
+                            # Copy attributes from the original function
+                            new_node.name = node.name
+                            new_node.lineno = node.lineno
+                            new_node.col_offset = node.col_offset
+                            
+                            # Replace the old function with the new one
+                            for field, old_value in ast.iter_fields(node.parent):
+                                if isinstance(old_value, list) and node in old_value:
+                                    # Find the index of the old function
+                                    idx = old_value.index(node)
+                                    # Replace it with the new function
+                                    old_value[idx] = new_node
+                                    break
+                            break
+                    break
+        except SyntaxError:
+            # Ignore if the new code has syntax errors
+            pass
+    
+    def _add_method(self, tree: ast.AST, change: Dict[str, Any]) -> None:
+        """Add a method to a class."""
+        class_name = change.get('class_name')
+        method_code = change.get('method_code', '')
+        
+        # Parse the new method
+        try:
+            method_tree = ast.parse(method_code)
+            
+            # Find the class in the original tree
+            for node in ast.walk(tree):
+                if isinstance(node, ast.ClassDef) and node.name == class_name:
+                    # Extract the method from the parsed code
+                    for new_node in method_tree.body:
+                        if isinstance(new_node, ast.FunctionDef):
+                            # Add the method to the class
+                            node.body.append(new_node)
+                            break
+                    break
+        except SyntaxError:
+            # Ignore if the method code has syntax errors
+            pass
+    
+    def _modify_function_body(self, tree: ast.AST, change: Dict[str, Any]) -> None:
+        """Modify the body of a function while preserving its signature."""
+        function_name = change.get('function_name')
+        new_body_code = change.get('new_body', '')
+        
+        # Parse the new body
+        try:
+            # Wrap the body in a dummy function to parse it
+            dummy_func = f"def dummy():\n{new_body_code}"
+            new_tree = ast.parse(dummy_func)
+            
+            # Find the function in the original tree
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and node.name == function_name:
+                    # Extract the body from the dummy function
+                    for new_node in ast.walk(new_tree):
+                        if isinstance(new_node, ast.FunctionDef):
+                            # Replace the body of the original function
+                            node.body = new_node.body
+                            break
+                    break
+        except SyntaxError:
+            # Ignore if the new body has syntax errors
+            pass
+    
+    def _apply_text_changes(self, content: str, changes: List[Dict[str, Any]]) -> str:
+        """Fallback method to apply changes as text diffs."""
+        # This would be a more sophisticated implementation
+        # For now, just a placeholder
+        return content
+
+class ChangeExtractor:
+    """Extracts code changes from AI responses."""
+    
+    def extract_changes(self, ai_response: str) -> Dict[str, CodeChange]:
+        """Extract code changes from an AI response."""
+        changes = {}
+        
+        # Extract diff blocks
+        diff_blocks = re.finditer(r'```(?:diff)?\s*\n(.*?)```', ai_response, re.DOTALL)
+        
+        for block in diff_blocks:
+            diff_content = block.group(1)
+            
+            # Try to find the file path
+            file_path_match = re.search(r'(?:---|\+\+\+) ([^\n]+)', diff_content)
+            if file_path_match:
+                file_path = file_path_match.group(1).strip()
+                # Clean up the file path (remove a/ or b/ prefixes)
+                file_path = re.sub(r'^[ab]/', '', file_path)
+                
+                # Create a code change
+                changes[file_path] = CodeChange(
+                    file_path=file_path,
+                    change_type='modify',
+                    content=self._extract_content_from_diff(diff_content)
+                )
+        
+        # Extract full file replacements
+        file_blocks = re.finditer(r'```\w*\s*\n// ([^\n]+)\n(.*?)```', ai_response, re.DOTALL)
+        
+        for block in file_blocks:
+            file_path = block.group(1).strip()
+            content = block.group(2)
+            
+            # Create a code change
+            changes[file_path] = CodeChange(
+                file_path=file_path,
+                change_type='add' if 'new file' in ai_response.lower() else 'modify',
+                content=content
+            )
+        
+        return changes
+    
+    def _extract_content_from_diff(self, diff_content: str) -> str:
+        """Extract the final content from a diff block."""
+        # This would be a more sophisticated implementation
+        # For now, just a placeholder that returns the diff
+        return diff_content
+
+4.2 Advanced Change Manager with Validation
+# changes/manager.py
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Union, Any
+import difflib
+import subprocess
+import tempfile
+import os
+import json
+
+from ..core.infrastructure.events import EventBus, Event, EventType
+from .transformer import CodeChange, ChangeExtractor, ASTTransformer
+
+class ChangeResult:
+    """Result of a change operation."""
+    success: bool
+    message: str
+    affected_files: List[str]
+    validation_results: Optional[Dict[str, Any]] = None
+
+class ChangeManager:
+    """Manages code changes with validation and transactional application."""
+    
+    def __init__(self, event_bus: EventBus, project_root: Path):
+        self.event_bus = event_bus
+        self.project_root = project_root
+        self.change_extractor = ChangeExtractor()
+        self.ast_transformer = ASTTransformer()
+        self.pending_changes: Dict[str, CodeChange] = {}
+    
+    def extract_changes_from_response(self, ai_response: str) -> Dict[str, CodeChange]:
+        """Extract code changes from an AI response."""
+        changes = self.change_extractor.extract_changes(ai_response)
+        
+        # Store as pending changes
+        self.pending_changes = changes
+        
+        # Publish event
+        self.event_bus.publish(Event(
+            type=EventType.CODE_CHANGED,
+            metadata={"status": "pending"},
+            payload={"changes": {k: vars(v) for k, v in changes.items()}}
+        ))
+        
+        return changes
+    
+    def preview_changes(self) -> List[str]:
+        """Generate a preview of pending changes."""
+        preview_lines = []
+        
+        for file_path, change in self.pending_changes.items():
+            full_path = self.project_root / file_path
+            
+            if not full_path.exists() or change.change_type == 'add':
+                preview_lines.append(f"New file: {file_path}")
+                preview_lines.append("```")
+                content = change.content or ""
+                preview_lines.append(content[:200] + "..." if len(content) > 200 else content)
+                preview_lines.append("```")
+            else:
+                with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    original_content = f.read()
+                
+                if change.change_type == 'delete':
+                    preview_lines.append(f"Delete file: {file_path}")
+                else:
+                    # Generate diff
+                    new_content = change.content or ""
+                    diff = difflib.unified_diff(
+                        original_content.splitlines(),
+                        new_content.splitlines(),
+                        fromfile=f"a/{file_path}",
+                        tofile=f"b/{file_path}",
+                        lineterm=""
+                    )
+                    
+                    preview_lines.append(f"Changes to: {file_path}")
+                    preview_lines.append("```diff")
+                    preview_lines.extend(diff)
+                    preview_lines.append("```")
+        
+        return preview_lines
+    
+    def validate_changes(self) -> Dict[str, Any]:
+        """Validate pending changes for syntax errors and basic functionality."""
+        validation_results = {
+            "syntax_valid": True,
+            "compile_valid": True,
+            "test_valid": True,
+            "errors": []
+        }
+        
+        # Create a temporary directory for validation
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            
+            # Copy current project files
+            self._copy_project_to_temp(temp_path)
+            
+            # Apply changes to the temp directory
+            self._apply_changes_to_temp(temp_path)
+            
+            # Validate syntax
+            syntax_result = self._validate_syntax(temp_path)
+            validation_results["syntax_valid"] = syntax_result["valid"]
+            if not syntax_result["valid"]:
+                validation_results["errors"].extend(syntax_result["errors"])
+            
+            # Validate compilation if syntax is valid
+            if validation_results["syntax_valid"]:
+                compile_result = self._validate_compilation(temp_path)
+                validation_results["compile_valid"] = compile_result["valid"]
+                if not compile_result["valid"]:
+                    validation_results["errors"].extend(compile_result["errors"])
+            
+            # Run tests if compilation is valid
+            if validation_results["compile_valid"]:
+                test_result = self._run_tests(temp_path)
+                validation_results["test_valid"] = test_result["valid"]
+                if not test_result["valid"]:
+                    validation_results["errors"].extend(test_result["errors"])
+        
+        return validation_results
+    
+    def apply_changes(self) -> ChangeResult:
+        """Apply pending changes to the actual project."""
+        # Validate first
+        validation = self.validate_changes()
+        
+        if not validation["syntax_valid"]:
+            return ChangeResult(
+                success=False,
+                message="Syntax errors detected. Changes not applied.",
+                affected_files=[],
+                validation_results=validation
+            )
+        
+        # Apply changes
+        affected_files = []
+        
+        try:
+            for file_path, change in self.pending_changes.items():
+                full_path = self.project_root / file_path
+                
+                if change.change_type == 'delete':
+                    if full_path.exists():
+                        os.remove(full_path)
+                        affected_files.append(file_path)
+                else:
+                    # Ensure parent directories exist
+                    full_path.parent.mkdir(parents=True, exist_ok=True)
+                    
+                    if full_path.exists() and change.change_type == 'modify':
+                        # Read current content
+                        with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                            current_content = f.read()
+                        
+                        # If we have AST changes, apply them
+                        if change.ast_changes:
+                            new_content = self.ast_transformer.apply_changes(
+                                full_path, 
+                                current_content, 
+                                change.ast_changes
+                            )
+                        else:
+                            # Otherwise use the full content
+                            new_content = change.content or ""
+                    else:
+                        # New file
+                        new_content = change.content or ""
+                    
+                    # Write the changes
+                    with open(full_path, 'w', encoding='utf-8') as f:
+                        f.write(new_content)
+                    
+                    affected_files.append(file_path)
+            
+            # Clear pending changes
+            self.pending_changes = {}
+            
+            # Publish event
+            self.event_bus.publish(Event(
+                type=EventType.CODE_CHANGED,
+                metadata={"status": "applied"},
+                payload={"affected_files": affected_files}
+            ))
+            
+            return ChangeResult(
+                success=True,
+                message=f"Successfully applied changes to {len(affected_files)} files.",
+                affected_files=affected_files,
+                validation_results=validation
+            )
+            
+        except Exception as e:
+            # Publish error event
+            self.event_bus.publish(Event(
+                type=EventType.ERROR_OCCURRED,
+                payload={"error": str(e), "operation": "apply_changes"}
+            ))
+            
+            return ChangeResult(
+                success=False,
+                message=f"Error applying changes: {str(e)}",
+                affected_files=affected_files,
+                validation_results=validation
+            )
+    
+    def _copy_project_to_temp(self, temp_path: Path) -> None:
+        """Copy project files to a temporary directory."""
+        # This would use a more efficient approach in a real implementation
+        # For now, a simple implementation
+        
+        for file_path in self.project_root.rglob("*"):
+            if file_path.is_file() and not any(ignored in str(file_path) for ignored in [".git", "__pycache__"]):
+                # Calculate relative path
+                rel_path = file_path.relative_to(self.project_root)
+                dest_path = temp_path / rel_path
+                
+                # Create parent directories
+                dest_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                # Copy the file
+                with open(file_path, 'rb') as src, open(dest_path, 'wb') as dst:
+                    dst.write(src.read())
+    
+    def _apply_changes_to_temp(self, temp_path: Path) -> None:
+        """Apply pending changes to a temporary directory."""
+        for file_path, change in self.pending_changes.items():
+            full_path = temp_path / file_path
+            
+            if change.change_type == 'delete':
+                if full_path.exists():
+                    os.remove(full_path)
+            else:
+                # Ensure parent directories exist
+                full_path.parent.mkdir(parents=True, exist_ok=True)
+                
+                if full_path.exists() and change.change_type == 'modify':
+                    # Read current content
+                    with open(full_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        current_content = f.read()
+                    
+                    # If we have AST changes, apply them
+                    if change.ast_changes:
+                        new_content = 
+
+---
 CodeNavigator: Advanced AI Coding Assistant Implementation
 Thank you for the feedback! You're right - we can go much deeper. Let's create a truly exceptional implementation that pushes the boundaries of what's possible with an AI coding assistant.
 
