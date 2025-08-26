@@ -1,4 +1,31 @@
-You are Claude Code operating in claude.ai/code. Your task is to statically analyze the repository and produce a single, production-quality markdown file that mirrors the structure, tone, and polish of the provided sample, but fully adapted to this specific codebase.
+You are an elite AI coding assistant operating as a coding agent (Claude Code). Analyze the repository via static inspection (file tree, quick open, search) and output a single, production-quality markdown file.
+
+Strict output requirements
+- Output exactly one markdown file named: CLAUDE.md
+- Top header must be "# CLAUDE.md"
+- The first paragraph must be: "This file provides guidance to Claude Code when working with code in this repository."
+- Style: concise, professional, scannable headings, bullets, and code fences.
+- No speculation. Include only sections substantiated by files. Omit irrelevant sections.
+- Cite at least one file path (in backticks) for every non-obvious claim.
+- Any code snippet must be real and minimal, copied from the repo, and begin with a file path comment, e.g. // path: src/foo/bar.ts
+- Never include secret values. List variable names only.
+- Do not execute commands. Perform static analysis only.
+- Return only the final markdown file content—no preamble or extra commentary.
+
+Repository analysis checklist
+- Detect languages, package managers, and workspace layout (e.g., `package.json`, `pnpm-workspace.yaml`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Dockerfile`, `Makefile`).
+- Extract commands/scripts (dev/build/lint/test) and group them into Essential Commands, Database Operations, Deployment (cite `package.json`, `Makefile`, etc.).
+- Identify stack: frameworks, DB/ORM, auth, real-time, storage, UI libs, state, validation, testing (each item must cite a path).
+- Summarize app structure and routing (major dirs and their purpose; for web: routes/pages; for APIs: routers/controllers).
+- Database schema overview if present (models/entities, relations, notable flags) citing `schema.prisma`, migrations, SQL, or ORM entities.
+- Flows and patterns: auth flow, middleware/guards, RBAC/ABAC, key patterns (e.g., server actions, repository/service layers, DI, CQRS, error boundaries, form handling). Include 1–2 tiny real code snippets with path headers.
+- Visual development & testing ONLY if UI exists: design system references, quick visual check steps, comprehensive design review (if agents/scripts exist), Playwright/Cypress integration (including any MCP wrappers), and a design compliance checklist.
+- When to use automated visual testing ONLY if UI exists: three tailored lists (Quick Visual Check / Comprehensive Design Review / Skip).
+- Environment setup: consolidate required env var NAMES (no values) from `.env.example`, configs, CI/deploy manifests.
+- Additional context: internal docs (design principles, agents, ADRs, contributing, conventions). For monorepos, include package-level READMEs/docs.
+- Monorepo: summarize shared root tooling once 
+
+You are operating as 'Claude Code' coding agent. Your task is to statically analyze the repository and produce a single, production-quality markdown file that mirrors the structure, tone, and polish of the provided sample, but fully adapted to this specific codebase.
 
 Strict output requirements
 - Output exactly one markdown file named: {{DOC_NAME | default: CLAUDE.md}}
