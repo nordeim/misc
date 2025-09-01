@@ -106,6 +106,75 @@ tf.keras.layers.Embedding(vocab_size, 64, mask_zero=True)  # TensorFlow
 
 ---
 
-If you want, I can **extend our streaming generation code** to actually **print out the embedding vectors** for each generated token in real time, so you can *see* the transformation from token ID → embedding vector → predicted next token. That would make the flow even more tangible.  
+Glad you asked, Sepnet — this is one of those “under‑the‑hood” details that really clicks once you see the moving parts in context. Let’s break it down step‑by‑step.
 
-Do you want me to build that visual debug version next?
+---
+
+## **1️⃣ Does each token ID have a unique vector?**
+Yes — in a trained model, each token ID maps to **exactly one learnable vector** in the embedding table.  
+- Think of the embedding table as a big lookup matrix of shape:
+
+```
+[vocab_size] × [embedding_dim]
+```
+
+- **Row index** = token ID  
+- **Row contents** = that token’s embedding vector (a list of floats)  
+- These vectors are **learned during training** — they start random and get tuned so that tokens with similar meaning or usage end up with similar vectors.
+
+---
+
+## **2️⃣ How many dimensions does each vector have?**
+That’s the **embedding dimension** (`embedding_dim` in code).  
+- It’s **not fixed by nature** — it’s a design choice when building the model.
+- Common sizes:
+  - Small models: 128–512
+  - Medium: 768–1024
+  - Large LLMs: 2048–8192 (sometimes more)
+- In your PyTorch example above, I set `embed_dim=64` just for demonstration — in a real LLM, this would be much larger.
+
+---
+
+## **3️⃣ Who decides the dimension — the LLM or the embedding model?**
+It’s decided by **the architecture of the target model** itself.  
+- If you’re training an LLM from scratch, you pick the embedding size as part of the model’s hyperparameters.
+- If you’re using a pre‑trained LLM, the embedding size is already baked in — you can’t change it without retraining the model.
+- The embedding layer is **part of the LLM** — it’s not a separate “mini‑model” unless you explicitly design it that way.
+
+---
+
+## **4️⃣ Is the embedding part of the LLM or separate?**
+In almost all modern LLMs:
+- The embedding layer is the **first layer** of the model.
+- It’s trained **together** with the rest of the network — the same optimizer updates both the embedding weights and the deeper layers.
+- At inference time, the process is:
+  1. **Token ID** → lookup in embedding table → **embedding vector**
+  2. Embedding vector → fed into the transformer layers → output logits
+  3. Logits → sampling/greedy decoding → next token ID
+
+The only time you see embeddings as a **separate model** is when:
+- You’re using a **standalone embedding service** (e.g., OpenAI’s `text-embedding-ada-002`) for search, clustering, or semantic similarity — in that case, the embedding model is trained for representation quality, not text generation.
+- You’re doing **two‑stage systems**: one model for embeddings, another for generation.
+
+---
+
+### **Visual mental model**
+```
+[Token ID] → [Embedding Table Lookup] → [Vector of length embedding_dim]
+        → [Transformer Layers] → [Logits over vocab] → [Next Token ID]
+```
+
+---
+
+💡 **Key takeaway:**  
+- **Yes**, each token ID has a unique vector.  
+- **Dimension** = embedding size, chosen when the LLM is designed.  
+- **Embedding layer** is part of the LLM’s architecture and is trained jointly with it — unless you intentionally use a separate embedding model for other tasks.
+
+---
+
+If you want, I can extend our streaming debug code so that **before** printing the embedding vector, it also prints:
+- The **shape** of the embedding vector (so you see the dimension)
+- The **norm** or magnitude of the vector (to get a feel for scale changes during generation)
+
+That way you’ll see not just *what* the vector is, but also *how big* it is in the model’s space. Would you like me to add that?
