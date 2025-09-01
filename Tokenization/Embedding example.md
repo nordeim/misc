@@ -426,4 +426,209 @@ If you swap in a real pre‑trained model (e.g., GPT‑2, LLaMA, etc.), the embe
 
 ---
 
-If you want, I can also **log the cosine similarity** between consecutive token embeddings during generation — that way you can see how semantically “close” each step is in the embedding space. That would make the transformation story even richer. Would you like me to add that next?
+### PyTorch streaming with cosine similarity between consecutive embeddings
+
+```python
+import os
+import time
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.utils.data import Dataset, DataLoader
+import sentencepiece as spm
+
+# === CONFIG ===
+INPUT_TEXT_FILE = "input.txt"
+MODEL_PREFIX = "custom_tokenizer"
+VOCAB_SIZE = 64000
+MODEL_SAVE_PATH = "pytorch_model.pth"
+
+# === 1. TRAIN TOKENIZER IF NEEDED ===
+if not os.path.exists(f"{MODEL_PREFIX}.model"):
+    spm.SentencePieceTrainer.Train(
+        input=INPUT_TEXT_FILE,
+        model_prefix=MODEL_PREFIX,
+        vocab_size=VOCAB_SIZE,
+        model_type="bpe",
+        byte_fallback=True,
+        normalization_rule_name="nfkc",
+        character_coverage=1.0,
+        pad_id=0, unk_id=1, bos_id=2, eos_id=3
+    )
+
+# === 2. LOAD TOKENIZER ===
+sp = spm.SentencePieceProcessor()
+sp.load(f"{MODEL_PREFIX}.model")
+vocab_size = sp.get_piece_size()
+EOS_ID = sp.eos_id()
+
+# === 3. DATASET ===
+class TextDataset(Dataset):
+    def __init__(self, texts):
+        self.data = [torch.tensor(sp.encode(t, out_type=int)) for t in texts]
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        ids = self.data[idx]
+        x = ids[:-1]
+        y = ids[1:]
+        return x, y
+
+def collate_fn(batch):
+    xs, ys = zip(*batch)
+    xs = nn.utils.rnn.pad_sequence(xs, batch_first=True, padding_value=0)
+    ys = nn.utils.rnn.pad_sequence(ys, batch_first=True, padding_value=0)
+    return xs, ys
+
+texts = [
+    "Hello world!",
+    "PyTorch integration with SentencePiece.",
+    "Tokenizers are fun to build."
+]
+dataset = TextDataset(texts)
+loader = DataLoader(dataset, batch_size=2, collate_fn=collate_fn)
+
+# === 4. MODEL ===
+class SimpleLM(nn.Module):
+    def __init__(self, vocab_size, embed_dim=64):
+        super().__init__()
+        self.embed = nn.Embedding(vocab_size, embed_dim)
+        self.lstm = nn.LSTM(embed_dim, 128, batch_first=True)
+        self.fc = nn.Linear(128, vocab_size)
+
+    def forward(self, x, hidden=None):
+        emb = self.embed(x)
+        out, hidden = self.lstm(emb, hidden)
+        logits = self.fc(out)
+        return logits, hidden, emb  # Return embeddings for debug
+
+model = SimpleLM(vocab_size)
+criterion = nn.CrossEntropyLoss(ignore_index=0)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# === 5. TRAIN ===
+for epoch in range(3):
+    for x, y in loader:
+        optimizer.zero_grad()
+        logits, _, _ = model(x)
+        loss = criterion(logits.view(-1, vocab_size), y.view(-1))
+        loss.backward()
+        optimizer.step()
+    print(f"Epoch {epoch+1} Loss: {loss.item():.4f}")
+
+torch.save(model.state_dict(), MODEL_SAVE_PATH)
+
+# === 6. SAMPLING UTILS ===
+def sample_next_token(logits, temperature=1.0, top_k=50, top_p=0.9):
+    logits = logits / temperature
+    probs = torch.softmax(logits, dim=-1)
+
+    if top_k > 0:
+        top_k = min(top_k, probs.size(-1))
+        values, _ = torch.topk(probs, top_k)
+        min_prob = values[:, -1].unsqueeze(1)
+        probs = torch.where(probs < min_prob, torch.zeros_like(probs), probs)
+
+    if top_p < 1.0:
+        sorted_probs, sorted_indices = torch.sort(probs, descending=True)
+        cumulative_probs = torch.cumsum(sorted_probs, dim=-1)
+        cutoff = cumulative_probs > top_p
+        cutoff[..., 1:] = cutoff[..., :-1].clone()
+        cutoff[..., 0] = False
+        sorted_probs[cutoff] = 0.0
+        probs = torch.zeros_like(probs).scatter(1, sorted_indices, sorted_probs)
+
+    probs = probs / probs.sum(dim=-1, keepdim=True)
+    next_id = torch.multinomial(probs, num_samples=1)
+    return next_id.item()
+
+def cosine(a: torch.Tensor, b: torch.Tensor, eps: float = 1e-8) -> float:
+    # a, b: shape [D]
+    denom = max(a.norm().item() * b.norm().item(), eps)
+    return float(torch.dot(a, b) / denom)
+
+# === 7. PRO STREAMING GENERATION WITH EMBEDDING DEBUG + COSINE SIMILARITY ===
+def generate_stream(
+    prompt,
+    max_new_tokens=10,
+    temperature=1.0,
+    top_k=50,
+    top_p=0.9,
+    delay=0.3,
+    print_vector=True,
+):
+    model.eval()
+    ids = sp.encode(prompt, out_type=int)
+    input_ids = torch.tensor(ids, dtype=torch.long).unsqueeze(0)
+    hidden = None
+
+    print(f"[Prompt IDs]: {ids}")
+    print(prompt, end="", flush=True)
+
+    prev_input_emb = None  # embedding of the previous input token (consecutive inputs)
+    for step in range(max_new_tokens):
+        with torch.no_grad():
+            logits, hidden, emb = model(input_ids[:, -1:], hidden)
+
+            # Current input token (the one we just fed)
+            last_token_id = input_ids[0, -1].item()
+            last_emb = emb[0, -1]  # shape [embed_dim]
+
+            # Debug: current input embedding
+            print(f"\n--- Token Debug (step {step+1}) ---")
+            print(f"Token ID (input): {last_token_id}")
+            print(f"Embedding shape: {tuple(last_emb.shape)}")
+            print(f"Embedding norm: {last_emb.norm().item():.6f}")
+            if print_vector:
+                print(f"Embedding vector: {last_emb.tolist()}")
+
+            # Cosine similarity between consecutive input embeddings (previous input → current input)
+            if prev_input_emb is not None:
+                cos_in_in = cosine(prev_input_emb, last_emb)
+                print(f"Cosine(prev input emb → current input emb): {cos_in_in:.6f}")
+
+            # Sample next token
+            next_id = sample_next_token(logits[:, -1, :], temperature, top_k, top_p)
+
+            # EOS handling
+            if next_id == EOS_ID:
+                print(" <EOS>")
+                break
+
+            # Cosine between current input embedding and predicted next token's embedding
+            next_emb = model.embed(torch.tensor([next_id], dtype=torch.long))[0]  # shape [embed_dim]
+            cos_in_next = cosine(last_emb, next_emb)
+            print(f"Cosine(current input emb → predicted next emb): {cos_in_next:.6f}")
+
+        # Stream out the predicted token
+        token = sp.id_to_piece(next_id)
+        print(token.replace("▁", " "), end="", flush=True)
+        print(f" [{next_id}]", end="", flush=True)
+        time.sleep(delay)
+
+        # Bookkeeping
+        prev_input_emb = last_emb.detach()
+        input_ids = torch.cat([input_ids, torch.tensor([[next_id]], dtype=torch.long)], dim=1)
+
+    print()
+
+# === RUN DEMO ===
+generate_stream(
+    "Tokenizers",
+    temperature=0.8,
+    top_k=40,
+    top_p=0.9,
+    delay=0.2,
+    print_vector=False  # set True if you want the full vector each step
+)
+```
+
+---
+
+#### Notes on interpreting cosine values
+- **Cosine(prev input → current input):** How similar consecutive input tokens are in embedding space as the context grows. Higher means the model represents them as semantically close.
+- **Cosine(current input → predicted next):** How similar the current input token’s embedding is to the embedding of the token the model is about to emit. This gives a feel for how “nearby” the model’s next step is in representation space.
+
