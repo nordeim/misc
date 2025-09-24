@@ -1,0 +1,1496 @@
+<think> I need to deeply analyze this project from multiple angles:
+The primary users are elderly adults and their caregivers - this means extreme simplicity, large touch targets, minimal cognitive load
+The business needs to build trust quickly - real photos, warm design, social proof
+The technical execution must be phased for an AI agent - each phase must be independently testable with clear success criteria
+We're using Laravel 12 + Livewire + Alpine - this allows for progressive enhancement and reactive components without complex SPA architecture
+Let me re-imagine the architecture focusing on:
+
+Component-based design for reusability
+Service layer pattern for business logic
+Repository pattern for data access
+Event-driven architecture for loose coupling
+Modular structure for independent phase execution
+For the execution plan, I need to consider:
+
+Each phase should produce working software
+Dependencies must be clearly defined
+File structure and naming conventions must be explicit
+Database migrations should be incremental
+Testing should be built into each phase
+The AI agent needs explicit file paths and code structure
+</think>
+Deep Analysis & Re-imagination of the Elderly Daycare Website
+1. Philosophical Approach to Design
+After deep consideration of the unique needs of elderly users and their caregivers, I propose a "Progressive Disclosure with Emotional Reassurance" design philosophy:
+
+Core Design Principles:
+Three-Click Rule: Any critical information accessible within 3 clicks
+Cognitive Comfort: Familiar patterns, no surprises, consistent behavior
+Emotional Journey: Each page builds trust through human elements
+Graceful Degradation: Full functionality even with JavaScript disabled
+Mobile-First but Desktop-Optimized: Responsive design that excels on all devices
+2. Re-imagined Information Architecture
+text
+
+HOME (Emotional Landing)
+├── Our Story (Trust Building)
+│   ├── About Us
+│   ├── Our Team
+│   ├── Our Facility
+│   └── Testimonials
+│
+├── Day Programs (Service Discovery)
+│   ├── Daily Activities
+│   ├── Wellness Programs
+│   ├── Social Activities
+│   └── Meals & Nutrition
+│
+├── Experience (Immersive Preview)
+│   ├── Virtual Tour
+│   ├── Photo Gallery
+│   ├── A Typical Day
+│   └── Success Stories
+│
+├── Get Started (Action Path)
+│   ├── Schedule a Visit
+│   ├── Check Availability
+│   ├── Enrollment Process
+│   └── Pricing & Insurance
+│
+├── Family Resources (Support System)
+│   ├── Caregiver Guide
+│   ├── FAQs
+│   ├── Downloads
+│   └── News & Updates
+│
+└── Connect (Engagement)
+    ├── Contact Us
+    ├── Newsletter
+    └── Community Events
+3. Revolutionary Component Architecture
+YAML
+
+Component Layer Architecture:
+  
+  Atomic Components:
+    - Button (3 sizes: large, xl, xxl for elderly)
+    - Card (service, staff, testimonial variants)
+    - MediaViewer (image/video with fallbacks)
+    - FormInput (enhanced with larger touch targets)
+    - Icon (with text labels always visible)
+  
+  Molecular Components:
+    - NavigationMenu (sticky, high contrast)
+    - ServiceCard (image + title + description + CTA)
+    - StaffProfile (photo + name + role + bio modal)
+    - TestimonialSlider (auto-play with pause)
+    - BookingCalendar (simplified date picker)
+    - ContactForm (progressive - starts with just phone)
+  
+  Organism Components:
+    - HeroSection (video/image + headline + dual CTAs)
+    - ServiceShowcase (grid of service cards)
+    - TrustBuilders (certifications + stats + testimonials)
+    - VirtualTourEmbed (interactive facility map)
+    - QuickContact (floating but non-intrusive)
+  
+  Template Components:
+    - PublicLayout (header + main + footer)
+    - AdminLayout (sidebar + header + main)
+    - PrintLayout (optimized for printing)
+4. Enhanced Technical Architecture
+mermaid
+
+graph TB
+    subgraph "Presentation Layer"
+        A[Blade Views] --> B[Livewire Components]
+        B --> C[Alpine.js Interactions]
+        C --> D[Tailwind Styling]
+    end
+    
+    subgraph "Application Layer"
+        E[Controllers] --> F[Service Classes]
+        F --> G[Repository Interfaces]
+        H[Livewire Controllers] --> F
+        I[API Controllers] --> F
+    end
+    
+    subgraph "Domain Layer"
+        J[Models] --> K[Events]
+        K --> L[Listeners]
+        M[Policies] --> J
+        N[Value Objects] --> J
+    end
+    
+    subgraph "Infrastructure Layer"
+        O[Repositories] --> P[Cache Layer]
+        P --> Q[Database]
+        R[File Storage] --> S[Media Service]
+    end
+5. Database Schema Design (Optimized)
+SQL
+
+-- Core Entities
+services (id, name, slug, description, short_description, image, icon, capacity, duration_minutes, price, is_active, sort_order)
+service_schedules (id, service_id, day_of_week, start_time, end_time, is_active)
+service_features (id, service_id, feature, icon, sort_order)
+
+-- People
+staff_members (id, name, slug, title, bio, photo, qualifications, years_experience, is_active, sort_order)
+clients (id, first_name, last_name, date_of_birth, photo, emergency_contact_json, notes, joined_at)
+
+-- Bookings
+booking_slots (id, date, start_time, end_time, service_id, capacity, booked_count, is_available)
+bookings (id, slot_id, client_name, contact_phone, contact_email, notes, status, confirmed_at, cancelled_at)
+
+-- Content
+media_items (id, type, title, description, file_path, thumbnail_path, mime_type, size, metadata_json, uploaded_at)
+testimonials (id, author_name, author_photo, content, rating, service_id, is_featured, published_at)
+resources (id, title, slug, type, description, file_path, download_count, published_at)
+pages (id, title, slug, content, meta_description, hero_image, template, published_at)
+
+-- System
+activity_logs (id, user_id, action, subject_type, subject_id, properties_json, created_at)
+settings (id, group, key, value, type, is_public)
+Comprehensive Execution Plan Methodology
+Planning Framework
+Before generating the execution plan, I've established these critical principles:
+
+Atomic Phases: Each phase produces a working application
+Zero Dependencies: Phases can be tested independently
+Explicit Instructions: Every file path, class name, and method is specified
+Progressive Enhancement: Each phase adds value without breaking previous work
+Test-Driven: Each phase includes its own test suite
+Documentation-Driven: Each phase updates documentation automatically
+Validation Checklist for Execution Plan
+ Each phase has clear acceptance criteria
+ File structures are explicitly defined
+ Database migrations are incremental
+ No phase depends on future phases
+ Each phase includes error handling
+ Styling and UX are considered from Phase 1
+ Admin functionality parallels public features
+ Testing is integrated, not an afterthought
+ Each phase is deployable to production
+COMPREHENSIVE EXECUTION PLAN FOR ELDERLY DAYCARE WEBSITE
+🎯 Project Configuration
+YAML
+
+Project Name: elderly-care-center
+Laravel Version: 12.x
+PHP Version: 8.4
+Database: MariaDB 11.8
+CSS Framework: Tailwind CSS 3.4
+JavaScript: Alpine.js 3.x + Livewire 3.x
+Build Tool: Vite
+Testing: PHPUnit + Laravel Dusk
+PHASE 0: Foundation & Infrastructure Setup
+Duration: 1 day | Priority: Critical
+
+Objectives
+Establish complete development environment
+Configure project structure
+Set up deployment pipeline
+Create design system
+Detailed Tasks
+Task 0.1: Docker Environment Setup
+Create docker-compose.yml:
+
+YAML
+
+version: '3.8'
+services:
+  web:
+    image: webdevops/php-nginx:8.4-alpine
+    volumes:
+      - ./:/app
+    environment:
+      - WEB_DOCUMENT_ROOT=/app/public
+      - PHP_MEMORY_LIMIT=512M
+    ports:
+      - "8080:80"
+  
+  db:
+    image: mariadb:11.8
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=eldercare
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+  
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  db_data:
+Task 0.2: Laravel Installation & Configuration
+Bash
+
+# Commands to execute
+composer create-project laravel/laravel:^12.0 elderly-care-center
+cd elderly-care-center
+composer require livewire/livewire:^3.0
+composer require --dev laravel/dusk
+php artisan livewire:publish --config
+npm install -D tailwindcss@latest postcss@latest autoprefixer@latest alpinejs@latest
+npm install @tailwindcss/forms @tailwindcss/typography @tailwindcss/aspect-ratio
+Task 0.3: Project Structure Creation
+text
+
+elderly-care-center/
+├── app/
+│   ├── Domain/
+│   │   ├── Services/
+│   │   ├── Bookings/
+│   │   ├── Staff/
+│   │   └── Media/
+│   ├── Services/
+│   ├── Repositories/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Public/
+│   │   │   └── Admin/
+│   │   └── Livewire/
+│   │       ├── Public/
+│   │       └── Admin/
+│   └── View/
+│       └── Components/
+├── resources/
+│   ├── views/
+│   │   ├── layouts/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── admin/
+│   ├── css/
+│   │   └── app.css
+│   └── js/
+│       └── app.js
+├── database/
+│   ├── migrations/
+│   ├── seeders/
+│   └── factories/
+└── tests/
+    ├── Feature/
+    ├── Unit/
+    └── Browser/
+Task 0.4: Design System Configuration
+Create tailwind.config.js:
+
+JavaScript
+
+module.exports = {
+  content: [
+    "./resources/**/*.blade.php",
+    "./resources/**/*.js",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        'primary': '#2563eb',    // Calming blue
+        'secondary': '#10b981',  // Gentle green  
+        'warm': '#f59e0b',      // Warm amber
+        'neutral': '#6b7280',   // Soft gray
+      },
+      fontSize: {
+        'base': '18px',  // Larger base font
+        'lg': '20px',
+        'xl': '24px',
+        '2xl': '30px',
+        '3xl': '36px',
+        '4xl': '48px',
+      },
+      spacing: {
+        '18': '4.5rem',
+        '88': '22rem',
+        '128': '32rem',
+      }
+    }
+  },
+  plugins: [
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
+  ]
+}
+Task 0.5: Base Layout Templates
+Create resources/views/layouts/public.blade.php:
+
+blade
+
+<!DOCTYPE html>
+<html lang="en" class="text-base">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Sunshine Elderly Care Center')</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+</head>
+<body class="antialiased bg-gray-50">
+    <a href="#main" class="sr-only focus:not-sr-only">Skip to main content</a>
+    
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <x-navigation />
+    </header>
+    
+    <main id="main" class="min-h-screen">
+        @yield('content')
+    </main>
+    
+    <footer class="bg-gray-800 text-white mt-12">
+        <x-footer />
+    </footer>
+    
+    @livewireScripts
+</body>
+</html>
+Acceptance Criteria - Phase 0
+ Docker containers start successfully
+ Laravel welcome page accessible at localhost:8080
+ Database connection verified via php artisan migrate
+ Tailwind CSS compilation working
+ Livewire installation confirmed
+ Base layout renders without errors
+PHASE 1: Core Content Management System
+Duration: 2 days | Priority: Critical
+
+Objectives
+Implement service management
+Create staff profiles system
+Build public display pages
+Establish admin CRUD interfaces
+Detailed Tasks
+Task 1.1: Database Migrations
+Create database/migrations/2024_01_01_create_services_table.php:
+
+PHP
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('services', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->text('short_description');
+            $table->longText('description');
+            $table->string('image')->nullable();
+            $table->string('icon')->nullable();
+            $table->integer('capacity')->default(20);
+            $table->integer('duration_minutes')->default(60);
+            $table->decimal('price', 8, 2)->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->integer('sort_order')->default(0);
+            $table->json('features')->nullable();
+            $table->json('schedule')->nullable();
+            $table->timestamps();
+            
+            $table->index(['slug', 'is_active']);
+            $table->index('sort_order');
+        });
+    }
+    
+    public function down(): void
+    {
+        Schema::dropIfExists('services');
+    }
+};
+Create database/migrations/2024_01_02_create_staff_members_table.php:
+
+PHP
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('staff_members', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->string('title');
+            $table->text('bio');
+            $table->string('photo')->nullable();
+            $table->json('qualifications')->nullable();
+            $table->integer('years_experience')->default(0);
+            $table->boolean('is_active')->default(true);
+            $table->integer('sort_order')->default(0);
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->timestamps();
+            
+            $table->index(['slug', 'is_active']);
+            $table->index('sort_order');
+        });
+    }
+    
+    public function down(): void
+    {
+        Schema::dropIfExists('staff_members');
+    }
+};
+Task 1.2: Domain Models
+Create app/Domain/Services/Models/Service.php:
+
+PHP
+
+<?php
+
+namespace App\Domain\Services\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Str;
+
+class Service extends Model
+{
+    protected $fillable = [
+        'name', 'slug', 'short_description', 'description',
+        'image', 'icon', 'capacity', 'duration_minutes',
+        'price', 'is_active', 'sort_order', 'features', 'schedule'
+    ];
+    
+    protected $casts = [
+        'is_active' => 'boolean',
+        'features' => 'array',
+        'schedule' => 'array',
+        'price' => 'decimal:2',
+    ];
+    
+    protected static function booted(): void
+    {
+        static::creating(function ($service) {
+            if (empty($service->slug)) {
+                $service->slug = Str::slug($service->name);
+            }
+        });
+    }
+    
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+    
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('sort_order')->orderBy('name');
+    }
+    
+    protected function imageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->image 
+                ? asset('storage/' . $this->image) 
+                : asset('images/default-service.jpg')
+        );
+    }
+}
+Create app/Domain/Staff/Models/StaffMember.php:
+
+PHP
+
+<?php
+
+namespace App\Domain\Staff\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
+class StaffMember extends Model
+{
+    protected $fillable = [
+        'name', 'slug', 'title', 'bio', 'photo',
+        'qualifications', 'years_experience', 'is_active',
+        'sort_order', 'email', 'phone'
+    ];
+    
+    protected $casts = [
+        'is_active' => 'boolean',
+        'qualifications' => 'array',
+        'years_experience' => 'integer',
+    ];
+    
+    protected static function booted(): void
+    {
+        static::creating(function ($staff) {
+            if (empty($staff->slug)) {
+                $staff->slug = Str::slug($staff->name);
+            }
+        });
+    }
+    
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+    
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('sort_order')->orderBy('name');
+    }
+    
+    public function getPhotoUrlAttribute()
+    {
+        return $this->photo 
+            ? asset('storage/' . $this->photo) 
+            : asset('images/default-avatar.jpg');
+    }
+}
+Task 1.3: Repository Layer
+Create app/Repositories/ServiceRepository.php:
+
+PHP
+
+<?php
+
+namespace App\Repositories;
+
+use App\Domain\Services\Models\Service;
+use Illuminate\Support\Collection;
+
+class ServiceRepository
+{
+    public function getAllActive(): Collection
+    {
+        return cache()->remember('services.active', 3600, function () {
+            return Service::active()->ordered()->get();
+        });
+    }
+    
+    public function findBySlug(string $slug): ?Service
+    {
+        return cache()->remember("service.{$slug}", 3600, function () use ($slug) {
+            return Service::where('slug', $slug)->active()->first();
+        });
+    }
+    
+    public function create(array $data): Service
+    {
+        $service = Service::create($data);
+        $this->clearCache();
+        return $service;
+    }
+    
+    public function update(Service $service, array $data): Service
+    {
+        $service->update($data);
+        $this->clearCache();
+        return $service;
+    }
+    
+    public function delete(Service $service): bool
+    {
+        $result = $service->delete();
+        $this->clearCache();
+        return $result;
+    }
+    
+    private function clearCache(): void
+    {
+        cache()->forget('services.active');
+        cache()->flush(); // Clear all service-specific caches
+    }
+}
+Task 1.4: Public Controllers
+Create app/Http/Controllers/Public/ServiceController.php:
+
+PHP
+
+<?php
+
+namespace App\Http\Controllers\Public;
+
+use App\Http\Controllers\Controller;
+use App\Repositories\ServiceRepository;
+
+class ServiceController extends Controller
+{
+    public function __construct(
+        private ServiceRepository $serviceRepository
+    ) {}
+    
+    public function index()
+    {
+        $services = $this->serviceRepository->getAllActive();
+        
+        return view('pages.services.index', compact('services'));
+    }
+    
+    public function show(string $slug)
+    {
+        $service = $this->serviceRepository->findBySlug($slug);
+        
+        if (!$service) {
+            abort(404);
+        }
+        
+        $relatedServices = $this->serviceRepository->getAllActive()
+            ->where('id', '!=', $service->id)
+            ->take(3);
+        
+        return view('pages.services.show', compact('service', 'relatedServices'));
+    }
+}
+Task 1.5: Livewire Admin Components
+Create app/Http/Livewire/Admin/ServiceManager.php:
+
+PHP
+
+<?php
+
+namespace App\Http\Livewire\Admin;
+
+use Livewire\Component;
+use Livewire\WithPagination;
+use Livewire\WithFileUploads;
+use App\Domain\Services\Models\Service;
+
+class ServiceManager extends Component
+{
+    use WithPagination, WithFileUploads;
+    
+    public $showModal = false;
+    public $editingService = null;
+    
+    // Form fields
+    public $name = '';
+    public $short_description = '';
+    public $description = '';
+    public $capacity = 20;
+    public $duration_minutes = 60;
+    public $price = null;
+    public $is_active = true;
+    public $image = null;
+    public $features = [];
+    
+    protected $rules = [
+        'name' => 'required|min:3|max:255',
+        'short_description' => 'required|max:500',
+        'description' => 'required',
+        'capacity' => 'required|integer|min:1|max:100',
+        'duration_minutes' => 'required|integer|min:15|max:480',
+        'price' => 'nullable|numeric|min:0',
+        'image' => 'nullable|image|max:2048',
+    ];
+    
+    public function render()
+    {
+        $services = Service::ordered()->paginate(10);
+        return view('livewire.admin.service-manager', compact('services'));
+    }
+    
+    public function create()
+    {
+        $this->reset(['name', 'short_description', 'description', 
+                     'capacity', 'duration_minutes', 'price', 'image']);
+        $this->editingService = null;
+        $this->showModal = true;
+    }
+    
+    public function edit(Service $service)
+    {
+        $this->editingService = $service;
+        $this->name = $service->name;
+        $this->short_description = $service->short_description;
+        $this->description = $service->description;
+        $this->capacity = $service->capacity;
+        $this->duration_minutes = $service->duration_minutes;
+        $this->price = $service->price;
+        $this->is_active = $service->is_active;
+        $this->features = $service->features ?? [];
+        $this->showModal = true;
+    }
+    
+    public function save()
+    {
+        $this->validate();
+        
+        $data = [
+            'name' => $this->name,
+            'short_description' => $this->short_description,
+            'description' => $this->description,
+            'capacity' => $this->capacity,
+            'duration_minutes' => $this->duration_minutes,
+            'price' => $this->price,
+            'is_active' => $this->is_active,
+            'features' => $this->features,
+        ];
+        
+        if ($this->image) {
+            $data['image'] = $this->image->store('services', 'public');
+        }
+        
+        if ($this->editingService) {
+            $this->editingService->update($data);
+            session()->flash('message', 'Service updated successfully.');
+        } else {
+            Service::create($data);
+            session()->flash('message', 'Service created successfully.');
+        }
+        
+        $this->showModal = false;
+        $this->reset();
+    }
+    
+    public function delete(Service $service)
+    {
+        $service->delete();
+        session()->flash('message', 'Service deleted successfully.');
+    }
+    
+    public function toggleActive(Service $service)
+    {
+        $service->update(['is_active' => !$service->is_active]);
+    }
+}
+Task 1.6: View Templates
+Create resources/views/pages/services/index.blade.php:
+
+blade
+
+@extends('layouts.public')
+
+@section('title', 'Our Services - Elderly Care Center')
+
+@section('content')
+<div class="bg-gradient-to-b from-blue-50 to-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                Our Care Services
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                Comprehensive day programs designed to enrich lives, promote wellness, 
+                and provide peace of mind for families.
+            </p>
+        </div>
+        
+        <!-- Services Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            @foreach($services as $service)
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                    @if($service->image)
+                        <img src="{{ $service->imageUrl }}" 
+                             alt="{{ $service->name }}"
+                             class="w-full h-48 object-cover">
+                    @endif
+                    
+                    <div class="p-6">
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-3">
+                            {{ $service->name }}
+                        </h2>
+                        
+                        <p class="text-gray-600 mb-4 line-clamp-3">
+                            {{ $service->short_description }}
+                        </p>
+                        
+                        @if($service->features)
+                            <ul class="mb-4 space-y-2">
+                                @foreach(array_slice($service->features, 0, 3) as $feature)
+                                    <li class="flex items-center text-sm text-gray-600">
+                                        <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                        </svg>
+                                        {{ $feature }}
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endif
+                        
+                        <div class="flex items-center justify-between">
+                            <a href="{{ route('services.show', $service->slug) }}" 
+                               class="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                                Learn More
+                                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </a>
+                            
+                            @if($service->price)
+                                <span class="text-gray-500">
+                                    From ${{ number_format($service->price, 2) }}
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        
+        <!-- CTA Section -->
+        <div class="mt-16 bg-blue-600 rounded-2xl p-8 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">
+                Ready to Experience Our Care?
+            </h2>
+            <p class="text-xl text-blue-100 mb-6">
+                Schedule a tour today and see how we can help your loved one thrive.
+            </p>
+            <a href="{{ route('contact') }}" 
+               class="inline-block px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors text-lg">
+                Schedule a Tour
+            </a>
+        </div>
+    </div>
+</div>
+@endsection
+Acceptance Criteria - Phase 1
+ Services CRUD working in admin panel
+ Staff CRUD working in admin panel
+ Public service pages display correctly
+ Public staff pages display correctly
+ Image uploads functional
+ Responsive design on mobile/tablet
+ Cache layer operational
+ Basic SEO meta tags present
+PHASE 2: Media Management & Gallery System
+Duration: 2 days | Priority: High
+
+Objectives
+Implement media upload system
+Create photo/video galleries
+Build virtual tour feature
+Optimize media delivery
+Detailed Tasks
+Task 2.1: Media Database Schema
+Create database/migrations/2024_01_10_create_media_items_table.php:
+
+PHP
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('media_items', function (Blueprint $table) {
+            $table->id();
+            $table->enum('type', ['image', 'video', 'document']);
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->string('file_path');
+            $table->string('thumbnail_path')->nullable();
+            $table->string('mime_type');
+            $table->bigInteger('size');
+            $table->json('metadata')->nullable();
+            $table->string('category')->nullable();
+            $table->boolean('is_featured')->default(false);
+            $table->boolean('is_public')->default(true);
+            $table->integer('sort_order')->default(0);
+            $table->integer('view_count')->default(0);
+            $table->timestamps();
+            
+            $table->index(['type', 'is_public']);
+            $table->index(['category', 'is_public']);
+            $table->index('is_featured');
+        });
+    }
+    
+    public function down(): void
+    {
+        Schema::dropIfExists('media_items');
+    }
+};
+Task 2.2: Media Service Layer
+Create app/Services/MediaService.php:
+
+PHP
+
+<?php
+
+namespace App\Services;
+
+use App\Domain\Media\Models\MediaItem;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
+
+class MediaService
+{
+    private array $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    private array $videoExtensions = ['mp4', 'webm', 'ogg', 'mov'];
+    private int $maxImageSize = 5120; // 5MB in KB
+    private int $maxVideoSize = 102400; // 100MB in KB
+    
+    public function uploadMedia(UploadedFile $file, array $metadata = []): MediaItem
+    {
+        $extension = $file->getClientOriginalExtension();
+        $type = $this->determineType($extension);
+        
+        $this->validateFile($file, $type);
+        
+        // Generate unique filename
+        $filename = uniqid() . '_' . time() . '.' . $extension;
+        $path = "{$type}s/" . date('Y/m') . '/' . $filename;
+        
+        // Store original file
+        $storedPath = $file->storeAs(
+            dirname($path),
+            basename($path),
+            'public'
+        );
+        
+        // Generate thumbnail for images and videos
+        $thumbnailPath = null;
+        if ($type === 'image') {
+            $thumbnailPath = $this->generateImageThumbnail($file, $storedPath);
+        } elseif ($type === 'video') {
+            $thumbnailPath = $this->generateVideoThumbnail($storedPath);
+        }
+        
+        // Create database record
+        return MediaItem::create([
+            'type' => $type,
+            'title' => $metadata['title'] ?? $file->getClientOriginalName(),
+            'description' => $metadata['description'] ?? null,
+            'file_path' => $storedPath,
+            'thumbnail_path' => $thumbnailPath,
+            'mime_type' => $file->getMimeType(),
+            'size' => $file->getSize(),
+            'metadata' => $this->extractMetadata($file, $type),
+            'category' => $metadata['category'] ?? 'general',
+        ]);
+    }
+    
+    private function determineType(string $extension): string
+    {
+        if (in_array(strtolower($extension), $this->imageExtensions)) {
+            return 'image';
+        }
+        if (in_array(strtolower($extension), $this->videoExtensions)) {
+            return 'video';
+        }
+        return 'document';
+    }
+    
+    private function validateFile(UploadedFile $file, string $type): void
+    {
+        $maxSize = $type === 'video' ? $this->maxVideoSize : $this->maxImageSize;
+        
+        if ($file->getSize() > $maxSize * 1024) {
+            throw new \Exception("File too large. Maximum size is {$maxSize}KB");
+        }
+    }
+    
+    private function generateImageThumbnail(UploadedFile $file, string $storedPath): string
+    {
+        $thumbnailPath = str_replace(
+            '.' . $file->getClientOriginalExtension(),
+            '_thumb.' . $file->getClientOriginalExtension(),
+            $storedPath
+        );
+        
+        $image = Image::read($file->getRealPath());
+        $image->scale(width: 400);
+        $image->save(storage_path('app/public/' . $thumbnailPath));
+        
+        return $thumbnailPath;
+    }
+    
+    private function generateVideoThumbnail(string $videoPath): ?string
+    {
+        // Placeholder for video thumbnail generation
+        // Would use FFMpeg in production
+        return null;
+    }
+    
+    private function extractMetadata(UploadedFile $file, string $type): array
+    {
+        $metadata = [
+            'original_name' => $file->getClientOriginalName(),
+            'extension' => $file->getClientOriginalExtension(),
+        ];
+        
+        if ($type === 'image') {
+            $imageInfo = getimagesize($file->getRealPath());
+            $metadata['width'] = $imageInfo[0] ?? null;
+            $metadata['height'] = $imageInfo[1] ?? null;
+        }
+        
+        return $metadata;
+    }
+    
+    public function deleteMedia(MediaItem $media): bool
+    {
+        // Delete files
+        Storage::disk('public')->delete($media->file_path);
+        if ($media->thumbnail_path) {
+            Storage::disk('public')->delete($media->thumbnail_path);
+        }
+        
+        // Delete database record
+        return $media->delete();
+    }
+}
+Task 2.3: Gallery Livewire Component
+Create app/Http/Livewire/Public/MediaGallery.php:
+
+PHP
+
+<?php
+
+namespace App\Http\Livewire\Public;
+
+use Livewire\Component;
+use App\Domain\Media\Models\MediaItem;
+
+class MediaGallery extends Component
+{
+    public $category = 'all';
+    public $type = 'all';
+    public $selectedMedia = null;
+    public $showModal = false;
+    
+    protected $queryString = ['category', 'type'];
+    
+    public function render()
+    {
+        $query = MediaItem::query()
+            ->where('is_public', true)
+            ->orderBy('sort_order')
+            ->orderBy('created_at', 'desc');
+        
+        if ($this->category !== 'all') {
+            $query->where('category', $this->category);
+        }
+        
+        if ($this->type !== 'all') {
+            $query->where('type', $this->type);
+        }
+        
+        $mediaItems = $query->paginate(12);
+        
+        $categories = MediaItem::where('is_public', true)
+            ->distinct()
+            ->pluck('category')
+            ->filter();
+        
+        return view('livewire.public.media-gallery', [
+            'mediaItems' => $mediaItems,
+            'categories' => $categories,
+        ]);
+    }
+    
+    public function showMedia(MediaItem $media)
+    {
+        $this->selectedMedia = $media;
+        $this->showModal = true;
+        
+        // Increment view count
+        $media->increment('view_count');
+    }
+    
+    public function closeModal()
+    {
+        $this->showModal = false;
+        $this->selectedMedia = null;
+    }
+    
+    public function nextMedia()
+    {
+        if (!$this->selectedMedia) return;
+        
+        $next = MediaItem::where('is_public', true)
+            ->where('id', '>', $this->selectedMedia->id)
+            ->orderBy('id')
+            ->first();
+        
+        if ($next) {
+            $this->showMedia($next);
+        }
+    }
+    
+    public function previousMedia()
+    {
+        if (!$this->selectedMedia) return;
+        
+        $previous = MediaItem::where('is_public', true)
+            ->where('id', '<', $this->selectedMedia->id)
+            ->orderBy('id', 'desc')
+            ->first();
+        
+        if ($previous) {
+            $this->showMedia($previous);
+        }
+    }
+}
+Task 2.4: Gallery View Template
+Create resources/views/livewire/public/media-gallery.blade.php:
+
+blade
+
+<div class="py-12">
+    <!-- Filters -->
+    <div class="mb-8 bg-white p-4 rounded-lg shadow">
+        <div class="flex flex-wrap gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <select wire:model.live="category" 
+                        class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="all">All Categories</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat }}">{{ ucfirst($cat) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                <select wire:model.live="type"
+                        class="rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="all">All Types</option>
+                    <option value="image">Photos</option>
+                    <option value="video">Videos</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gallery Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        @foreach($mediaItems as $media)
+            <div wire:click="showMedia({{ $media->id }})"
+                 class="cursor-pointer group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                
+                <!-- Thumbnail -->
+                <div class="aspect-w-4 aspect-h-3 bg-gray-200">
+                    @if($media->type === 'image')
+                        <img src="{{ asset('storage/' . ($media->thumbnail_path ?: $media->file_path)) }}"
+                             alt="{{ $media->title }}"
+                             class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                             loading="lazy">
+                    @elseif($media->type === 'video')
+                        <div class="flex items-center justify-center bg-gray-800">
+                            <svg class="w-16 h-16 text-white opacity-80" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"></path>
+                            </svg>
+                        </div>
+                    @endif
+                    
+                    <!-- Type Badge -->
+                    @if($media->type === 'video')
+                        <div class="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">
+                            VIDEO
+                        </div>
+                    @endif
+                </div>
+                
+                <!-- Info -->
+                <div class="p-4 bg-white">
+                    <h3 class="font-semibold text-gray-900 truncate">{{ $media->title }}</h3>
+                    @if($media->description)
+                        <p class="text-sm text-gray-600 mt-1 line-clamp-2">{{ $media->description }}</p>
+                    @endif
+                </div>
+            </div>
+        @endforeach
+    </div>
+    
+    <!-- Pagination -->
+    <div class="mt-8">
+        {{ $mediaItems->links() }}
+    </div>
+    
+    <!-- Media Modal -->
+    @if($showModal && $selectedMedia)
+        <div class="fixed inset-0 z-50 overflow-y-auto" 
+             x-data 
+             x-show="true"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100">
+            
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                <!-- Background overlay -->
+                <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity"
+                     wire:click="closeModal"></div>
+                
+                <!-- Modal panel -->
+                <div class="relative inline-block align-bottom bg-white rounded-lg shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                    <!-- Close button -->
+                    <button wire:click="closeModal"
+                            class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 z-10">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Media content -->
+                    <div class="p-6">
+                        @if($selectedMedia->type === 'image')
+                            <img src="{{ asset('storage/' . $selectedMedia->file_path) }}"
+                                 alt="{{ $selectedMedia->title }}"
+                                 class="w-full h-auto rounded-lg">
+                        @elseif($selectedMedia->type === 'video')
+                            <video controls class="w-full rounded-lg">
+                                <source src="{{ asset('storage/' . $selectedMedia->file_path) }}" 
+                                        type="{{ $selectedMedia->mime_type }}">
+                                Your browser does not support the video tag.
+                            </video>
+                        @endif
+                        
+                        <!-- Media info -->
+                        <div class="mt-4">
+                            <h2 class="text-2xl font-bold text-gray-900">{{ $selectedMedia->title }}</h2>
+                            @if($selectedMedia->description)
+                                <p class="mt-2 text-gray-600">{{ $selectedMedia->description }}</p>
+                            @endif
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <div class="flex justify-between items-center px-6 pb-4">
+                        <button wire:click="previousMedia"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                            Previous
+                        </button>
+                        <button wire:click="nextMedia"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+</div>
+Acceptance Criteria - Phase 2
+ Media upload functional with validation
+ Thumbnails generated for images
+ Gallery displays with filtering
+ Lightbox/modal viewer works
+ Video playback functional
+ Admin can manage media items
+ View counts tracked
+ Responsive gallery layout
+PHASE 3: Booking & Visit Management System
+Duration: 3 days | Priority: Critical
+
+Objectives
+Implement booking calendar system
+Create slot management
+Build booking forms
+Set up confirmation emails
+Detailed Tasks
+Task 3.1: Booking Database Schema
+Create database/migrations/2024_01_20_create_booking_tables.php:
+
+PHP
+
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        // Booking slots (available time slots)
+        Schema::create('booking_slots', function (Blueprint $table) {
+            $table->id();
+            $table->date('date');
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->foreignId('service_id')->nullable()->constrained()->onDelete('cascade');
+            $table->integer('capacity')->default(1);
+            $table->integer('booked_count')->default(0);
+            $table->boolean('is_available')->default(true);
+            $table->string('type')->default('visit'); // visit, enrollment, consultation
+            $table->text('notes')->nullable();
+            $table->timestamps();
+            
+            $table->index(['date', 'is_available']);
+            $table->index(['service_id', 'date']);
+            $table->unique(['date', 'start_time', 'service_id']);
+        });
+        
+        // Actual bookings
+        Schema::create('bookings', function (Blueprint $table) {
+            $table->id();
+            $table->string('booking_number')->unique();
+            $table->foreignId('slot_id')->constrained('booking_slots')->onDelete('restrict');
+            $table->string('client_name');
+            $table->string('contact_phone');
+            $table->string('contact_email');
+            $table->string('relationship')->nullable(); // son, daughter, spouse, etc.
+            $table->text('notes')->nullable();
+            $table->text('special_requirements')->nullable();
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed', 'no-show'])
+                  ->default('pending');
+            $table->timestamp('confirmed_at')->nullable();
+            $table->timestamp('cancelled_at')->nullable();
+            $table->string('cancellation_reason')->nullable();
+            $table->json('metadata')->nullable();
+            $table->timestamps();
+            
+            $table->index(['status', 'created_at']);
+            $table->index('booking_number');
+            $table->index('contact_email');
+        });
+    }
+    
+    public function down(): void
+    {
+        Schema::dropIfExists('bookings');
+        Schema::dropIfExists('booking_slots');
+    }
+};
+Task 3.2: Booking Service Layer
+Create app/Services/BookingService.php:
+
+PHP
+
+<?php
+
+namespace App\Services;
+
+use App\Domain\Bookings\Models\Booking;
+use App\Domain\Bookings\Models\BookingSlot;
+use App\Mail\BookingConfirmation;
+use App\Mail\BookingNotification;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+
+class BookingService
+{
+    public function getAvailableSlots(Carbon $startDate, Carbon $endDate, ?int $serviceId = null)
+    {
+        $query = BookingSlot::where('date', '>=', $startDate)
+            ->where('date', '<=', $endDate)
+            ->where('is_available', true)
+            ->whereRaw('booked_count < capacity');
+        
+        if ($serviceId) {
+            $query->where('service_id', $serviceId);
+        }
+        
+        return $query->orderBy('date')
+            ->orderBy('start_time')
+            ->get()
+            ->groupBy('date');
+    }
+    
+    public function createBooking(array $data): Booking
+    {
+        return DB::transaction(function () use ($data) {
+            $slot = BookingSlot::findOrFail($data['slot_id']);
+            
+            // Check availability
+            if ($slot->booked_count >= $slot->capacity) {
+                throw new \Exception('This slot is no longer available');
+            }
+            
+            // Generate booking number
+            $bookingNumber = $this->generateBookingNumber();
+            
+            // Create booking
+            $booking = Booking::create([
+                'booking_number' => $bookingNumber,
+                'slot_id' => $slot->id,
+                'client_name' => $data['client_name'],
+                'contact_phone' => $data['contact_phone'],
+                'contact_email' => $data['contact_email'],
+                'relationship' => $data['relationship'] ?? null,
+                'notes' => $data['notes'] ?? null,
+                'special_requirements' => $data['special_requirements'] ?? null,
+                'status' => 'pending',
+                'metadata' => [
+                    'ip_address' => request()->ip(),
+                    'user_agent' => request()->userAgent(),
+                ],
+            ]);
+            
+            // Update slot count
+            $slot->increment('booked_count');
+            
+            // Send confirmation email
+            $this->sendBookingConfirmation($booking);
+            
+            // Send notification to admin
+            $this->sendAdminNotification($booking);
+            
+            return $booking;
+        });
+    }
+    
+    public function confirmBooking(Booking $booking): bool
+    {
+        if ($booking->status !== 'pending') {
+            return false;
+        }
+        
+        $booking->update([
+            'status' => 'confirmed',
+            'confirmed_at' => now(),
+        ]);
+        
+        // Send confirmation email
+        Mail::to($booking->contact_email)->send(
+            new BookingConfirmation($booking, 'confirmed')
+        );
+        
+        return true;
+    }
+    
+    public function cancelBooking(Booking $booking, string $reason = null): bool
+    {
+        if (in_array($booking->status, ['cancelled', 'completed'])) {
+            return false;
+        }
+        
+        DB::transaction(function () use ($booking, $reason) {
+            $booking->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancellation_reason' => $reason,
+            ]);
+            
+            // Decrement slot count
+            $booking->slot->decrement('booked_count');
+        });
+        
+        // Send cancellation email
+        Mail::to($booking->contact_email)->send(
+            new BookingConfirmation($booking, 'cancelled')
+        );
+        
+        return true;
+    }
+    
+    public function generateSlots(Carbon $date, array $config): array
+    {
+        $slots = [];
+        $startTime = Carbon::parse($config['start_time']);
+        $endTime = Carbon::parse($config['end_time']);
+        $duration = $config['duration_minutes'] ?? 60;
+        $capacity = $config['capacity'] ?? 1;
+        $serviceId = $config['service_id'] ?? null;
+        
+        while ($startTime < $endTime) {
+            $slotEndTime = $startTime->copy()->addMinutes($duration);
+            
+            
