@@ -8,55 +8,53 @@ pip install chromadb sentence-transformers
 ## This example demonstrates how to create a ChromaDB instance, add documents to a collection, and perform both a basic similarity search and a search with metadata filtering.
 
 ```python
-import os
-from huggingface_hub import InferenceClient
+from sentence_transformers import SentenceTransformer
 
-client = InferenceClient(
-    provider="hf-inference",
-    api_key=os.environ["HF_TOKEN"],
-)
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
-result = client.sentence_similarity(
-    {
-    "source_sentence": "That is a happy person",
-    "sentences": [
-        "That is a happy dog",
-        "That is a very happy person",
-        "Today is a sunny day"
-    ]
-},
-    model="sentence-transformers/all-MiniLM-L6-v2",
-)
+sentences = [
+    "That is a happy person",
+    "That is a happy dog",
+    "That is a very happy person",
+    "Today is a sunny day"
+]
+embeddings = model.encode(sentences)
+
+similarities = model.similarity(embeddings, embeddings)
+print(similarities.shape)
 ```
 
 ```python
-import os
-from huggingface_hub import InferenceClient
+from sentence_transformers import SentenceTransformer
 
-client = InferenceClient(
-    provider="hf-inference",
-    api_key=os.environ["HF_TOKEN"],
-)
+model = SentenceTransformer("google/embeddinggemma-300m")
 
-result = client.feature_extraction(
-    "Today is a sunny day and I will get some ice cream.",
-    model="Qwen/Qwen3-Embedding-0.6B",
-)
+sentences = [
+    "That is a happy person",
+    "That is a happy dog",
+    "That is a very happy person",
+    "Today is a sunny day"
+]
+embeddings = model.encode(sentences)
+
+similarities = model.similarity(embeddings, embeddings)
+print(similarities.shape)
 ```
 
-```
-import os
-from huggingface_hub import InferenceClient
+```python
+from sentence_transformers import SentenceTransformer
 
-client = InferenceClient(
-    provider="hf-inference",
-    api_key=os.environ["HF_TOKEN"],
-)
+model = SentenceTransformer("Qwen/Qwen3-Embedding-0.6B")
 
-result = client.feature_extraction(
-    "Today is a sunny day and I will get some ice cream.",
-    model="Qwen/Qwen3-Embedding-0.6B",
-)
+sentences = [
+    "The weather is lovely today.",
+    "It's so sunny outside!",
+    "He drove to the stadium."
+]
+embeddings = model.encode(sentences)
+
+similarities = model.similarity(embeddings, embeddings)
+print(similarities.shape)
 ```
 
 ```python
