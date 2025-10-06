@@ -51,8 +51,8 @@ ElderCare SG is a warm, mobile-responsive web platform that connects families in
 |----------------------|-----------------------------------|
 | Frontend             | Blade + TailwindCSS + Alpine.js   |
 | Design System        | shadcn/ui components library      |
-| Backend              | Laravel 12 (PHP 8.2)              |
-| Data Store           | MariaDB                           |
+| Backend              | Laravel 12 (PHP 8.3)              |
+| Data Store           | MariaDB 10.11                     |
 | Task Queue           | Redis                              |
 | CI/CD                | GitHub Actions                     |
 | CDN & Caching        | Cloudflare; image/video optimizer  |
