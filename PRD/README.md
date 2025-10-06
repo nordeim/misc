@@ -106,8 +106,8 @@ Seeders populate: a demo centre, 5 testimonials, and one sample booking window. 
 ## Architecture & Stack
 **Recommended (decoupled)**
 - Frontend: Next.js + TypeScript + Tailwind CSS + Storybook
-- Backend: Laravel 12 (PHP 8.2) — REST API servicing bookings & content
-- Data: MariaDB, Redis (queues)
+- Backend: Laravel 12 (PHP 8.3) — REST API servicing bookings & content
+- Data: MariaDB 10.11, Redis (queues)
 - Dev & Infra: Docker (local), GitHub Actions -> Vercel (frontend)/Docker image -> GKE or Cloud Run (API)
 - Observability: OpenTelemetry traces, Prometheus metrics, Grafana dashboards, Sentry for errors, RUM for Web Vitals
 
@@ -284,17 +284,6 @@ This repository is released under the MIT License. See `LICENSE`.
 
 **Media & asset licensing**
 All hero videos and photos live in `/assets/` with accompanying license files. Ensure any image/video used in new content has a license record in `assets/licenses/`.
-
----
-
-### Want me to scaffold more?
-I can next create any of these artifacts on demand:
-- `CONTRIBUTING.md` + PR template ✅
-- `api/openapi.yaml` booking endpoint ✅
-- `docker-compose.dev.yml` for local dev ✅
-- GitHub Actions `ci.yml` snippet (Lighthouse + axe + Playwright) ✅
-
-Pick one (or say “all”) and I’ll generate it next.
 
 ---
 
