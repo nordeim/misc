@@ -95,8 +95,8 @@ ElderCare SG is a thoughtfully designed web platform that serves as a bridge bet
 - **Animation**: Framer Motion with reduced motion support
 
 **Backend**
-- **API**: Laravel 12 with PHP 8.2
-- **Database**: MariaDB with read replicas for scaling
+- **API**: Laravel 12 with PHP 8.3
+- **Database**: MariaDB 10.11 with read replicas for scaling
 - **Caching**: Redis for session and application caching
 - **Search**: Elasticsearch for content search
 - **File Storage**: AWS S3 with Singapore region
