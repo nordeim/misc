@@ -1,27 +1,22 @@
-version: "3.9"
+# Dockerfile.nginx
+FROM nginx:1.29-alpine
 
-services:
-  reverse-proxy:
-    build:
-      context: .
-      dockerfile: Dockerfile.nginx
-    container_name: reverse-proxy
-    restart: unless-stopped
-    ports:
-      # Publish host ports to physical LAN
-      - "3000:3000"
-      - "8000:8000"
-      - "5555:5555"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8080/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      # Attach to the existing network where the app container lives
-      - alpine_dev_net
+# Install curl for healthcheck debugging (optional)
+RUN apk add --no-cache curl
 
-networks:
-  alpine_dev_net:
-    external: true
-    name: alpine-dev_default
+# Copy nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Create log directories
+RUN mkdir -p /var/log/nginx \
+    && touch /var/log/nginx/access_3000.log /var/log/nginx/access_8000.log /var/log/nginx/access_5555.log \
+    && touch /var/log/nginx/error.log
+
+# Expose ports (informational; compose will publish)
+EXPOSE 3000 8000 5555
+
+# Healthcheck script (optional)
+RUN printf '%s\n' 'server { listen 8080; location = /health { return 200 "OK\n"; add_header Content-Type text/plain; } }' > /etc/nginx/conf.d/health.conf
+
+# Default command
+CMD ["nginx", "-g", "daemon off;"]
