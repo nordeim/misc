@@ -1,5 +1,3 @@
----
-
 ## Analysis Summary
 
 Purpose: Produce a publication-ready, blog-post version of a deep-dive guide summarizing and teaching the techniques presented in the YouTube video **“Stop Using AI Wrong – 30 Techniques You're Missing”** (source provided by the user).
