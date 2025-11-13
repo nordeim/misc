@@ -6,3 +6,7 @@ https://dribbble.com/search/design-system
 
 ---
 
+Let's create a simple screen that contains every UI component that would exist in a design system on a mock dashboard, following the design style outlined in [1] design.json. Build this as a Vite app using react and translate all styling into tailwind v3. Then run this locally.
+
+---
+
