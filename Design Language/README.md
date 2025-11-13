@@ -10,3 +10,5 @@ Let's create a simple screen that contains every UI component that would exist i
 
 ---
 
+In this project create a folder named 'design' and create a design-system.json file in this folder that outlines the exact styling for all components and styles in this app along with high level design guidelines. The goal with the file is to create a comprehensive guide for AI to follow when builing new features in this app.
+
