@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LimeAura Design System Demo Dashboard</title>
+    <link rel="stylesheet" href="styles/globals.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/6b4f0d9d0a.js" crossorigin="anonymous"></script>
+    <meta name="description" content="Interactive demo showcasing the LimeAura design system components - cards, buttons, forms, navigation, and data displays with vibrant lime background and clean white cards.">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Section 1: Hero Profile -->
+        <div class="card hero-with-cutout">
+            <div class="profile-summary">
+                <div class="avatar">AR</div>
+                <h1>Amber Rodriguez</h1>
+                <p class="role">Senior Product Designer</p>
+                <div class="tags-container">
+                    <span class="tag">UI/UX</span>
+                    <span class="tag">Design Systems</span>
+                    <span class="tag">Figma Expert</span>
+                </div>
+            </div>
+            <div class="progress-circular">
+                <svg width="40" height="40" viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="var(--accent-primary-soft)" stroke-width="6"/>
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="var(--accent-primary)" stroke-width="6" stroke-dasharray="100" stroke-dashoffset="30" transform="rotate(-90 20 20)"/>
+                    <text x="20" y="24" text-anchor="middle" font-weight="600" font-size="12" fill="var(--accent-primary)">70%</text>
+                </svg>
+                <span>Project Completion</span>
+            </div>
+        </div>
+
+        <!-- Section 2: Notifications -->
+        <div class="card notifications-card">
+            <div class="card-header">
+                <h2>Notifications <span class="badge">3</span></h2>
+                <button class="icon-button">⋯</button>
+            </div>
+            <div class="notification-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #FFB020, #FF8C00);">SC</div>
+                <div class="notification-content">
+                    <p><strong>Sarah Chen</strong> requested access to <strong>Figma Design System</strong></p>
+                    <p class="timestamp">2 minutes ago</p>
+                </div>
+                <div class="notification-actions">
+                    <button class="button success">Accept</button>
+                    <button class="button secondary">Deny</button>
+                </div>
+            </div>
+            <div class="notification-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #00C6AE, #009688);">MJ</div>
+                <div class="notification-content">
+                    <p><strong>Marcus Johnson</strong> commented on your design mockup</p>
+                    <p class="timestamp">15 minutes ago</p>
+                </div>
+                <div class="notification-actions">
+                    <button class="button secondary">View</button>
+                </div>
+            </div>
+            <div class="notification-item">
+                <i class="fas fa-bell" style="font-size: 24px; color: var(--accent-primary);"></i>
+                <div class="notification-content">
+                    <p><strong>System Alert:</strong> Weekly design sync moved to 2:30 PM</p>
+                    <p class="timestamp">1 hour ago</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Calendar -->
+        <div class="card calendar-card">
+            <div class="calendar-header">
+                <button class="icon-button">←</button>
+                <h3>November 2025</h3>
+                <button class="icon-button">→</button>
+            </div>
+            <div class="calendar-grid">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+                
+                <div class="calendar-day muted">26</div>
+                <div class="calendar-day muted">27</div>
+                <div class="calendar-day muted">28</div>
+                <div class="calendar-day muted">29</div>
+                <div class="calendar-day muted">30</div>
+                <div class="calendar-day">1</div>
+                <div class="calendar-day">2</div>
+                
+                <div class="calendar-day">3</div>
+                <div class="calendar-day">4</div>
+                <div class="calendar-day">5</div>
+                <div class="calendar-day">6</div>
+                <div class="calendar-day">7</div>
+                <div class="calendar-day">8</div>
+                <div class="calendar-day">9</div>
+                
+                <div class="calendar-day">10</div>
+                <div class="calendar-day">11</div>
+                <div class="calendar-day">12</div>
+                <div class="calendar-day">13</div>
+                <div class="calendar-day today selected">14</div>
+                <div class="calendar-day">15</div>
+                <div class="calendar-day">16</div>
+                
+                <div class="calendar-day">17</div>
+                <div class="calendar-day">18</div>
+                <div class="calendar-day">19</div>
+                <div class="calendar-day">20</div>
+                <div class="calendar-day">21</div>
+                <div class="calendar-day">22</div>
+                <div class="calendar-day">23</div>
+                
+                <div class="calendar-day">24</div>
+                <div class="calendar-day">25</div>
+                <div class="calendar-day">26</div>
+                <div class="calendar-day">27</div>
+                <div class="calendar-day">28</div>
+                <div class="calendar-day">29</div>
+                <div class="calendar-day">30</div>
+            </div>
+        </div>
+
+        <!-- Section 4: Milestones -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Project Milestones</h2>
+                <button class="button ghost">View all</button>
+            </div>
+            <div class="milestone-card">
+                <div class="milestone-header">
+                    <div class="milestone-title">Amber Website Redesign</div>
+                    <span class="status-pill">In Progress</span>
+                </div>
+                <div class="milestone-details">
+                    <div>
+                        <div class="milestone-label">Due date</div>
+                        <div class="milestone-value">November 28, 2025</div>
+                    </div>
+                    <div class="milestone-progress">
+                        <svg width="32" height="32" viewBox="0 0 32 32">
+                            <circle cx="16" cy="16" r="12" fill="none" stroke="var(--accent-primary-soft)" stroke-width="4"/>
+                            <circle cx="16" cy="16" r="12" fill="none" stroke="var(--accent-primary)" stroke-width="4" stroke-dasharray="75" stroke-dashoffset="18.75" transform="rotate(-90 16 16)"/>
+                            <text x="16" y="19" text-anchor="middle" font-weight="500" font-size="10" fill="var(--accent-primary)">75%</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="milestone-label" style="margin-top: var(--spacing-md); margin-bottom: var(--spacing-xs);">Assignees</div>
+                <div class="avatar-group">
+                    <div class="avatar" style="background: linear-gradient(135deg, #7B3EFF, #5A20E0);">AR</div>
+                    <div class="avatar" style="background: linear-gradient(135deg, #00C6AE, #009688);">MJ</div>
+                    <div class="avatar" style="background: linear-gradient(135deg, #FFB020, #FF8C00);">SC</div>
+                </div>
+            </div>
+            <div class="milestone-card">
+                <div class="milestone-header">
+                    <div class="milestone-title">Mobile App Onboarding</div>
+                    <span class="status-pill">Planning</span>
+                </div>
+                <div class="milestone-details">
+                    <div>
+                        <div class="milestone-label">Due date</div>
+                        <div class="milestone-value">December 15, 2025</div>
+                    </div>
+                    <div class="milestone-progress">
+                        <svg width="32" height="32" viewBox="0 0 32 32">
+                            <circle cx="16" cy="16" r="12" fill="none" stroke="var(--accent-primary-soft)" stroke-width="4"/>
+                            <circle cx="16" cy="16" r="12" fill="none" stroke="var(--accent-primary)" stroke-width="4" stroke-dasharray="40" stroke-dashoffset="28.8" transform="rotate(-90 16 16)"/>
+                            <text x="16" y="19" text-anchor="middle" font-weight="500" font-size="10" fill="var(--accent-primary)">40%</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="milestone-label" style="margin-top: var(--spacing-md); margin-bottom: var(--spacing-xs);">Assignees</div>
+                <div class="avatar-group">
+                    <div class="avatar" style="background: linear-gradient(135deg, #7B3EFF, #5A20E0);">AR</div>
+                    <div class="avatar" style="background: linear-gradient(135deg, #00C6AE, #009688);">MJ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Integrations -->
+        <div class="card integrations-card">
+            <div class="card-header">
+                <h2>Integrations</h2>
+                <button class="button ghost">View all</button>
+            </div>
+            <div class="integration-row">
+                <div class="service-icon">
+                    <i class="fab fa-slack"></i>
+                </div>
+                <div class="service-info">
+                    <p class="service-name">Slack</p>
+                    <p class="service-description">Team communication and collaboration</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="integration-row">
+                <div class="service-icon">
+                    <i class="fab fa-google-meet"></i>
+                </div>
+                <div class="service-info">
+                    <p class="service-name">Google Meet</p>
+                    <p class="service-description">Video conferencing and meetings</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="integration-row">
+                <div class="service-icon">
+                    <i class="fab fa-github"></i>
+                </div>
+                <div class="service-info">
+                    <p class="service-name">GitHub</p>
+                    <p class="service-description">Code repository and version control</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="integration-row">
+                <div class="service-icon">
+                    <i class="fab fa-figma"></i>
+                </div>
+                <div class="service-info">
+                    <p class="service-name">Figma</p>
+                    <p class="service-description">Design collaboration and prototyping</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 6: Brand Pills -->
+        <div class="card brands-card">
+            <h2>Payment Methods</h2>
+            <div class="pill-brand-container">
+                <div class="pill-brand">
+                    <i class="fab fa-stripe"></i>
+                </div>
+                <div class="pill-brand">
+                    <i class="fab fa-paypal"></i>
+                </div>
+                <div class="pill-brand visa">
+                    <span>Visa</span>
+                </div>
+                <div class="pill-brand">
+                    <i class="fab fa-apple-pay"></i>
+                </div>
+                <div class="pill-brand">
+                    <i class="fab fa-amazon-pay"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Component Library -->
+        <div class="card components-card">
+            <h2>Button Variants</h2>
+            <div class="button-group">
+                <button class="button primary">Primary Button</button>
+                <button class="button success">Success Button</button>
+                <button class="button secondary">Secondary Button</button>
+                <button class="button ghost">Ghost Button</button>
+            </div>
+            
+            <h3 style="margin: var(--spacing-xl) 0 var(--spacing-md) 0;">Toggle Switches</h3>
+            <div class="toggle-group">
+                <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <h3 style="margin: var(--spacing-xl) 0 var(--spacing-md) 0;">Notification Badges</h3>
+            <div style="display: flex; gap: var(--spacing-lg); align-items: center;">
+                <span class="badge">5</span>
+                <span class="status-pill">Active</span>
+                <span class="status-pill" style="background-color: var(--success); color: white;">Complete</span>
+                <span class="status-pill" style="background-color: var(--warning); color: white;">Pending</span>
+            </div>
+            
+            <h3 style="margin: var(--spacing-xl) 0 var(--spacing-md) 0;">Avatar Groups</h3>
+            <div class="avatar-group" style="margin-top: var(--spacing-md);">
+                <div class="avatar" style="background: linear-gradient(135deg, #7B3EFF, #5A20E0);">AR</div>
+                <div class="avatar" style="background: linear-gradient(135deg, #00C6AE, #009688);">MJ</div>
+                <div class="avatar" style="background: linear-gradient(135deg, #FFB020, #FF8C00);">SC</div>
+                <div class="avatar" style="background: linear-gradient(135deg, #10B981, #059669);">TL</div>
+                <div class="avatar" style="background: linear-gradient(135deg, #9CA3AF, #6B7280);">+2</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/landing.js"></script>
+</body>
+</html>
