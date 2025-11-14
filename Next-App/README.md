@@ -1,6 +1,10 @@
+# Create Next.js app with specific version
 $ npx create-next-app@14.2.33 limeaura-styleguide --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
 
+# Install exact dependency versions from reference stack
 $ npm install @radix-ui/react-label@2 @radix-ui/react-select@2 @radix-ui/react-slot@1 lucide-react react-hook-form@7 tailwind-merge@2
+
+# Install dev dependencies
 
 $ npm list
 ├── @types/node@20.19.25
