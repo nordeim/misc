@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LimeAura Demo Dashboard - A beautiful, modern productivity dashboard showcasing the LimeAura design system">
+    <meta name="theme-color" content="#D6F25F">
+    
+    <title>Lumina Studio Dashboard - LimeAura Design System</title>
+    
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles/globals.css">
+</head>
+<body>
+    <!-- Loading State -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="app-container">
+        
+        <!-- Navigation Bar -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <div class="navbar-left">
+                    <div class="logo">
+                        <div class="logo-icon">
+                            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                <circle cx="16" cy="16" r="16" fill="#7B3EFF"/>
+                                <path d="M10 16L14 20L22 12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <span class="logo-text">Lumina</span>
+                    </div>
+                    <div class="search-bar">
+                        <svg class="search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M11 11L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        <input type="search" placeholder="Search projects, people, or files..." class="search-input">
+                    </div>
+                </div>
+                <div class="navbar-right">
+                    <button class="icon-button notification-button">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                            <path d="M15 6.5C15 3.5 12.5 1 9.5 1C6.5 1 4 3.5 4 6.5C4 13 1 15 1 15H18C18 15 15 13 15 6.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M10.5 18C10.1 18.6 9.3 19 8.5 19C7.7 19 6.9 18.6 6.5 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <span class="badge-numeric">3</span>
+                    </button>
+                    <div class="avatar-with-dropdown">
+                        <button class="avatar avatar-md">
+                            <span>SC</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Dashboard Content -->
+        <main class="dashboard-container">
+            
+            <!-- Hero Welcome Section -->
+            <section class="hero-welcome card card-hero">
+                <div class="hero-background-shape"></div>
+                <div class="hero-content">
+                    <div class="hero-greeting">
+                        <h1 class="hero-title">Good morning, Sarah! <span class="emoji-sun">☀️</span></h1>
+                        <p class="hero-quote">"Success is the sum of small efforts repeated daily"</p>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat-pill">
+                            <span class="stat-number">4</span>
+                            <span class="stat-label">tasks due today</span>
+                        </div>
+                        <div class="stat-pill">
+                            <span class="stat-number">2</span>
+                            <span class="stat-label">meetings scheduled</span>
+                        </div>
+                        <div class="stat-pill">
+                            <div class="team-online-indicator"></div>
+                            <span class="stat-label">Team: 12 online</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Grid Layout -->
+            <div class="dashboard-grid">
+                
+                <!-- Active Project Card -->
+                <div class="grid-item grid-project">
+                    <div class="card card-featured">
+                        <div class="card-header">
+                            <div class="card-header-content">
+                                <h2 class="card-title">Amber Website Redesign</h2>
+                                <p class="card-subtitle">E-commerce Platform Refresh</p>
+                            </div>
+                            <button class="button-ghost button-sm">View details</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="project-meta">
+                                <div class="meta-item">
+                                    <label class="meta-label">Client</label>
+                                    <span class="meta-value">Amber Industries</span>
+                                </div>
+                                <div class="meta-item">
+                                    <label class="meta-label">Due Date</label>
+                                    <span class="meta-value">Dec 20, 2024</span>
+                                </div>
+                                <div class="meta-item">
+                                    <label class="meta-label">Budget</label>
+                                    <span class="meta-value">$45,000</span>
+                                </div>
+                            </div>
+                            <div class="project-progress-section">
+                                <div class="progress-header">
+                                    <span class="progress-label">Overall Progress</span>
+                                    <span class="progress-percentage">68%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 68%"></div>
+                                </div>
+                                <div class="progress-phases">
+                                    <div class="phase phase-complete">
+                                        <div class="phase-dot"></div>
+                                        <span>Research</span>
+                                    </div>
+                                    <div class="phase phase-complete">
+                                        <div class="phase-dot"></div>
+                                        <span>Design</span>
+                                    </div>
+                                    <div class="phase phase-active">
+                                        <div class="phase-dot"></div>
+                                        <span>Development</span>
+                                    </div>
+                                    <div class="phase">
+                                        <div class="phase-dot"></div>
+                                        <span>Launch</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="project-team">
+                                <label class="meta-label">Team Members</label>
+                                <div class="avatar-group">
+                                    <div class="avatar avatar-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                        <span>JD</span>
+                                    </div>
+                                    <div class="avatar avatar-sm" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                        <span>AS</span>
+                                    </div>
+                                    <div class="avatar avatar-sm" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                        <span>MK</span>
+                                    </div>
+                                    <div class="avatar avatar-sm" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                        <span>LT</span>
+                                    </div>
+                                    <div class="avatar avatar-sm avatar-more">
+                                        <span>+3</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Pulse Section -->
+                <div class="grid-item grid-team">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Team Pulse</h2>
+                            <span class="badge-status">12 Active</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="team-grid">
+                                <div class="team-member">
+                                    <div class="member-avatar-wrapper">
+                                        <div class="avatar avatar-md" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                            <span>JD</span>
+                                        </div>
+                                        <div class="status-dot status-online"></div>
+                                    </div>
+                                    <div class="member-info">
+                                        <p class="member-name">John Doe</p>
+                                        <p class="member-role">UI Designer</p>
+                                    </div>
+                                    <div class="member-tags">
+                                        <span class="tag">Figma</span>
+                                        <span class="tag">UI</span>
+                                    </div>
+                                </div>
+                                <div class="team-member">
+                                    <div class="member-avatar-wrapper">
+                                        <div class="avatar avatar-md" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                            <span>AS</span>
+                                        </div>
+                                        <div class="status-dot status-online"></div>
+                                    </div>
+                                    <div class="member-info">
+                                        <p class="member-name">Anna Smith</p>
+                                        <p class="member-role">Developer</p>
+                                    </div>
+                                    <div class="member-tags">
+                                        <span class="tag">React</span>
+                                        <span class="tag">Node</span>
+                                    </div>
+                                </div>
+                                <div class="team-member">
+                                    <div class="member-avatar-wrapper">
+                                        <div class="avatar avatar-md" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                            <span>MK</span>
+                                        </div>
+                                        <div class="status-dot status-busy"></div>
+                                    </div>
+                                    <div class="member-info">
+                                        <p class="member-name">Mike Kim</p>
+                                        <p class="member-role">Product Lead</p>
+                                    </div>
+                                    <div class="member-tags">
+                                        <span class="tag">Strategy</span>
+                                    </div>
+                                </div>
+                                <div class="team-member">
+                                    <div class="member-avatar-wrapper">
+                                        <div class="avatar avatar-md" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                            <span>LT</span>
+                                        </div>
+                                        <div class="status-dot status-away"></div>
+                                    </div>
+                                    <div class="member-info">
+                                        <p class="member-name">Lisa Tang</p>
+                                        <p class="member-role">Researcher</p>
+                                    </div>
+                                    <div class="member-tags">
+                                        <span class="tag">UX</span>
+                                        <span class="tag">Data</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="button-secondary button-full">View All Team Members</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Feed -->
+                <div class="grid-item grid-notifications">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">
+                                Notifications
+                                <span class="badge-numeric">3</span>
+                            </h2>
+                            <button class="button-ghost button-sm">Mark all read</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="notification-list">
+                                <div class="notification-item notification-unread">
+                                    <div class="avatar avatar-sm" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                                        <span>AB</span>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p class="notification-text">
+                                            <strong>Anna Baker</strong> commented on your design: "Love the new color palette! 🎨"
+                                        </p>
+                                        <div class="notification-meta">
+                                            <span class="notification-time">2 minutes ago</span>
+                                            <span class="notification-project">• Amber Redesign</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="notification-item notification-unread">
+                                    <div class="avatar avatar-sm" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                                        <span>TS</span>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p class="notification-text">
+                                            <strong>Tom Sanders</strong> requested to join your team
+                                        </p>
+                                        <div class="notification-meta">
+                                            <span class="notification-time">1 hour ago</span>
+                                        </div>
+                                        <div class="notification-actions">
+                                            <button class="button-success button-sm">Accept</button>
+                                            <button class="button-secondary button-sm">Deny</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="notification-item">
+                                    <div class="notification-icon-wrapper">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <circle cx="10" cy="10" r="10" fill="#10B981"/>
+                                            <path d="M6 10L9 13L14 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="notification-content">
+                                        <p class="notification-text">
+                                            <strong>Deployment successful!</strong> Your changes are now live
+                                        </p>
+                                        <div class="notification-meta">
+                                            <span class="notification-time">3 hours ago</span>
+                                            <span class="notification-project">• Platform Update</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Widget -->
+                <div class="grid-item grid-calendar">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Calendar</h2>
+                            <div class="calendar-nav">
+                                <button class="icon-button icon-button-sm" id="calPrev">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M10 12L6 8L10 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <span class="calendar-month">December 2024</span>
+                                <button class="icon-button icon-button-sm" id="calNext">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                        <path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="calendar-grid">
+                                <div class="calendar-weekdays">
+                                    <span>SUN</span>
+                                    <span>MON</span>
+                                    <span>TUE</span>
+                                    <span>WED</span>
+                                    <span>THU</span>
+                                    <span>FRI</span>
+                                    <span>SAT</span>
+                                </div>
+                                <div class="calendar-days" id="calendarDays">
+                                    <!-- Generated by JS -->
+                                </div>
+                            </div>
+                            <div class="calendar-events">
+                                <p class="events-title">Today's Schedule</p>
+                                <div class="event-item">
+                                    <div class="event-time">09:00</div>
+                                    <div class="event-details">
+                                        <p class="event-name">Design Review</p>
+                                        <p class="event-participants">with Anna & Mike</p>
+                                    </div>
+                                </div>
+                                <div class="event-item">
+                                    <div class="event-time">14:00</div>
+                                    <div class="event-details">
+                                        <p class="event-name">Client Presentation</p>
+                                        <p class="event-participants">Amber Industries</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid-item grid-actions">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Quick Actions</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="action-grid">
+                                <button class="action-card">
+                                    <div class="action-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <path d="M10 4V16M4 10H16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                    <span>New Project</span>
+                                </button>
+                                <button class="action-card">
+                                    <div class="action-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <path d="M17 10C17 14 14 17 10 17C6 17 3 14 3 10C3 6 6 3 10 3C14 3 17 6 17 10Z" stroke="white" stroke-width="2"/>
+                                            <path d="M10 6V10L12 12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                    <span>Schedule</span>
+                                </button>
+                                <button class="action-card">
+                                    <div class="action-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <path d="M10 10C12 10 14 8 14 6C14 4 12 2 10 2C8 2 6 4 6 6C6 8 8 10 10 10Z" stroke="white" stroke-width="2"/>
+                                            <path d="M2 18C2 14 6 12 10 12C14 12 18 14 18 18" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                    <span>Invite Member</span>
+                                </button>
+                                <button class="action-card">
+                                    <div class="action-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                            <path d="M4 4L16 4M4 10H16M4 16H10" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                                        </svg>
+                                    </div>
+                                    <span>Create Task</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Milestones -->
+                <div class="grid-item grid-milestones">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Milestones</h2>
+                            <button class="button-ghost button-sm">View all</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="milestone-list">
+                                <div class="milestone-item">
+                                    <div class="milestone-progress">
+                                        <svg class="progress-ring" width="44" height="44">
+                                            <circle cx="22" cy="22" r="18" stroke-width="4" fill="none" class="progress-ring-track"/>
+                                            <circle cx="22" cy="22" r="18" stroke-width="4" fill="none" class="progress-ring-fill" style="stroke-dasharray: 113; stroke-dashoffset: 28;"/>
+                                        </svg>
+                                        <span class="progress-text">75%</span>
+                                    </div>
+                                    <div class="milestone-info">
+                                        <p class="milestone-name">Design System</p>
+                                        <p class="milestone-date">Due Dec 15</p>
+                                    </div>
+                                    <div class="milestone-assignees">
+                                        <div class="avatar-group-small">
+                                            <div class="avatar avatar-xs">JD</div>
+                                            <div class="avatar avatar-xs">AS</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="milestone-item">
+                                    <div class="milestone-progress">
+                                        <svg class="progress-ring" width="44" height="44">
+                                            <circle cx="22" cy="22" r="18" stroke-width="4" fill="none" class="progress-ring-track"/>
+                                            <circle cx="22" cy="22" r="18" stroke-width="4" fill="none" class="progress-ring-fill" style="stroke-dasharray: 113; stroke-dashoffset: 51;"/>
+                                        </svg>
+                                        <span class="progress-text">55%</span>
+                                    </div>
+                                    <div class="milestone-info">
+                                        <p class="milestone-name">API Integration</p>
+                                        <p class="milestone-date">Due Dec 22</p>
+                                    </div>
+                                    <div class="milestone-assignees">
+                                        <div class="avatar-group-small">
+                                            <div class="avatar avatar-xs">MK</div>
+                                            <div class="avatar avatar-xs">LT</div>
+                                            <div class="avatar avatar-xs">+1</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="milestone-item">
+                                    <div class="milestone-progress">
+                                        <svg class="progress-ring" width="44" height="44">
+                                            <circle cx="22" cy="22" r="18" stroke-width="4" fill="none" class="progress-ring-track"/>
+                                            <circle cx="22" cy="22" r="18" stroke-width="4" fill="none" class="progress-ring-fill" style="stroke-dasharray: 113; stroke-dashoffset: 96;"/>
+                                        </svg>
+                                        <span class="progress-text">15%</span>
+                                    </div>
+                                    <div class="milestone-info">
+                                        <p class="milestone-name">User Testing</p>
+                                        <p class="milestone-date">Due Jan 5</p>
+                                    </div>
+                                    <div class="milestone-assignees">
+                                        <div class="avatar-group-small">
+                                            <div class="avatar avatar-xs">SC</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integrations Panel -->
+                <div class="grid-item grid-integrations">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Integrations & Tools</h2>
+                            <button class="button-primary button-sm">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="margin-right: 6px;">
+                                    <path d="M7 3V11M3 7H11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                </svg>
+                                Add New
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="integration-list">
+                                <div class="integration-item">
+                                    <div class="integration-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M9 12L11 14L15 10M21 12C21 16.97 16.97 21 12 21C7.03 21 3 16.97 3 12C3 7.03 7.03 3 12 3C16.97 3 21 7.03 21 12Z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="integration-info">
+                                        <p class="integration-name">Slack</p>
+                                        <p class="integration-desc">Team communication</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="integration-item">
+                                    <div class="integration-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <rect x="3" y="5" width="18" height="14" rx="2" stroke="#F59E0B" stroke-width="2"/>
+                                            <path d="M8 10L12 14L16 10" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="integration-info">
+                                        <p class="integration-name">Google Drive</p>
+                                        <p class="integration-desc">File storage & sharing</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="integration-item">
+                                    <div class="integration-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 2L2 7V12C2 16.5 5 20.25 12 21C19 20.25 22 16.5 22 12V7L12 2Z" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="integration-info">
+                                        <p class="integration-name">GitHub</p>
+                                        <p class="integration-desc">Code repository</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="integration-item">
+                                    <div class="integration-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                            <circle cx="12" cy="12" r="9" stroke="#EF4444" stroke-width="2"/>
+                                            <path d="M8 12L10 14L14 10" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </div>
+                                    <div class="integration-info">
+                                        <p class="integration-name">Stripe</p>
+                                        <p class="integration-desc">Payment processing</p>
+                                    </div>
+                                    <label class="toggle">
+                                        <input type="checkbox">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Floating Action Button -->
+        <button class="fab" id="fabButton">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/landing.js"></script>
+</body>
+</html>
