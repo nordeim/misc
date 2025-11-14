@@ -129,7 +129,7 @@ Please treat this as the permanent operating system for all coding and technical
 
 Please remember this framework for all coding related requests and tasks.
 
-Now, please meticulously plan and then create a demo style guide app that showcases /contains every UI component that would exist in a design system on a mock dashboard, following the design style outlined in the attached `design.json`. Build this as a Vite app using the following reference tech stack.
+Now, please meticulously plan and then create a demo style guide app that showcases /contains every UI component that would exist in a design system on a mock dashboard, following the design style outlined in the attached `design.json`. You will create a comprehensive demo style guide app that showcases every UI component in the design system using the comprehensive design system specification and style. Create a detailed plan for building the demo style guide app that showcases every UI component from this design system. Build this as a React app using the following package versions from my reference tech stack.
 
 $ npm list 
 ├── @next/bundle-analyzer@16.0.1
