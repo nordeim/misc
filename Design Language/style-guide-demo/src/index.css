@@ -1,69 +1,88 @@
-     1	:root {
-     2	  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-     3	  line-height: 1.5;
-     4	  font-weight: 400;
-     5	
-     6	  color-scheme: light dark;
-     7	  color: rgba(255, 255, 255, 0.87);
-     8	  background-color: #242424;
-     9	
-    10	  font-synthesis: none;
-    11	  text-rendering: optimizeLegibility;
-    12	  -webkit-font-smoothing: antialiased;
-    13	  -moz-osx-font-smoothing: grayscale;
-    14	}
-    15	
-    16	a {
-    17	  font-weight: 500;
-    18	  color: #646cff;
-    19	  text-decoration: inherit;
-    20	}
-    21	a:hover {
-    22	  color: #535bf2;
-    23	}
-    24	
-    25	body {
-    26	  margin: 0;
-    27	  display: flex;
-    28	  place-items: center;
-    29	  min-width: 320px;
-    30	  min-height: 100vh;
-    31	}
-    32	
-    33	h1 {
-    34	  font-size: 3.2em;
-    35	  line-height: 1.1;
-    36	}
-    37	
-    38	button {
-    39	  border-radius: 8px;
-    40	  border: 1px solid transparent;
-    41	  padding: 0.6em 1.2em;
-    42	  font-size: 1em;
-    43	  font-weight: 500;
-    44	  font-family: inherit;
-    45	  background-color: #1a1a1a;
-    46	  cursor: pointer;
-    47	  transition: border-color 0.25s;
-    48	}
-    49	button:hover {
-    50	  border-color: #646cff;
-    51	}
-    52	button:focus,
-    53	button:focus-visible {
-    54	  outline: 4px auto -webkit-focus-ring-color;
-    55	}
-    56	
-    57	@media (prefers-color-scheme: light) {
-    58	  :root {
-    59	    color: #213547;
-    60	    background-color: #ffffff;
-    61	  }
-    62	  a:hover {
-    63	    color: #747bff;
-    64	  }
-    65	  button {
-    66	    background-color: #f9f9f9;
-    67	  }
-    68	}
-    69	
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    
+    color-scheme: light;
+    color: #111111;
+    background-color: #D6F25F;
+    
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: #D6F25F;
+  }
+  
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surfacePrimary rounded-card shadow-card p-6;
+  }
+  
+  .card-hover {
+    @apply hover:shadow-[0_14px_30px_0_rgba(15,23,42,0.10)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer;
+  }
+  
+  .btn-primary {
+    @apply bg-accentPrimary text-white rounded-pill px-4.5 py-2.5 text-body-bold shadow-[0_8px_18px_0_rgba(123,62,255,0.25)] hover:bg-[#6B2FFF] active:scale-98 transition-all duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-textPrimary border border-borderSubtle rounded-pill px-4.5 py-2.5 text-body-bold hover:bg-surfaceSoft active:scale-98 transition-all duration-200;
+  }
+  
+  .btn-ghost {
+    @apply bg-transparent text-textPrimary rounded-pill px-4.5 py-2.5 text-body-bold hover:bg-surfaceSoft active:scale-98 transition-all duration-200;
+  }
+  
+  .tag {
+    @apply bg-surfaceSoft text-textPrimary rounded-pill px-3.5 py-1.5 text-label;
+  }
+  
+  .badge {
+    @apply bg-accentPrimary text-white rounded-full min-w-[18px] h-[18px] text-[10px] font-semibold flex items-center justify-center;
+  }
+  
+  .avatar {
+    @apply rounded-full border-2 border-surfacePrimary;
+  }
+  
+  .toggle {
+    @apply relative inline-flex h-6 w-11 items-center rounded-pill transition-colors duration-200;
+  }
+  
+  .toggle-input {
+    @apply sr-only;
+  }
+  
+  .toggle-track {
+    @apply inline-block h-6 w-11 rounded-full bg-gray-200 transition-colors duration-200;
+  }
+  
+  .toggle-handle {
+    @apply absolute left-0.5 top-0.5 h-4.5 w-4.5 rounded-full bg-white shadow-md transition-transform duration-200;
+  }
+  
+  .toggle-input:checked + .toggle-track {
+    @apply bg-accentPrimary;
+  }
+  
+  .toggle-input:checked + .toggle-track + .toggle-handle {
+    @apply translate-x-5;
+  }
+}
