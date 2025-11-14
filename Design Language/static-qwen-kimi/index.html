@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="limeaura-pro">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LimeAura Pro - Next-generation design system with glassmorphism, 3D transforms, and cinematic animations">
+  <title>LimeAura Pro Dashboard</title>
+  
+  <!-- Critical CSS Preload -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles/globals.css">
+</head>
+<body>
+  <!-- Ambient Background -->
+  <div class="ambient-bg" aria-hidden="true">
+    <div class="gradient-mesh"></div>
+    <div class="floating-particles" id="particles"></div>
+  </div>
+
+  <!-- Custom Cursor -->
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <div class="cursor__dot"></div>
+    <div class="cursor__glow"></div>
+  </div>
+
+  <!-- Skip Link -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <div class="wrapper" id="app">
+    <!-- Hidden Theme Trigger (Easter Egg) -->
+    <button class="theme-trigger" aria-label="Cycle color theme" data-theme-trigger>
+      <span class="sr-only">Cycle theme</span>
+    </button>
+
+    <!-- Hero Section with Parallax -->
+    <section class="section section--hero" data-section="hero" aria-labelledby="hero-title">
+      <div class="card card--glass card--hero" data-component="card" data-parallax="0.5">
+        <div class="card__header">
+          <h1 class="card__title gradient-text" id="hero-title">LimeAura Pro Workspace</h1>
+          <button class="icon-btn" aria-label="Workspace options">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="profile-summary">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=256&h=256&fit=crop&crop=face" 
+               alt="Alex Chen" 
+               class="avatar avatar--large avatar--magnetic"
+               data-magnetic>
+          <div class="profile-summary__info">
+            <h2 class="profile-summary__name">Alex Chen</h2>
+            <p class="profile-summary__role">Senior Product Designer</p>
+            <div class="tag-cluster" role="list">
+              <span class="tag tag--animated" data-tag="UI Design">UI Design</span>
+              <span class="tag tag--animated" data-tag="Design Systems">Design Systems</span>
+              <span class="tag tag--animated" data-tag="Prototyping">Prototyping</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card__actions">
+          <button class="btn btn--primary btn--magnetic" data-magnetic>
+            <span>Edit Profile</span>
+            <div class="btn__shimmer"></div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dashboard Section -->
+    <section class="section section--dashboard" data-section="dashboard">
+      <div class="grid grid--2col">
+        <!-- Enhanced Project Card -->
+        <div class="card card--glass" data-component="card" data-parallax="0.7">
+          <div class="card__header">
+            <h2 class="card__title">Amber Website Redesign</h2>
+            <span class="badge badge--pill badge--animated">In Progress</span>
+          </div>
+          
+          <div class="project-overview">
+            <div class="progress-circular progress-circular--animated" data-progress="72">
+              <svg class="progress-circular__svg" viewBox="0 0 40 40" width="80" height="80">
+                <circle class="progress-circular__track" cx="20" cy="20" r="17"></circle>
+                <circle class="progress-circular__fill" cx="20" cy="20" r="17"></circle>
+              </svg>
+              <span class="progress-circular__label">72%</span>
+            </div>
+            
+            <div class="milestone-list">
+              <article class="milestone-card card--glass">
+                <div class="milestone-card__header">
+                  <h3 class="milestone-card__title">Design System Audit</h3>
+                  <button class="btn btn--ghost btn--sm">View details</button>
+                </div>
+                <div class="milestone-card__meta">
+                  <div class="meta-item">
+                    <span class="meta-item__label">Due date</span>
+                    <span class="meta-item__value">Oct 28</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-item__label">Assignees</span>
+                    <div class="avatar-group">
+                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face" 
+                           alt="Jake" class="avatar avatar--sm avatar--magnetic" data-magnetic>
+                      <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face" 
+                           alt="Sarah" class="avatar avatar--sm avatar--magnetic" data-magnetic>
+                    </div>
+                  </div>
+                </div>
+              </article>
+              
+              <article class="milestone-card card--glass">
+                <div class="milestone-card__header">
+                  <h3 class="milestone-card__title">Component Library</h3>
+                  <button class="btn btn--ghost btn--sm">View details</button>
+                </div>
+                <div class="milestone-card__meta">
+                  <div class="meta-item">
+                    <span class="meta-item__label">Due date</span>
+                    <span class="meta-item__value">Nov 15</span>
+                  </div>
+                  <div class="avatar-group">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face" 
+                         alt="Mike" class="avatar avatar--sm avatar--magnetic" data-magnetic>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Enhanced Notifications -->
+        <div class="card card--glass" data-component="card" data-parallax="0.9">
+          <div class="card__header">
+            <h2 class="card__title">Live Activity</h2>
+            <span class="badge badge--numeric badge--animated" aria-label="3 unread notifications">3</span>
+          </div>
+          
+          <ul class="notification-list" role="list" data-live-region="polite">
+            <li class="notification-item notification-item--enter" role="listitem">
+              <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=100&h=100&fit=crop&crop=face" 
+                   alt="" class="avatar avatar--sm avatar--magnetic" data-magnetic>
+              <div class="notification-item__content">
+                <p class="notification-item__text"><strong>Michael</strong> mentioned you in a comment</p>
+                <time class="notification-item__time" datetime="2025-11-14T10:30:00">2m ago</time>
+              </div>
+              <button class="icon-btn" aria-label="Notification options">
+                <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/>
+                </svg>
+              </button>
+            </li>
+            
+            <li class="notification-item notification-item--enter" role="listitem">
+              <div class="notification-item__icon" aria-hidden="true">
+                <svg class="icon icon--accent" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <div class="notification-item__content">
+                <p class="notification-item__text">New team invitation from <strong>Figma Plugins</strong></p>
+                <div class="notification-item__actions">
+                  <button class="btn btn--success btn--sm btn--magnetic" data-magnetic>Accept</button>
+                  <button class="btn btn--secondary btn--sm btn--magnetic" data-magnetic>Decline</button>
+                </div>
+              </div>
+            </li>
+            
+            <li class="notification-item notification-item--enter" role="listitem">
+              <img src="https://images.unsplash.com/photo-1517849845537-4d257902454a?w=100&h=100&fit=crop&crop=face" 
+                   alt="" class="avatar avatar--sm avatar--magnetic" data-magnetic>
+              <div class="notification-item__content">
+                <p class="notification-item__text"><strong>Jamie</strong> completed their onboarding</p>
+                <time class="notification-item__time" datetime="2025-11-14T09:00:00">1h ago</time>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tools & Calendar Section -->
+    <section class="section section--tools" data-section="tools">
+      <div class="grid grid--2col">
+        <!-- Interactive Calendar -->
+        <div class="card card--glass card--compact" data-component="card">
+          <div class="card__header">
+            <button class="icon-btn" aria-label="Previous month">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <h2 class="card__title">November 2025</h2>
+            <button class="icon-btn" aria-label="Next month">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="calendar" role="application" aria-label="Calendar">
+            <div class="calendar__weekdays">
+              <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span>
+              <span>THU</span><span>FRI</span><span>SAT</span>
+            </div>
+            <div class="calendar__days" role="grid">
+              <!-- Calendar days generated by JS for full interactivity -->
+              <button class="calendar__day" role="gridcell" aria-label="November 1, 2025">1</button>
+              <button class="calendar__day" role="gridcell" aria-label="November 2, 2025">2</button>
+              <!-- ... more days ... -->
+              <button class="calendar__day calendar__day--today" role="gridcell" aria-current="date" aria-label="Today, November 14, 2025">14</button>
+              <button class="calendar__day" role="gridcell" aria-label="November 15, 2025">15</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Enhanced Integrations -->
+        <div class="card card--glass card--compact" data-component="card">
+          <h2 class="card__title">Integrations</h2>
+          
+          <ul class="integration-list" role="list">
+            <li class="integration-row" role="listitem">
+              <div class="integration-row__icon" style="background-color: #4A154B;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523..."/>
+                </svg>
+              </div>
+              <div class="integration-row__content">
+                <h3 class="integration-row__name">Slack</h3>
+                <p class="integration-row__description">Team communication and updates</p>
+              </div>
+              <button class="toggle" role="switch" aria-checked="true" aria-label="Enable Slack integration">
+                <span class="toggle__handle"></span>
+              </button>
+            </li>
+            
+            <!-- More integrations... -->
+          </ul>
+          
+          <div class="card__footer">
+            <h3 class="u-sr-only">Payment Methods</h3>
+            <div class="pill-cluster">
+              <div class="pill-brand" title="Stripe">
+                <svg width="40" height="20" viewBox="0 0 40 20" fill="currentColor">
+                  <!-- Stripe logo path -->
+                </svg>
+              </div>
+              <div class="pill-brand" title="Visa">
+                <svg width="40" height="20" viewBox="0 0 40 20" fill="currentColor">
+                  <!-- Visa logo path -->
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Theme Explorer Section -->
+    <section class="section section--theme" data-section="theme">
+      <div class="card card--glass card--compact">
+        <h2 class="card__title">Theme Explorer</h2>
+        <p class="card__subtitle">Experience the design system in different color palettes</p>
+        
+        <div class="theme-switcher">
+          <button class="theme-option theme-option--limeaura-pro is-active" data-theme="limeaura-pro" aria-label="LimeAura Pro theme (active)">
+            <span class="theme-option__swatch"></span>
+            <span class="theme-option__label">LimeAura Pro</span>
+          </button>
+          <button class="theme-option theme-option--sunset" data-theme="sunset" aria-label="Sunset theme">
+            <span class="theme-option__swatch"></span>
+            <span class="theme-option__label">Sunset</span>
+          </button>
+          <button class="theme-option theme-option--ocean" data-theme="ocean" aria-label="Ocean theme">
+            <span class="theme-option__swatch"></span>
+            <span class="theme-option__label">Ocean</span>
+          </button>
+        </div>
+        
+        <p class="theme-info">Current theme: <strong id="current-theme">LimeAura Pro</strong></p>
+      </div>
+    </section>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="js/landing.js" defer></script>
+</body>
+</html>
