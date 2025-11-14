@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LimeAura Design System Demo Dashboard</title>
+    
+    <!-- 
+      1. METICULOUS APPROACH: FONT IMPLEMENTATION
+      Importing 'Nunito' as the primary font and 'Inter' as the secondary.
+      This is critical to matching the "Friendly, rounded geometry" and "soft geometric sans-serif"
+      principle from the design.json (section 2.1 and 3.foundations.typography).
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Kit -->
+    <script src="https://kit.fontawesome.com/6b4f0d9d0a.js" crossorigin="anonymous"></script>
+    
+    <meta name="description" content="Interactive demo showcasing the LimeAura design system components - cards, buttons, forms, navigation, and data displays with vibrant lime background and clean white cards.">
+
+    <style>
+      /*
+        2. METICULOUS APPROACH: CSS REFINEMENT (from globals.css)
+        This CSS has been meticulously rewritten to:
+        - Perfectly align with design_tokens_json.md.
+        - Add subtle, performant animations (Keyframes) for a "wow" factor.
+        - Move all hover/active states from JavaScript to pure CSS for smoothness.
+      */
+      
+      :root {
+        /* Colors from design_tokens.json */
+        --background-main: #D6F25F;
+        --surface-primary: #FFFFFF;
+        --surface-soft: #F9FAFB;
+        --text-primary: #111111;
+        --text-secondary: #555555;
+        --text-muted: #9CA3AF;
+        --accent-primary: #7B3EFF;
+        --accent-primary-soft: #EDE7FF;
+        --accent-secondary: #00C6AE;
+        --accent-yellow: #FFB020;
+        --border-subtle: #F0F0F0;
+        --success: #10B981;
+        --warning: #FBBF24;
+        --danger: #EF4444;
+
+        /* Spacing scale */
+        --spacing-xxs: 4px;
+        --spacing-xs: 6px;
+        --spacing-sm: 8px;
+        --spacing-md: 12px;
+        --spacing-lg: 16px;
+        --spacing-xl: 20px;
+        --spacing-xxl: 24px;
+        --spacing-xxxl: 32px;
+
+        /* Radii scale */
+        --radius-pill: 999px;
+        --radius-card-large: 28px;
+        --radius-card-medium: 20px;
+        --radius-button: 999px;
+        --radius-avatar: 999px;
+
+        /* Shadows */
+        --shadow-card: 0 10px 25px 0 rgba(15, 23, 42, 0.06);
+        --shadow-floating: 0 18px 40px 0 rgba(15, 23, 42, 0.10);
+        --shadow-button-primary: 0 8px 18px 0 rgba(123, 62, 255, 0.25);
+        
+        /* Typography - Per design_tokens.json, 'Nunito' is the primary choice */
+        --font-family-primary: 'Nunito', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        
+        /* Typography Scale */
+        --text-h1-size: 28px;
+        --text-h1-weight: 600;
+        --text-h1-line-height: 1.3;
+        
+        --text-h2-size: 22px;
+        --text-h2-weight: 600;
+        --text-h2-line-height: 1.35;
+        
+        --text-h3-size: 18px;
+        --text-h3-weight: 500;
+        --text-h3-line-height: 1.4;
+        
+        --text-body-large-size: 16px;
+        --text-body-large-weight: 400;
+        --text-body-large-line-height: 1.5;
+        
+        --text-body-size: 14px;
+        --text-body-weight: 400;
+        --text-body-line-height: 1.5;
+        
+        --text-body-bold-size: 14px;
+        --text-body-bold-weight: 500;
+        --text-body-bold-line-height: 1.4;
+        
+        --text-label-size: 12px;
+        --text-label-weight: 500;
+        --text-label-line-height: 1.3;
+        
+        /* Motion Tokens - from design_tokens.json */
+        --duration-fast: 120ms;
+        --duration-normal: 200ms;
+        --easing-standard: cubic-bezier(0.25, 0.8, 0.25, 1);
+      }
+
+      /*
+        3. METICULOUS APPROACH: ANIMATION (WOW FACTOR)
+        Defining keyframes for subtle load-in effects and progress bars
+        as per the "smooth and subtle" interaction principle.
+      */
+      
+      @keyframes fadeInFromBottom {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @keyframes progressFill70 {
+        from { stroke-dashoffset: 100; }
+        to { stroke-dashoffset: 30; } /* 100 - 70 = 30 */
+      }
+      
+      @keyframes progressFill75 {
+        from { stroke-dashoffset: 75; }
+        to { stroke-dashoffset: 18.75; } /* 75 - (75 * 0.75) = 18.75 */
+      }
+
+      @keyframes progressFill40 {
+        from { stroke-dashoffset: 75; }
+        to { stroke-dashoffset: 45; } /* 75 - (75 * 0.40) = 45 */
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: var(--background-main);
+        font-family: var(--font-family-primary);
+        color: var(--text-primary);
+        line-height: 1.5;
+        padding: var(--spacing-xxxl);
+        min-height: 100vh;
+        /* Adding perspective for 3D card hover effects */
+        perspective: 1000px;
+      }
+
+      .dashboard-container {
+        max-width: 1440px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: var(--spacing-xxl);
+      }
+
+      .card {
+        background-color: var(--surface-primary);
+        border-radius: var(--radius-card-large);
+        box-shadow: var(--shadow-card);
+        padding: var(--spacing-xxl);
+        /* Using CSS transitions, not JS, for smoother, hardware-accelerated interaction.
+          Matches 'states.hover.cards' in design.json
+        */
+        transition: all 0.3s var(--easing-standard);
+        position: relative;
+        /* Animation: Staggered load-in */
+        opacity: 0;
+        animation: fadeInFromBottom 0.5s var(--easing-standard) forwards;
+      }
+      
+      /* Staggered animation delays for the "wow" effect */
+      .card:nth-child(1) { animation-delay: 0.1s; }
+      .card:nth-child(2) { animation-delay: 0.2s; }
+      .card:nth-child(3) { animation-delay: 0.3s; }
+      .card:nth-child(4) { animation-delay: 0.4s; }
+      .card:nth-child(5) { animation-delay: 0.5s; }
+      .card:nth-child(6) { animation-delay: 0.6s; }
+      .card:nth-child(7) { animation-delay: 0.7s; }
+
+      /*
+        4. METICULOUS APPROACH: INTERACTION REFINEMENT (CSS > JS)
+        Creating a more subtle, 3D tilt effect on hover.
+      */
+      .card:hover:not(.hero-with-cutout):not(.calendar-card):not(.integrations-card):not(.components-card) {
+        box-shadow: var(--shadow-floating);
+        transform: translateY(-4px) rotateX(2deg);
+      }
+
+      .hero-with-cutout {
+        grid-column: span 2;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .hero-with-cutout::before {
+        content: '';
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 160px;
+        height: 160px;
+        background-color: var(--background-main);
+        border-radius: 50%;
+        z-index: 0;
+        /* Animate the cutout swoop-in */
+        opacity: 0;
+        transform: scale(0.5) translate(50px, -50px);
+        animation: fadeInFromBottom 0.6s 0.2s var(--easing-standard) forwards;
+      }
+
+      .hero-with-cutout > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .profile-summary {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        max-width: 60%;
+      }
+
+      .profile-summary h1 {
+        font-size: var(--text-h1-size);
+        font-weight: var(--text-h1-weight);
+        line-height: var(--text-h1-line-height);
+        color: var(--text-primary);
+      }
+      
+      .profile-summary .role {
+        font-size: var(--text-h3-size);
+        font-weight: var(--text-h3-weight);
+        color: var(--text-secondary);
+        margin-top: -8px; /* Tighter spacing per design */
+      }
+
+      .avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: var(--radius-avatar);
+        background: linear-gradient(135deg, var(--accent-primary), #5A20E0); /* Refined gradient */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: var(--text-h3-weight);
+        font-size: var(--text-h3-size);
+        border: 3px solid var(--surface-primary); /* Slightly thicker border for premium feel */
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: all var(--duration-normal) var(--easing-standard);
+      }
+      
+      .avatar-group .avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+        border-width: 2px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      }
+
+      .avatar-group .avatar:hover {
+        transform: scale(1.1) translateY(-2px);
+        z-index: 10 !important;
+        box-shadow: var(--shadow-floating);
+      }
+
+      .avatar-group {
+        display: flex;
+        align-items: center;
+      }
+      
+      .avatar-group .avatar:not(:first-child) {
+        margin-left: -12px; /* Slightly more overlap */
+      }
+
+      .tags-container {
+        display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+      }
+
+      .tag {
+        background-color: var(--surface-soft);
+        color: var(--text-primary);
+        border-radius: var(--radius-pill);
+        padding: var(--spacing-xs) var(--spacing-lg);
+        font-size: var(--text-label-size);
+        font-weight: var(--text-label-weight);
+        display: inline-flex;
+        align-items: center;
+        transition: all var(--duration-normal) var(--easing-standard);
+      }
+      
+      .tag:hover {
+        transform: translateY(-2px);
+        background-color: var(--accent-primary-soft);
+        color: var(--accent-primary);
+      }
+
+      .progress-circular {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--spacing-sm);
+        font-size: var(--text-label-size);
+        font-weight: var(--text-label-weight);
+        color: var(--text-secondary);
+      }
+      
+      /* Animate the progress bars on load */
+      .hero-progress-circle {
+        animation: progressFill70 1s 0.5s var(--easing-standard) forwards;
+      }
+      .milestone-progress-75 {
+        animation: progressFill75 1s 0.6s var(--easing-standard) forwards;
+      }
+      .milestone-progress-40 {
+        animation: progressFill40 1s 0.7s var(--easing-standard) forwards;
+      }
+
+      .progress-circular text {
+        font-size: 12px;
+        font-weight: 600;
+        fill: var(--accent-primary);
+        font-family: var(--font-family-primary);
+      }
+
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .card-header h2 {
+        font-size: var(--text-h2-size);
+        font-weight: var(--text-h2-weight);
+        line-height: var(--text-h2-line-height);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-sm);
+      }
+
+      .badge {
+        min-width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: var(--accent-primary);
+        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2px;
+        font-family: var(--font-family-primary);
+      }
+
+      .icon-button {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-pill);
+        background-color: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
+        font-size: 16px;
+        transition: all var(--duration-normal) var(--easing-standard);
+      }
+
+      .icon-button:hover {
+        background-color: var(--surface-soft);
+        color: var(--text-primary);
+        transform: scale(1.1);
+      }
+
+      .notification-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md) var(--spacing-xs); /* Add horizontal padding */
+        border-bottom: 1px solid var(--border-subtle);
+        transition: all var(--duration-normal) var(--easing-standard);
+        border-radius: var(--radius-card-medium);
+      }
+      
+      .notification-item:hover {
+        background-color: var(--surface-soft);
+      }
+
+      .notification-item:last-child {
+        border-bottom: none;
+      }
+      
+      .notification-item .avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      
+      .notification-item .fa-bell {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        color: var(--accent-primary);
+      }
+
+      .notification-content {
+        flex: 1;
+        min-width: 0; /* Prevents text overflow issues */
+      }
+
+      .notification-content p {
+        margin-bottom: 0;
+        font-size: var(--text-body-size);
+        line-height: var(--text-body-line-height);
+      }
+      
+      .notification-content p strong {
+         font-weight: 600; /* Bolder */
+         color: var(--text-primary);
+      }
+
+      .notification-content .timestamp {
+        color: var(--text-muted);
+        font-size: var(--text-label-size);
+        margin-top: var(--spacing-xxs);
+      }
+
+      .notification-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-left: auto;
+      }
+
+      .button {
+        border-radius: var(--radius-pill);
+        font-weight: var(--text-body-bold-weight);
+        font-size: var(--text-body-size);
+        font-family: var(--font-family-primary);
+        padding: 9px 18px;
+        border: none;
+        cursor: pointer;
+        transition: all var(--duration-normal) var(--easing-standard);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 36px;
+        transform: translateZ(0); /* GPU acceleration */
+      }
+
+      .button:hover {
+        transform: translateY(-2px);
+      }
+      
+      .button:active {
+        transform: translateY(0px) scale(0.98);
+      }
+
+      .button.primary {
+        background-color: var(--accent-primary);
+        color: white;
+        box-shadow: var(--shadow-button-primary);
+      }
+
+      .button.primary:hover {
+        background-color: #6B2FFF; /* From state.hover */
+        box-shadow: var(--shadow-floating);
+      }
+
+      .button.success {
+        background-color: var(--success);
+        color: white;
+      }
+
+      .button.success:hover {
+        background-color: #0da26c;
+        box-shadow: 0 6px 15px rgba(16, 185, 129, 0.25);
+      }
+
+      .button.secondary {
+        background-color: white;
+        color: var(--text-primary);
+        border: 1px solid var(--border-subtle);
+      }
+
+      .button.secondary:hover {
+        background-color: var(--surface-soft); /* From state.hover */
+        border-color: #e0e0e0;
+      }
+
+      .button.ghost {
+        background-color: transparent;
+        color: var(--text-primary);
+        padding: 6px 12px;
+        font-size: var(--text-body-size);
+      }
+
+      .button.ghost:hover {
+        background-color: var(--surface-soft);
+      }
+
+      .calendar-card {
+        grid-column: span 2;
+      }
+
+      .calendar-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--spacing-lg);
+      }
+
+      .calendar-header h3 {
+        font-size: var(--text-h2-size);
+        font-weight: var(--text-h2-weight);
+        line-height: var(--text-h2-line-height);
+      }
+      
+      .calendar-header .icon-button {
+        font-size: 20px; /* Make arrows bolder */
+      }
+
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: var(--spacing-xs);
+        place-items: center; /* Center all items */
+      }
+
+      .weekday {
+        text-align: center;
+        font-size: var(--text-label-size);
+        color: var(--text-muted);
+        font-weight: var(--text-label-weight);
+        text-transform: uppercase;
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+      }
+
+      .calendar-day {
+        width: 36px;
+        height: 36px;
+        display: grid;
+        place-items: center;
+        border-radius: var(--radius-pill);
+        font-size: var(--text-body-size);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--duration-normal) var(--easing-standard);
+      }
+
+      .calendar-day:hover:not(.muted) {
+        background-color: var(--surface-soft);
+        transform: scale(1.05);
+      }
+
+      .calendar-day.today {
+        background-color: var(--text-primary);
+        color: white;
+        font-weight: 700;
+      }
+
+      .calendar-day.selected {
+        background-color: var(--accent-primary);
+        color: white;
+        font-weight: 700;
+      }
+      
+      /* Handle case where today is also selected */
+      .calendar-day.today.selected {
+         background-color: var(--accent-primary);
+         box-shadow: 0 0 0 2px var(--surface-primary), 0 0 0 4px var(--accent-primary);
+      }
+
+      .calendar-day.muted {
+        color: var(--text-muted);
+        opacity: 0.6;
+        cursor: default;
+      }
+
+      .integrations-card {
+        grid-column: span 2;
+      }
+
+      .integration-row {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-md) var(--spacing-xs);
+        border-bottom: 1px solid var(--border-subtle);
+        border-radius: var(--radius-card-medium);
+        transition: all var(--duration-normal) var(--easing-standard);
+      }
+      
+      .integration-row:hover {
+        background-color: var(--surface-soft);
+      }
+
+      .integration-row:last-child {
+        border-bottom: none;
+      }
+
+      .service-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-pill);
+        background-color: var(--surface-soft);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--accent-primary);
+        font-size: 20px;
+        transition: all var(--duration-normal) var(--easing-standard);
+      }
+      
+      .integration-row:hover .service-icon {
+        transform: scale(1.1);
+        background-color: var(--accent-primary-soft);
+      }
+
+      .service-info {
+        flex: 1;
+      }
+
+      .service-name {
+        font-weight: var(--text-body-bold-weight);
+        font-size: var(--text-body-size);
+        margin-bottom: var(--spacing-xxs);
+      }
+
+      .service-description {
+        color: var(--text-secondary);
+        font-size: var(--text-body-size);
+      }
+
+      .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+        flex-shrink: 0;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #E5E7EB;
+        transition: all 0.3s var(--easing-standard);
+        border-radius: var(--radius-pill);
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: all 0.3s var(--easing-standard);
+        border-radius: 50%;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+
+      input:checked + .slider {
+        background-color: var(--accent-primary);
+      }
+
+      input:checked + .slider:before {
+        transform: translateX(20px);
+      }
+      
+      /* Focus state per design.json */
+      input:focus + .slider {
+        box-shadow: 0 0 0 3px var(--accent-primary-soft);
+      }
+
+      .brands-card {
+        text-align: center;
+      }
+
+      .pill-brand-container {
+        display: flex;
+        justify-content: center;
+        gap: var(--spacing-lg);
+        margin-top: var(--spacing-lg);
+        flex-wrap: wrap;
+      }
+
+      .pill-brand {
+        background-color: var(--surface-primary);
+        border-radius: var(--radius-pill);
+        padding: 9px 18px;
+        box-shadow: var(--shadow-card);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 80px;
+        height: 40px;
+        font-size: 16px;
+        color: var(--text-primary);
+        transition: all var(--duration-normal) var(--easing-standard);
+      }
+
+      .pill-brand:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-floating);
+      }
+
+      .pill-brand i {
+        font-size: 20px;
+      }
+
+      .pill-brand.visa {
+        background: linear-gradient(135deg, #1a1f71, #2e3192);
+        color: white;
+        font-weight: 700;
+        font-style: italic;
+      }
+
+      .components-card {
+        grid-column: span 2;
+      }
+
+      .button-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-md);
+        margin: var(--spacing-lg) 0;
+      }
+
+      .toggle-group {
+        display: flex;
+        gap: var(--spacing-lg);
+        margin: var(--spacing-lg) 0;
+      }
+      
+      h3 {
+        font-size: var(--text-h3-size);
+        font-weight: var(--text-h3-weight);
+        line-height: var(--text-h3-line-height);
+      }
+
+      .milestone-card {
+        background-color: var(--surface-primary);
+        border: 1px solid var(--border-subtle); /* Add subtle border */
+        border-radius: var(--radius-card-medium);
+        padding: var(--spacing-lg);
+        margin-bottom: var(--spacing-md);
+        box-shadow: none; /* Use border instead of shadow for differentiation */
+        transition: all var(--duration-normal) var(--easing-standard);
+      }
+
+      .milestone-card:hover {
+        box-shadow: var(--shadow-card); /* Add shadow on hover */
+        border-color: transparent;
+        transform: translateY(-2px);
+      }
+
+      .milestone-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+      }
+
+      .milestone-title {
+        font-size: var(--text-h3-size);
+        font-weight: var(--text-h3-weight);
+        line-height: var(--text-h3-line-height);
+      }
+
+      .milestone-details {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+      }
+
+      .milestone-label {
+        font-weight: var(--text-body-bold-weight);
+        color: var(--text-secondary);
+        font-size: var(--text-body-size);
+        margin-bottom: var(--spacing-xxs);
+      }
+
+      .milestone-value {
+        font-size: var(--text-body-size);
+        font-weight: 500;
+      }
+
+      .milestone-progress {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-md);
+      }
+      
+      .milestone-progress text {
+        font-size: 10px;
+        font-weight: 500;
+        fill: var(--accent-primary);
+        font-family: var(--font-family-primary);
+      }
+
+      .status-pill {
+        background-color: var(--accent-primary-soft);
+        color: var(--accent-primary);
+        border-radius: var(--radius-pill);
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 600; /* Bolder */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .status-pill.success {
+        background-color: #D1FAE5; /* Soft success */
+        color: #065F46;
+      }
+      
+      .status-pill.warning {
+        background-color: #FEF3C7; /* Soft warning */
+        color: #92400E;
+      }
+
+      @media (max-width: 1200px) {
+        .hero-with-cutout,
+        .calendar-card,
+        .integrations-card,
+        .components-card {
+          grid-column: span 1;
+        }
+      }
+
+      @media (max-width: 768px) {
+        body {
+            padding: var(--spacing-lg);
+        }
+        
+        .dashboard-container {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-with-cutout {
+          flex-direction: column;
+          text-align: center;
+          gap: var(--spacing-xl);
+        }
+
+        .hero-with-cutout::before {
+          display: none;
+        }
+
+        .profile-summary {
+          max-width: 100%;
+          align-items: center;
+        }
+
+        .notification-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: var(--spacing-lg);
+        }
+        
+        .notification-actions {
+          width: 100%;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+        
+        .calendar-grid {
+          gap: 2px;
+        }
+        
+        .calendar-day, .weekday {
+          width: 100%;
+          height: 34px;
+        }
+        
+        .integration-row {
+            flex-wrap: wrap;
+        }
+        .integration-row .toggle-switch {
+            margin-left: auto;
+        }
+      }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Section 1: Hero Profile -->
+        <div class="card hero-with-cutout">
+            <div class="profile-summary">
+                <div class="avatar">AR</div>
+                <h1>Amber Rodriguez</h1>
+                <p class="role">Senior Product Designer</p>
+                <div class="tags-container">
+                    <span class="tag">UI/UX</span>
+                    <span class="tag">Design Systems</span>
+                    <span class="tag">Figma Expert</span>
+                </div>
+            </div>
+            <div class="progress-circular">
+                <svg width="40" height="40" viewBox="0 0 40 40">
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="var(--accent-primary-soft)" stroke-width="6"/>
+                    <circle class="hero-progress-circle" cx="20" cy="20" r="16" fill="none" stroke="var(--accent-primary)" stroke-width="6" stroke-dasharray="100" stroke-dashoffset="100" transform="rotate(-90 20 20)"/>
+                    <text x="20" y="24" text-anchor="middle">70%</text>
+                </svg>
+                <span>Project Completion</span>
+            </div>
+        </div>
+
+        <!-- Section 2: Notifications -->
+        <div class="card notifications-card">
+            <div class="card-header">
+                <h2>Notifications <span class="badge">3</span></h2>
+                <button class="icon-button">⋯</button>
+            </div>
+            <div class="notification-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #FFB020, #FF8C00);">SC</div>
+                <div class="notification-content">
+                    <p><strong>Sarah Chen</strong> requested access to <strong>Figma Design System</strong></p>
+                    <p class="timestamp">2 minutes ago</p>
+                </div>
+                <div class="notification-actions">
+                    <button class="button success">Accept</button>
+                    <button class="button secondary">Deny</button>
+                </div>
+            </div>
+            <div class="notification-item">
+                <div class="avatar" style="background: linear-gradient(135deg, #00C6AE, #009688);">MJ</div>
+                <div class="notification-content">
+                    <p><strong>Marcus Johnson</strong> commented on your design mockup</p>
+                    <p class="timestamp">15 minutes ago</p>
+                </div>
+                <div class="notification-actions">
+                    <button class="button secondary">View</button>
+                </div>
+            </div>
+            <div class="notification-item">
+                <i class="fas fa-bell"></i>
+                <div class="notification-content">
+                    <p><strong>System Alert:</strong> Weekly design sync moved to 2:30 PM</p>
+                    <p class="timestamp">1 hour ago</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Calendar -->
+        <div class="card calendar-card">
+            <div class="calendar-header">
+                <button class="icon-button"><i class="fas fa-chevron-left"></i></button>
+                <h3>November 2025</h3>
+                <button class="icon-button"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+                
+                <div class="calendar-day muted">26</div>
+                <div class="calendar-day muted">27</div>
+                <div class="calendar-day muted">28</div>
+                <div class="calendar-day muted">29</div>
+                <div class="calendar-day muted">30</div>
+                <div class="calendar-day" role="button" tabindex="0">1</div>
+                <div class="calendar-day" role="button" tabindex="0">2</div>
+                
+                <div class="calendar-day" role="button" tabindex="0">3</div>
+                <div class="calendar-day" role="button" tabindex="0">4</div>
+                <div class="calendar-day" role="button" tabindex="0">5</div>
+                <div class="calendar-day" role="button" tabindex="0">6</div>
+                <div class="calendar-day" role="button" tabindex="0">7</div>
+                <div class="calendar-day" role="button" tabindex="0">8</div>
+                <div class="calendar-day" role="button" tabindex="0">9</div>
+                
+                <div class="calendar-day" role="button" tabindex="0">10</div>
+                <div class="calendar-day" role="button" tabindex="0">11</div>
+                <div class="calendar-day" role="button" tabindex="0">12</div>
+                <div class="calendar-day" role="button" tabindex="0">13</div>
+                <div class="calendar-day today selected" role="button" tabindex="0" aria-selected="true">14</div>
+                <div class="calendar-day" role="button" tabindex="0">15</div>
+                <div class="calendar-day" role="button" tabindex="0">16</div>
+                
+                <div class="calendar-day" role="button" tabindex="0">17</div>
+                <div class="calendar-day" role="button" tabindex="0">18</div>
+                <div class="calendar-day" role="button" tabindex="0">19</div>
+                <div class="calendar-day" role="button" tabindex="0">20</div>
+                <div class="calendar-day" role="button" tabindex="0">21</div>
+                <div class="calendar-day" role="button" tabindex="0">22</div>
+                <div class="calendar-day" role="button" tabindex="0">23</div>
+                
+                <div class="calendar-day" role="button" tabindex="0">24</div>
+                <div class="calendar-day" role="button" tabindex="0">25</div>
+                <div class="calendar-day" role="button" tabindex="0">26</div>
+                <div class="calendar-day" role="button" tabindex="0">27</div>
+                <div class="calendar-day" role="button" tabindex="0">28</div>
+                <div class="calendar-day" role="button" tabindex="0">29</div>
+                <div class="calendar-day" role="button" tabindex="0">30</div>
+            </div>
+        </div>
+
+        <!-- Section 4: Milestones -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Project Milestones</h2>
+                <button class="button ghost">View all</button>
+            </div>
+            <div class="milestone-card">
+                <div class="milestone-header">
+                    <div class="milestone-title">Amber Website Redesign</div>
+                    <span class="status-pill">In Progress</span>
+                </div>
+                <div class="milestone-details">
+                    <div>
+                        <div class="milestone-label">Due date</div>
+                        <div class="milestone-value">November 28, 2025</div>
+                    </div>
+                    <div class="milestone-progress">
+                        <svg width="32" height="32" viewBox="0 0 32 32">
+                            <circle cx="16" cy="16" r="12" fill="none" stroke="var(--accent-primary-soft)" stroke-width="4"/>
+                            <circle class="milestone-progress-75" cx="16" cy="16" r="12" fill="none" stroke="var(--accent-primary)" stroke-width="4" stroke-dasharray="75" stroke-dashoffset="75" transform="rotate(-90 16 16)"/>
+                            <text x="16" y="19" text-anchor="middle">75%</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="milestone-label" style="margin-top: var(--spacing-md); margin-bottom: var(--spacing-xs);">Assignees</div>
+                <div class="avatar-group">
+                    <div class="avatar" style="background: linear-gradient(135deg, #7B3EFF, #5A20E0);">AR</div>
+                    <div class="avatar" style="background: linear-gradient(135deg, #00C6AE, #009688);">MJ</div>
+                    <div class="avatar" style="background: linear-gradient(135deg, #FFB020, #FF8C00);">SC</div>
+                </div>
+            </div>
+            <div class="milestone-card">
+                <div class="milestone-header">
+                    <div class="milestone-title">Mobile App Onboarding</div>
+                    <span class="status-pill warning">Planning</span>
+                </div>
+                <div class="milestone-details">
+                    <div>
+                        <div class="milestone-label">Due date</div>
+                        <div class="milestone-value">December 15, 2025</div>
+                    </div>
+                    <div class="milestone-progress">
+                        <svg width="32" height="32" viewBox="0 0 32 32">
+                            <circle cx="16" cy="16" r="12" fill="none" stroke="var(--accent-primary-soft)" stroke-width="4"/>
+                            <circle class="milestone-progress-40" cx="16" cy="16" r="12" fill="none" stroke="var(--accent-primary)" stroke-width="4" stroke-dasharray="75" stroke-dashoffset="75" transform="rotate(-90 16 16)"/>
+                            <text x="16" y="19" text-anchor="middle">40%</text>
+                        </svg>
+                    </div>
+                </div>
+                <div class="milestone-label" style="margin-top: var(--spacing-md); margin-bottom: var(--spacing-xs);">Assignees</div>
+                <div class="avatar-group">
+                    <div class="avatar" style="background: linear-gradient(135deg, #7B3EFF, #5A20E0);">AR</div>
+                    <div class="avatar" style="background: linear-gradient(135deg, #00C6AE, #009688);">MJ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Integrations -->
+        <div class="card integrations-card">
+            <div class="card-header">
+                <h2>Integrations</h2>
+                <button class="button ghost">View all</button>
+            </div>
+            <div class="integration-row">
+                <div class="service-icon">
+                    <i class="fab fa-slack"></i>
+                </div>
+                <div class="service-info">
+                    <p class="service-name">Slack</p>
+                    <p class="service-description">Team communication and collaboration</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="integration-row">
+                <div class="service-icon" style="color: #00875A;">
+                    <i class="fas fa-video"></i> <!-- Using a more generic 'video' icon -->
+                </div>
+                <div class="service-info">
+                    <p class="service-name">Google Meet</p>
+                    <p class="service-description">Video conferencing and meetings</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="integration-row">
+                <div class="service-icon" style="color: #181717;">
+                    <i class="fab fa-github"></i>
+                </div>
+                <div class="service-info">
+                    <p class="service-name">GitHub</p>
+                    <p class="service-description">Code repository and version control</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="integration-row">
+                <div class="service-icon" style="color: #F24E1E;">
+                    <i class="fab fa-figma"></i>
+                </div>
+                <div class="service-info">
+                    <p class="service-name">Figma</p>
+                    <p class="service-description">Design collaboration and prototyping</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Section 6: Brand Pills -->
+        <div class="card brands-card">
+            <h2>Payment Methods</h2>
+            <div class="pill-brand-container">
+                <div class="pill-brand" style="color: #635BFF;">
+                    <i class="fab fa-stripe-s"></i> <!-- Stripe 'S' logo -->
+                </div>
+                <div class="pill-brand" style="color: #003087;">
+                    <i class="fab fa-paypal"></i>
+                </div>
+                <div class="pill-brand visa">
+                    <span>VISA</span>
+                </div>
+                <div class="pill-brand" style="color: #000;">
+                    <i class="fab fa-apple-pay"></i>
+                </div>
+                <div class="pill-brand" style="color: #FF9900;">
+                    <i class="fab fa-amazon-pay"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Component Library -->
+        <div class="card components-card">
+            <h2>Button Variants</h2>
+            <div class="button-group">
+                <button class="button primary">Primary Button</button>
+                <button class="button success">Success Button</button>
+                <button class="button secondary">Secondary Button</button>
+                <button class="button ghost">Ghost Button</button>
+            </div>
+            
+            <h3 style="margin: var(--spacing-xl) 0 var(--spacing-md) 0;">Toggle Switches</h3>
+            <div class="toggle-group">
+                <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider"></span>
+                </label>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <h3 style="margin: var(--spacing-xl) 0 var(--spacing-md) 0;">Notification Badges</h3>
+            <div style="display: flex; gap: var(--spacing-lg); align-items: center; flex-wrap: wrap;">
+                <span class="badge">5</span>
+                <span class="status-pill">Active</span>
+                <span class="status-pill success">Complete</span>
+                <span class="status-pill warning">Pending</span>
+            </div>
+            
+            <h3 style="margin: var(--spacing-xl) 0 var(--spacing-md) 0;">Avatar Groups</h3>
+            <div class="avatar-group" style="margin-top: var(--spacing-md);">
+                <div class="avatar" style="background: linear-gradient(135deg, #7B3EFF, #5A20E0);">AR</div>
+                <div class="avatar" style="background: linear-gradient(135deg, #00C6AE, #009688);">MJ</div>
+                <div class="avatar" style="background: linear-gradient(135deg, #FFB020, #FF8C00);">SC</div>
+                <div class="avatar" style="background: linear-gradient(135deg, #10B981, #059669);">TL</div>
+                <div class="avatar" style="background: #F9FAFB; color: var(--text-secondary); border: 2px dashed var(--border-subtle); box-shadow: none;">+2</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      /*
+        5. METICULOUS APPROACH: JAVASCRIPT REFACTORING (from landing.js)
+        
+        This script has been refactored for maintainability and performance:
+        - REMOVED: All 'mouseenter'/'mouseleave' event listeners for cards,
+          buttons, avatars, and pills. This is now handled by pure CSS
+          (:hover pseudo-class) for a much smoother, hardware-accelerated
+          experience.
+        - REMOVED: All 'mousedown'/'mouseup' listeners for buttons. This is
+          now handled by pure CSS (:active pseudo-class).
+        - KEPT: Logic-based interactions (toggle 'change', calendar 'click',
+          notification 'click') as these manage application state.
+        - CLEANED: Simplified and added comments for clarity.
+      */
+      document.addEventListener('DOMContentLoaded', () => {
+          console.log('LimeAura Design System Demo Dashboard (Meticulous Makeover) loaded successfully!');
+
+          // --- Toggle switch functionality ---
+          const toggleSwitches = document.querySelectorAll('.toggle-switch input');
+          toggleSwitches.forEach(toggle => {
+              toggle.addEventListener('change', function() {
+                  // The JS is only responsible for the *checked* state.
+                  // The CSS handles all visual changes based on :checked.
+                  this.parentElement.classList.toggle('active', this.checked);
+              });
+          });
+
+          // --- Calendar day selection ---
+          const calendarDays = document.querySelectorAll('.calendar-day');
+          calendarDays.forEach(day => {
+              if (!day.classList.contains('muted')) {
+                  day.addEventListener('click', function() {
+                      // Remove selected class from all days
+                      calendarDays.forEach(d => {
+                          d.classList.remove('selected');
+                          d.setAttribute('aria-selected', 'false');
+                      });
+                      
+                      // Add selected class to clicked day
+                      this.classList.add('selected');
+                      this.setAttribute('aria-selected', 'true');
+                  });
+              }
+          });
+
+          // --- Notification actions ---
+          const acceptButtons = document.querySelectorAll('.notification-actions .button.success');
+          acceptButtons.forEach(button => {
+              button.addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  const notificationItem = this.closest('.notification-item');
+                  // Add a class to trigger the CSS animation
+                  notificationItem.style.transition = 'all 0.3s ease-out';
+                  notificationItem.style.opacity = '0';
+                  notificationItem.style.transform = 'translateX(20px)';
+                  setTimeout(() => {
+                      notificationItem.remove();
+                      updateNotificationBadge();
+                  }, 300);
+              });
+          });
+
+          const denyButtons = document.querySelectorAll('.notification-actions .button.secondary');
+          denyButtons.forEach(button => {
+              button.addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  const notificationItem = this.closest('.notification-item');
+                  notificationItem.style.transition = 'all 0.3s ease-out';
+                  notificationItem.style.opacity = '0';
+                  notificationItem.style.transform = 'translateX(-20px)';
+                  setTimeout(() => {
+                      notificationItem.remove();
+                      updateNotificationBadge();
+                  }, 300);
+              });
+          });
+
+          // --- Update notification badge count ---
+          function updateNotificationBadge() {
+              const badge = document.querySelector('.notifications-card .badge');
+              if (!badge) return;
+              
+              const notificationItems = document.querySelectorAll('.notification-item');
+              const count = notificationItems.length;
+              
+              if (count > 0) {
+                  badge.textContent = count.toString();
+                  badge.style.display = 'inline-flex';
+              } else {
+                  badge.style.display = 'none';
+                  // Optional: Show an "all clear" message
+                  const notificationCard = document.querySelector('.notifications-card');
+                  if(notificationCard) {
+                      notificationCard.innerHTML += '<p style="text-align: center; color: var(--text-muted); padding: var(--spacing-lg) 0;">All caught up!</p>';
+                  }
+              }
+          }
+          
+          // --- Accessibility: Focus States ---
+          // The CSS :focus state is good, but for JS-interactive elements
+          // we can add keyboard (Enter/Space) support.
+          calendarDays.forEach(day => {
+             if (!day.classList.contains('muted')) {
+                day.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.click();
+                    }
+                });
+             }
+          });
+
+          console.log('LimeAura Design System Demo Dashboard initialized with refactored, logic-only JS.');
+      });
+
+    </script>
+</body>
+</html>
