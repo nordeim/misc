@@ -1,5 +1,7 @@
 $ npx create-next-app@14.2.33 limeaura-styleguide --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
 
+$ npm install @radix-ui/react-label@2 @radix-ui/react-select@2 @radix-ui/react-slot@1 lucide-react react-hook-form@7 tailwind-merge@2
+
 $ npm list
 ├── @types/node@20.19.25
 ├── @types/react-dom@18.3.7
