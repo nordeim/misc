@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="limeaura">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="LimeAura Design System Demo Dashboard - A vibrant, accessible showcase of modern UI components">
+  <title>LimeAura Demo Dashboard</title>
+  
+  <!-- Preconnect for fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <!-- Fonts: Nunito + Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/globals.css">
+</head>
+<body>
+  <!-- Aurora Background Layer -->
+  <div class="aurora" aria-hidden="true"></div>
+  
+  <!-- Skip to main content -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  
+  <!-- Main Container -->
+  <div class="wrapper" id="app">
+    <!-- Hidden Theme Trigger (Easter Egg) -->
+    <button class="theme-trigger" aria-label="Cycle color theme" data-theme-trigger>
+      <span class="sr-only">Cycle theme</span>
+    </button>
+    
+    <!-- Section 1: Hero Profile -->
+    <section class="section" data-section="profile" aria-labelledby="profile-title">
+      <div class="card card--cutout" data-component="card">
+        <div class="card__header">
+          <h1 class="card__title" id="profile-title">Your Workspace</h1>
+          <button class="icon-btn" aria-label="Profile options">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="1"></circle>
+              <circle cx="12" cy="5" r="1"></circle>
+              <circle cx="12" cy="19" r="1"></circle>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="profile-summary">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=128&h=128&fit=crop&crop=face" 
+               alt="Alex Chen" 
+               class="avatar avatar--large">
+          <div class="profile-summary__info">
+            <h2 class="profile-summary__name">Alex Chen</h2>
+            <p class="profile-summary__role">Product Designer</p>
+            <div class="tag-cluster" role="list">
+              <span class="tag" role="listitem">UI Design</span>
+              <span class="tag" role="listitem">Design Systems</span>
+              <span class="tag" role="listitem">Prototyping</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card__actions">
+          <button class="btn btn--primary">Edit Profile</button>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Section 2: Project Dashboard -->
+    <section class="section section--dashboard" data-section="dashboard">
+      <div class="grid grid--2col">
+        <!-- Active Project Card -->
+        <div class="card" data-component="card">
+          <div class="card__header">
+            <h2 class="card__title">Amber Website Redesign</h2>
+            <span class="badge badge--pill">In Progress</span>
+          </div>
+          
+          <div class="project-overview">
+            <div class="progress-circular" data-progress="72">
+              <svg class="progress-circular__svg" viewBox="0 0 40 40" width="80" height="80">
+                <circle class="progress-circular__track" cx="20" cy="20" r="17"></circle>
+                <circle class="progress-circular__fill" cx="20" cy="20" r="17"></circle>
+              </svg>
+              <span class="progress-circular__label">72%</span>
+            </div>
+            
+            <div class="milestone-list">
+              <article class="milestone-card">
+                <div class="milestone-card__header">
+                  <h3 class="milestone-card__title">Design System Audit</h3>
+                  <button class="btn btn--ghost btn--sm">View details</button>
+                </div>
+                <div class="milestone-card__meta">
+                  <div class="meta-item">
+                    <span class="meta-item__label">Due date</span>
+                    <span class="meta-item__value">Oct 28</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-item__label">Assignees</span>
+                    <div class="avatar-group">
+                      <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=36&h=36&fit=crop&crop=face" alt="Jake" class="avatar">
+                      <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=36&h=36&fit=crop&crop=face" alt="Sarah" class="avatar">
+                    </div>
+                  </div>
+                </div>
+              </article>
+              
+              <article class="milestone-card">
+                <div class="milestone-card__header">
+                  <h3 class="milestone-card__title">Component Library</h3>
+                  <button class="btn btn--ghost btn--sm">View details</button>
+                </div>
+                <div class="milestone-card__meta">
+                  <div class="meta-item">
+                    <span class="meta-item__label">Due date</span>
+                    <span class="meta-item__value">Nov 15</span>
+                  </div>
+                  <div class="avatar-group">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=36&h=36&fit=crop&crop=face" alt="Mike" class="avatar">
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Notifications Card -->
+        <div class="card" data-component="card">
+          <div class="card__header">
+            <h2 class="card__title">Notifications</h2>
+            <span class="badge badge--numeric" aria-label="3 unread notifications">3</span>
+          </div>
+          
+          <ul class="notification-list" role="list">
+            <li class="notification-item" role="listitem">
+              <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=40&h=40&fit=crop&crop=face" 
+                   alt="" class="avatar avatar--sm">
+              <div class="notification-item__content">
+                <p class="notification-item__text"><strong>Michael</strong> mentioned you in a comment</p>
+                <time class="notification-item__time">2m ago</time>
+              </div>
+              <button class="icon-btn" aria-label="Notification options">
+                <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="12" cy="5" r="1"></circle>
+                  <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+              </button>
+            </li>
+            
+            <li class="notification-item notification-item--with-actions" role="listitem">
+              <div class="notification-item__icon" aria-hidden="true">
+                <svg class="icon icon--accent" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+              </div>
+              <div class="notification-item__content">
+                <p class="notification-item__text">New team invitation from <strong>Figma Plugins</strong></p>
+                <div class="notification-item__actions">
+                  <button class="btn btn--success btn--sm">Accept</button>
+                  <button class="btn btn--secondary btn--sm">Deny</button>
+                </div>
+              </div>
+            </li>
+            
+            <li class="notification-item" role="listitem">
+              <img src="https://images.unsplash.com/photo-1517849845537-4d257902454a?w=40&h=40&fit=crop&crop=face" 
+                   alt="" class="avatar avatar--sm">
+              <div class="notification-item__content">
+                <p class="notification-item__text"><strong>Jamie</strong> completed their onboarding</p>
+                <time class="notification-item__time">1h ago</time>
+              </div>
+              <button class="icon-btn" aria-label="Notification options">
+                <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="1"></circle>
+                  <circle cx="12" cy="5" r="1"></circle>
+                  <circle cx="12" cy="19" r="1"></circle>
+                </svg>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Section 3: Schedule & Tools -->
+    <section class="section section--tools" data-section="tools">
+      <div class="grid grid--2col">
+        <!-- Calendar Card -->
+        <div class="card card--compact" data-component="card">
+          <div class="card__header">
+            <button class="icon-btn" aria-label="Previous month">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <h2 class="card__title">October 2025</h2>
+            <button class="icon-btn" aria-label="Next month">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="calendar">
+            <div class="calendar__weekdays">
+              <span>SUN</span><span>MON</span><span>TUE</span><span>WED</span>
+              <span>THU</span><span>FRI</span><span>SAT</span>
+            </div>
+            <div class="calendar__days" role="grid">
+              <!-- Days will be generated by JS for interactivity -->
+              <button class="calendar__day" role="gridcell">1</button>
+              <button class="calendar__day" role="gridcell">2</button>
+              <button class="calendar__day" role="gridcell">3</button>
+              <button class="calendar__day calendar__day--today" role="gridcell" aria-current="date">14</button>
+              <button class="calendar__day" role="gridcell">15</button>
+              <button class="calendar__day" role="gridcell">16</button>
+              <button class="calendar__day" role="gridcell">17</button>
+              <button class="calendar__day" role="gridcell">18</button>
+              <button class="calendar__day" role="gridcell">19</button>
+              <button class="calendar__day" role="gridcell">20</button>
+              <button class="calendar__day" role="gridcell">21</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tools & Integrations Card -->
+        <div class="card card--compact" data-component="card">
+          <h2 class="card__title">Integrations</h2>
+          
+          <ul class="integration-list" role="list">
+            <li class="integration-row" role="listitem">
+              <div class="integration-row__icon" style="background-color: #4A154B;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.522 2.522v2.52H8.834zM8.834 6.313a2.528 2.528 0 0 1 2.522 2.521 2.528 2.528 0 0 1-2.522 2.522H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312zM18.956 8.834a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.522h-2.522V8.834zM17.688 8.834a2.528 2.528 0 0 1-2.521 2.522 2.528 2.528 0 0 1-2.521-2.522V2.522A2.528 2.528 0 0 1 15.167 0a2.528 2.528 0 0 1 2.521 2.522v6.312zM15.167 18.956a2.528 2.528 0 0 1 2.521 2.522A2.528 2.528 0 0 1 15.167 24a2.528 2.528 0 0 1-2.521-2.522v-2.522h2.521zM15.167 17.688a2.528 2.528 0 0 1-2.521-2.522 2.528 2.528 0 0 1 2.521-2.521h6.313A2.528 2.528 0 0 1 24 15.166a2.528 2.528 0 0 1-2.522 2.522h-6.313z"/>
+                </svg>
+              </div>
+              <div class="integration-row__content">
+                <h3 class="integration-row__name">Slack</h3>
+                <p class="integration-row__description">Team communication and updates</p>
+              </div>
+              <button class="toggle" role="switch" aria-checked="true" aria-label="Enable Slack integration">
+                <span class="toggle__handle"></span>
+              </button>
+            </li>
+            
+            <li class="integration-row" role="listitem">
+              <div class="integration-row__icon" style="background-color: #4285F4;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm3 14h-6v-2h6v2zm0-4h-6V7h6v5z"/>
+                </svg>
+              </div>
+              <div class="integration-row__content">
+                <h3 class="integration-row__name">Google Meet</h3>
+                <p class="integration-row__description">Video calls and screen sharing</p>
+              </div>
+              <button class="toggle" role="switch" aria-checked="false" aria-label="Enable Google Meet integration">
+                <span class="toggle__handle"></span>
+              </button>
+            </li>
+            
+            <li class="integration-row" role="listitem">
+              <div class="integration-row__icon" style="background-color: #24292f;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+              </div>
+              <div class="integration-row__content">
+                <h3 class="integration-row__name">GitHub</h3>
+                <p class="integration-row__description">Code repositories and workflows</p>
+              </div>
+              <button class="toggle" role="switch" aria-checked="true" aria-label="Enable GitHub integration">
+                <span class="toggle__handle"></span>
+              </button>
+            </li>
+          </ul>
+          
+          <div class="card__footer">
+            <h3 class="u-sr-only">Payment Methods</h3>
+            <div class="pill-cluster">
+              <div class="pill-brand" title="Stripe">
+                <svg width="40" height="20" viewBox="0 0 40 20" fill="currentColor">
+                  <path d="M9 6h8v8H9zM23.5 8.2c0-1.1.8-1.7 1.7-1.7.9 0 1.4.6 1.4 1.4 0 1-.8 1.4-1.8 1.4-.4 0-.8 0-1.1-.1v2.7H23V8.2h.5zm17.5 0c0-1.1.8-1.7 1.7-1.7.9 0 1.4.6 1.4 1.4 0 1-.8 1.4-1.8 1.4-.4 0-.8 0-1.1-.1v2.7h-.5V8.2H41zM13.5 12.9c-.9 0-1.8-.2-2.5-.7l.4-.7c.6.4 1.4.6 2.1.6 1.2 0 1.8-.6 1.8-1.5v-.4c-.5.3-1.2.5-2 .5-1.6 0-2.8-1-2.8-2.6 0-1.6 1.2-2.6 2.8-2.6.8 0 1.5.2 2 .5V6h.8v3.8c0 1.4-.9 2.3-2.6 2.3zm6-.1h-2V6.2h2c2 0 3.3 1.2 3.3 3.2s-1.3 3.3-3.3 3.3zm6.7.1c-1.6 0-2.8-1-2.8-2.6 0-1.6 1.2-2.6 2.8-2.6.8 0 1.5.2 2 .5V5.2h.8v6.9h-.8v-.7c-.5.3-1.2.5-2 .5zm8.8 0c-1.6 0-2.8-1-2.8-2.6 0-1.6 1.2-2.6 2.8-2.6.8 0 1.5.2 2 .5V6.2h.8v5.7h-.8v-.7c-.5.3-1.2.5-2 .5z"/>
+                </svg>
+              </div>
+              <div class="pill-brand" title="Visa">
+                <svg width="40" height="20" viewBox="0 0 40 20" fill="currentColor">
+                  <path d="M12.5 3.6c2.1 0 3.6 1.4 3.6 4.1 0 3.1-1.9 4.5-4 4.5h-2.6V3.6H12.5zm21.5 0c2.1 0 3.6 1.4 3.6 4.1 0 3.1-1.9 4.5-4 4.5H27V3.6h7zm-16.4 7.1l3.3-7.4h2.9l-4.7 10.1h-2.7L13 6.9h2.6zm9.4 0l2-5h2.6l-3.1 5h-1.5zm-12.4-5.9h-3L10.8 12h-2l1.5-5.1-2.3-5.2h2.8l1.4 3.6 1.4-3.6h2.7l-2.3 5.1 1.5 5.2h-2l-.8-2.5z"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Section 4: Component Gallery -->
+    <section class="section section--gallery" data-section="gallery" aria-labelledby="gallery-title">
+      <div class="card">
+        <div class="card__header">
+          <h2 class="card__title" id="gallery-title">Component Gallery</h2>
+        </div>
+        
+        <div class="component-grid">
+          <!-- Button Variants -->
+          <div class="component-card">
+            <h3 class="component-card__title">Buttons</h3>
+            <div class="component-card__demo">
+              <button class="btn btn--primary">Primary</button>
+              <button class="btn btn--success">Success</button>
+              <button class="btn btn--secondary">Secondary</button>
+              <button class="btn btn--ghost">Ghost</button>
+            </div>
+          </div>
+          
+          <!-- Tags -->
+          <div class="component-card">
+            <h3 class="component-card__title">Tags</h3>
+            <div class="component-card__demo">
+              <span class="tag tag--small">Design</span>
+              <span class="tag tag--medium">Development</span>
+              <span class="tag tag--large">Productivity</span>
+            </div>
+          </div>
+          
+          <!-- Badges -->
+          <div class="component-card">
+            <h3 class="component-card__title">Badges</h3>
+            <div class="component-card__demo">
+              <span class="badge badge--numeric">42</span>
+              <span class="badge badge--pill">New</span>
+            </div>
+          </div>
+          
+          <!-- Avatars -->
+          <div class="component-card">
+            <h3 class="component-card__title">Avatars</h3>
+            <div class="component-card__demo">
+              <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=36&h=36&fit=crop&crop=face" 
+                   alt="User" class="avatar">
+              <div class="avatar-group avatar-group--sm">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=28&h=28&fit=crop&crop=face" alt="">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=28&h=28&fit=crop&crop=face" alt="">
+                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=28&h=28&fit=crop&crop=face" alt="">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Icon Buttons -->
+          <div class="component-card">
+            <h3 class="component-card__title">Icon Buttons</h3>
+            <div class="component-card__demo">
+              <button class="icon-btn" aria-label="Like">
+                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </button>
+              <button class="icon-btn" aria-label="Share">
+                <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Toggles -->
+          <div class="component-card">
+            <h3 class="component-card__title">Toggles</h3>
+            <div class="component-card__demo">
+              <button class="toggle" role="switch" aria-checked="true" aria-label="Demo toggle">
+                <span class="toggle__handle"></span>
+              </button>
+              <button class="toggle toggle--off" role="switch" aria-checked="false" aria-label="Demo toggle off">
+                <span class="toggle__handle"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Section 5: Theme Demo -->
+    <section class="section section--theme" data-section="theme">
+      <div class="card card--compact">
+        <h2 class="card__title">Theme Explorer</h2>
+        <p class="card__subtitle">Click a color palette to see the system adapt instantly</p>
+        
+        <div class="theme-switcher">
+          <button class="theme-option theme-option--limeaura" data-theme="limeaura" aria-label="LimeAura theme (active)">
+            <span class="theme-option__swatch" style="background: #D6F25F;"></span>
+            <span class="theme-option__label">LimeAura</span>
+          </button>
+          <button class="theme-option theme-option--sunset" data-theme="sunset" aria-label="Sunset theme">
+            <span class="theme-option__swatch" style="background: #FF6B6B;"></span>
+            <span class="theme-option__label">Sunset</span>
+          </button>
+          <button class="theme-option theme-option--ocean" data-theme="ocean" aria-label="Ocean theme">
+            <span class="theme-option__swatch" style="background: #4ECDC4;"></span>
+            <span class="theme-option__label">Ocean</span>
+          </button>
+        </div>
+        
+        <p class="theme-info">Current theme: <strong id="current-theme">LimeAura</strong></p>
+      </div>
+    </section>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="js/landing.js" defer></script>
+</body>
+</html>
