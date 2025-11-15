@@ -1,0 +1,1603 @@
+{
+  "meta": {
+    "systemName": "LimeAura Design System",
+    "version": "2.0.0",
+    "description": "Definitive design system blueprint for the LimeAura productivity dashboard. Contains complete component specifications with AI-optimized implementation guidance, foundational tokens, and animation systems based on the meticulously crafted reference implementation.",
+    "targetPlatforms": ["Web", "Vite/React", "Vue", "Angular"],
+    "lastUpdated": "2025-11-15T10:30:00Z",
+    "author": "Elite AI Design Partner",
+    "usageContext": "This file serves as the single source of truth for implementing the LimeAura design system. AI developers and engineering teams should reference this file for exact component specifications, token mappings, and animation details."
+  },
+  "principles": {
+    "aiImplementationPhilosophy": {
+      "coreDirective": "Implement components exactly as specified using the provided tokens and animation systems. Do not deviate from the documented structure, states, or timing.",
+      "componentFirst": "Build components as self-contained units with clear props/interfaces. Each component should handle its own states and animations internally where possible.",
+      "tokenAdherence": "All visual properties must reference foundational tokens. Never hardcode values that exist in the token system.",
+      "animationPerformance": "All animations must be hardware-accelerated using transform and opacity properties. Use will-change sparingly and only for complex animations.",
+      "accessibilityFirst": "All interactive components must have proper ARIA attributes, focus states, and keyboard navigation support as documented in component specifications.",
+      "responsiveApproach": "Implement mobile-first responsive design using the documented breakpoints. All components must gracefully adapt to different screen sizes.",
+      "stateManagement": "Handle visual states through CSS pseudo-classes (:hover, :focus, :active, :checked) whenever possible. Use JavaScript only for complex state logic that cannot be handled by CSS."
+    },
+    "visualDirection": {
+      "tone": "Friendly, optimistic, and modern. The interface should feel alive and approachable while maintaining professional clarity.",
+      "colorUsage": "Use the vibrant lime background (#D6F25F) as the canvas. All content lives on white cards that float above this background. Accent colors are used sparingly for emphasis and interaction states.",
+      "typography": "Maintain clean, scannable typography with clear hierarchy. Use rounded sans-serif fonts to reinforce the friendly character of the system.",
+      "spacing": "Generous whitespace is essential. Components should breathe and never feel crowded. Maintain consistent spacing scales throughout.",
+      "motion": "Animations should be subtle, purposeful, and fast. Use easing curves that feel natural and physics-based. Never animate for decoration alone."
+    }
+  },
+  "foundations": {
+    "color": {
+      "background": {
+        "main": {
+          "value": "#D6F25F",
+          "type": "color",
+          "description": "Primary page background; vibrant lime-yellow canvas."
+        }
+      },
+      "surface": {
+        "primary": {
+          "value": "#FFFFFF",
+          "type": "color",
+          "description": "Main card and content surface."
+        },
+        "soft": {
+          "value": "#F9FAFB",
+          "type": "color",
+          "description": "Subtle internal surfaces for inputs, secondary areas."
+        }
+      },
+      "text": {
+        "primary": {
+          "value": "#111111",
+          "type": "color",
+          "description": "Primary text on light surfaces."
+        },
+        "secondary": {
+          "value": "#555555",
+          "type": "color",
+          "description": "Secondary descriptive text."
+        },
+        "muted": {
+          "value": "#9CA3AF",
+          "type": "color",
+          "description": "Metadata, timestamps, helper text."
+        },
+        "onAccent": {
+          "value": "#FFFFFF",
+          "type": "color",
+          "description": "Text color on primary accent backgrounds."
+        }
+      },
+      "accent": {
+        "primary": {
+          "value": "#7B3EFF",
+          "type": "color",
+          "description": "Core accent (purple) for key interactive and quantitative elements."
+        },
+        "primarySoft": {
+          "value": "#EDE7FF",
+          "type": "color",
+          "description": "Soft purple used as accent track/background."
+        },
+        "secondary": {
+          "value": "#00C6AE",
+          "type": "color",
+          "description": "Optional teal accent for confirmations or variety."
+        },
+        "yellow": {
+          "value": "#FFB020",
+          "type": "color",
+          "description": "Warm accent for subtle highlights."
+        }
+      },
+      "border": {
+        "subtle": {
+          "value": "#F0F0F0",
+          "type": "color",
+          "description": "Very light border/divider on white surfaces."
+        }
+      },
+      "semantic": {
+        "success": {
+          "value": "#10B981",
+          "type": "color",
+          "description": "Positive actions and states."
+        },
+        "warning": {
+          "value": "#FBBF24",
+          "type": "color",
+          "description": "Non-critical warnings and attention states."
+        },
+        "danger": {
+          "value": "#EF4444",
+          "type": "color",
+          "description": "Critical/destructive actions."
+        }
+      },
+      "common": {
+        "white": {
+          "value": "#FFFFFF",
+          "type": "color"
+        },
+        "black": {
+          "value": "#000000",
+          "type": "color"
+        }
+      }
+    },
+    "font": {
+      "family": {
+        "primary": {
+          "value": "'Nunito', 'SF Pro Rounded', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+          "type": "fontFamily",
+          "description": "Rounded/soft geometric sans-serif for all text."
+        }
+      },
+      "size": {
+        "h1": {
+          "value": "28px",
+          "type": "fontSize"
+        },
+        "h2": {
+          "value": "22px",
+          "type": "fontSize"
+        },
+        "h3": {
+          "value": "18px",
+          "type": "fontSize"
+        },
+        "bodyLg": {
+          "value": "16px",
+          "type": "fontSize"
+        },
+        "body": {
+          "value": "14px",
+          "type": "fontSize"
+        },
+        "label": {
+          "value": "12px",
+          "type": "fontSize"
+        }
+      },
+      "weight": {
+        "regular": {
+          "value": 400,
+          "type": "fontWeight"
+        },
+        "medium": {
+          "value": 500,
+          "type": "fontWeight"
+        },
+        "semibold": {
+          "value": 600,
+          "type": "fontWeight"
+        }
+      },
+      "lineHeight": {
+        "tight": {
+          "value": 1.3,
+          "type": "lineHeight"
+        },
+        "snug": {
+          "value": 1.35,
+          "type": "lineHeight"
+        },
+        "normal": {
+          "value": 1.5,
+          "type": "lineHeight"
+        }
+      },
+      "letterSpacing": {
+        "default": {
+          "value": "0em",
+          "type": "letterSpacing"
+        }
+      }
+    },
+    "spacing": {
+      "xxs": {
+        "value": "4px",
+        "type": "spacing"
+      },
+      "xs": {
+        "value": "6px",
+        "type": "spacing"
+      },
+      "sm": {
+        "value": "8px",
+        "type": "spacing"
+      },
+      "md": {
+        "value": "12px",
+        "type": "spacing"
+      },
+      "lg": {
+        "value": "16px",
+        "type": "spacing"
+      },
+      "xl": {
+        "value": "20px",
+        "type": "spacing"
+      },
+      "xxl": {
+        "value": "24px",
+        "type": "spacing"
+      },
+      "xxxl": {
+        "value": "32px",
+        "type": "spacing"
+      },
+      "pagePadding": {
+        "value": "40px",
+        "type": "spacing",
+        "description": "Recommended outer padding for main layout."
+      },
+      "cardPadding": {
+        "default": {
+          "value": "24px",
+          "type": "spacing",
+          "description": "Default internal padding for primary cards."
+        },
+        "compact": {
+          "value": "16px",
+          "type": "spacing",
+          "description": "Internal padding for compact cards/rows."
+        }
+      }
+    },
+    "radius": {
+      "pill": {
+        "value": "999px",
+        "type": "borderRadius",
+        "description": "Fully rounded; use for buttons, chips, toggles, avatars."
+      },
+      "card": {
+        "lg": {
+          "value": "28px",
+          "type": "borderRadius",
+          "description": "Large cards and hero surfaces."
+        },
+        "md": {
+          "value": "20px",
+          "type": "borderRadius",
+          "description": "Standard cards and list containers."
+        }
+      },
+      "control": {
+        "value": "999px",
+        "type": "borderRadius",
+        "description": "Small interactive elements that should appear pill-shaped."
+      }
+    },
+    "shadow": {
+      "none": {
+        "value": "none",
+        "type": "boxShadow"
+      },
+      "card": {
+        "value": "0 10px 25px 0 rgba(15, 23, 42, 0.06)",
+        "type": "boxShadow",
+        "description": "Default elevation for white cards."
+      },
+      "floating": {
+        "value": "0 18px 40px 0 rgba(15, 23, 42, 0.10)",
+        "type": "boxShadow",
+        "description": "Higher elevation for emphasized elements on hover or hero cards."
+      },
+      "button": {
+        "primary": {
+          "value": "0 8px 18px 0 rgba(123, 62, 255, 0.25)",
+          "type": "boxShadow",
+          "description": "Shadow for primary action buttons."
+        }
+      },
+      "avatar": {
+        "hover": {
+          "value": "0 6px 15px 0 rgba(0, 0, 0, 0.18)",
+          "type": "boxShadow",
+          "description": "Shadow for avatar hover state."
+        }
+      }
+    },
+    "border": {
+      "width": {
+        "none": {
+          "value": "0px",
+          "type": "borderWidth"
+        },
+        "hairline": {
+          "value": "1px",
+          "type": "borderWidth"
+        },
+        "focus": {
+          "value": "2px",
+          "type": "borderWidth"
+        }
+      },
+      "color": {
+        "subtle": {
+          "value": "{color.border.subtle.value}",
+          "type": "color"
+        }
+      }
+    },
+    "size": {
+      "icon": {
+        "sm": {
+          "value": "16px",
+          "type": "dimension"
+        },
+        "md": {
+          "value": "20px",
+          "type": "dimension"
+        },
+        "lg": {
+          "value": "24px",
+          "type": "dimension"
+        }
+      },
+      "avatar": {
+        "sm": {
+          "value": "32px",
+          "type": "dimension"
+        },
+        "md": {
+          "value": "36px",
+          "type": "dimension"
+        },
+        "lg": {
+          "value": "64px",
+          "type": "dimension"
+        }
+      },
+      "control": {
+        "toggle": {
+          "width": {
+            "value": "44px",
+            "type": "dimension"
+          },
+          "height": {
+            "value": "24px",
+            "type": "dimension"
+          },
+          "handle": {
+            "value": "18px",
+            "type": "dimension"
+          }
+        },
+        "iconButton": {
+          "value": "36px",
+          "type": "dimension"
+        },
+        "progressCircular": {
+          "default": {
+            "value": "40px",
+            "type": "dimension"
+          },
+          "small": {
+            "value": "32px",
+            "type": "dimension"
+          }
+        },
+        "calendarDay": {
+          "value": "36px",
+          "type": "dimension"
+        }
+      }
+    },
+    "motion": {
+      "duration": {
+        "fast": {
+          "value": "120ms",
+          "type": "duration"
+        },
+        "normal": {
+          "value": "180ms",
+          "type": "duration"
+        },
+        "slow": {
+          "value": "300ms",
+          "type": "duration"
+        }
+      },
+      "easing": {
+        "standard": {
+          "value": "cubic-bezier(0.25, 0.8, 0.25, 1)",
+          "type": "cubicBezier"
+        },
+        "gentle": {
+          "value": "cubic-bezier(0.34, 1.56, 0.64, 1)",
+          "type": "cubicBezier"
+        },
+        "elastic": {
+          "value": "cubic-bezier(0.68, -0.55, 0.27, 1.55)",
+          "type": "cubicBezier"
+        },
+        "bounce": {
+          "value": "cubic-bezier(0.68, -0.6, 0.32, 1.6)",
+          "type": "cubicBezier"
+        }
+      }
+    },
+    "state": {
+      "focus": {
+        "outlineWidth": {
+          "value": "{border.width.focus.value}",
+          "type": "borderWidth"
+        },
+        "outlineColor": {
+          "value": "{color.accent.primarySoft.value}",
+          "type": "color"
+        },
+        "outlineOffset": {
+          "value": "2px",
+          "type": "dimension"
+        }
+      },
+      "hover": {
+        "card": {
+          "shadow": {
+            "value": "{shadow.floating.value}",
+            "type": "boxShadow"
+          },
+          "transform": {
+            "value": "translateY(-4px) rotateX(2deg)",
+            "type": "transform"
+          }
+        },
+        "button": {
+          "primary": {
+            "background": {
+              "value": "#6B2FFF",
+              "type": "color"
+            }
+          },
+          "secondary": {
+            "background": {
+              "value": "#F9FAFB",
+              "type": "color"
+            }
+          }
+        }
+      },
+      "active": {
+        "button": {
+          "transform": {
+            "value": "scale(0.98)",
+            "type": "transform"
+          }
+        }
+      },
+      "disabled": {
+        "opacity": {
+          "value": 0.4,
+          "type": "opacity"
+        }
+      }
+    }
+  },
+  "layout": {
+    "global": {
+      "body": {
+        "backgroundColor": "foundations.color.background.main.value",
+        "fontFamily": "foundations.font.family.primary.value",
+        "color": "foundations.color.text.primary.value",
+        "lineHeight": "foundations.font.lineHeight.normal.value",
+        "padding": "foundations.spacing.pagePadding.value",
+        "minHeight": "100vh",
+        "perspective": "1200px",
+        "overflowX": "hidden",
+        "backgroundImage": "radial-gradient(circle at 10% 20%, rgba(123, 62, 255, 0.03) 0%, transparent 20%), radial-gradient(circle at 90% 80%, rgba(0, 198, 174, 0.03) 0%, transparent 20%)",
+        "aiImplementationNotes": [
+          "Set body overflow-x to hidden to prevent horizontal scrolling from animations",
+          "Use perspective: 1200px to enable 3D transforms on child elements",
+          "Apply subtle radial gradients as background overlays for depth"
+        ]
+      },
+      "container": {
+        "maxWidth": "1440px",
+        "margin": "0 auto",
+        "aiImplementationNotes": [
+          "Center the container horizontally with max-width constraint",
+          "This serves as the main wrapper for all dashboard content"
+        ]
+      }
+    },
+    "dashboard": {
+      "grid": {
+        "display": "grid",
+        "gridTemplateColumns": "repeat(auto-fit, minmax(380px, 1fr))",
+        "gap": "foundations.spacing.xxxl.value",
+        "opacity": "0",
+        "animation": "fadeInDelayed 0.8s foundations.motion.easing.standard.value forwards",
+        "aiImplementationNotes": [
+          "Use CSS Grid with auto-fit for responsive card layout",
+          "Minimum card width of 380px for desktop, will shrink on smaller screens",
+          "Apply staggered card entrance animation with 0.8s duration",
+          "Use will-change: opacity for performance optimization"
+        ]
+      },
+      "responsiveBreakpoints": {
+        "tablet": {
+          "maxWidth": "1200px",
+          "gridTemplateColumns": "repeat(auto-fit, minmax(320px, 1fr))",
+          "aiImplementationNotes": [
+            "On tablets, reduce minimum card width to 320px",
+            "Maintain auto-fit behavior for flexible layout"
+          ]
+        },
+        "mobile": {
+          "maxWidth": "768px",
+          "gridTemplateColumns": "1fr",
+          "padding": "foundations.spacing.lg.value",
+          "aiImplementationNotes": [
+            "On mobile, stack cards vertically in single column",
+            "Reduce body padding to foundations.spacing.lg for better mobile use of space",
+            "Ensure all interactive elements have touch-friendly sizing"
+          ]
+        }
+      }
+    }
+  },
+  "components": {
+    "Card": {
+      "description": "Base card component with white surface, rounded corners, and soft shadow. Serves as container for all dashboard sections.",
+      "aiImplementationNotes": [
+        "All cards should use the base card class with variant-specific modifications",
+        "Apply staggered animation delays using nth-child selectors",
+        "Use will-change: transform, box-shadow for performance optimization",
+        "Ensure all cards have proper semantic HTML structure (section/article as appropriate)"
+      ],
+      "base": {
+        "backgroundColor": "foundations.color.surface.primary.value",
+        "borderRadius": "foundations.radius.card.lg.value",
+        "boxShadow": "foundations.shadow.card.value",
+        "padding": "foundations.spacing.xxl.value",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "position": "relative",
+        "willChange": "transform, box-shadow",
+        "opacity": "0",
+        "transform": "translateY(20px)",
+        "animation": "fadeInUp 0.6s foundations.motion.easing.gentle.value forwards",
+        "animationDelay": "calc(var(--animation-delay, 0.1s) + 0.2s)"
+      },
+      "states": {
+        "hover": {
+          "boxShadow": "foundations.shadow.floating.value",
+          "transform": "translateY(-4px) rotateX(1deg) rotateY(0.5deg)"
+        },
+        "active": {
+          "transform": "translateY(-2px) scale(0.995)"
+        }
+      },
+      "variants": {
+        "heroWithCutout": {
+          "description": "Hero card with circular cutout in top-right corner for visual interest",
+          "base": {
+            "gridColumn": "span 2",
+            "display": "flex",
+            "alignItems": "center",
+            "justifyContent": "space-between",
+            "overflow": "hidden",
+            "position": "relative",
+            "minHeight": "280px"
+          },
+          "pseudoElements": {
+            "before": {
+              "content": "''",
+              "position": "absolute",
+              "top": "-30px",
+              "right": "-30px",
+              "width": "140px",
+              "height": "140px",
+              "backgroundColor": "foundations.color.background.main.value",
+              "borderRadius": "50%",
+              "zIndex": "0",
+              "opacity": "0",
+              "transform": "scale(0.5) translate(30px, -30px)",
+              "animation": "morphCutout 0.8s foundations.motion.easing.elastic.value 0.6s forwards"
+            }
+          },
+          "aiImplementationNotes": [
+            "Use ::before pseudo-element for the circular cutout effect",
+            "Apply morphCutout animation with elastic easing for organic feel",
+            "Set z-index: 0 on pseudo-element and z-index: 1 on content to layer properly",
+            "On mobile, hide the cutout effect and center content vertically"
+          ]
+        },
+        "calendarCard": {
+          "base": {
+            "gridColumn": "span 2"
+          },
+          "aiImplementationNotes": [
+            "Calendar card spans two columns on desktop for better visibility",
+            "Maintain single column on mobile for proper touch targets"
+          ]
+        },
+        "integrationsCard": {
+          "base": {
+            "gridColumn": "span 2"
+          },
+          "aiImplementationNotes": [
+            "Integrations card spans two columns on desktop for better layout",
+            "Ensure toggle switches are properly aligned on all screen sizes"
+          ]
+        }
+      },
+      "animationDelays": {
+        "child1": "--animation-delay: 0.1s",
+        "child2": "--animation-delay: 0.2s",
+        "child3": "--animation-delay: 0.3s",
+        "child4": "--animation-delay: 0.4s",
+        "child5": "--animation-delay: 0.5s",
+        "child6": "--animation-delay: 0.6s",
+        "child7": "--animation-delay: 0.7s"
+      }
+    },
+    "Avatar": {
+      "description": "Circular avatar component used for user profiles and team members",
+      "aiImplementationNotes": [
+        "Use flexbox for centering text within avatar",
+        "Apply border to create separation from background",
+        "Use linear gradients for colorful avatar backgrounds",
+        "Implement hover effects with z-index elevation for group interactions"
+      ],
+      "base": {
+        "width": "foundations.size.avatar.lg.value",
+        "height": "foundations.size.avatar.lg.value",
+        "borderRadius": "foundations.radius.pill.value",
+        "background": "linear-gradient(135deg, foundations.color.accent.primary.value, #5A20E0)",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "color": "foundations.color.common.white.value",
+        "fontWeight": "foundations.font.weight.semibold.value",
+        "fontSize": "20px",
+        "border": "3px solid foundations.color.surface.primary.value",
+        "boxShadow": "0 4px 12px rgba(0, 0, 0, 0.1)",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "willChange": "transform, box-shadow"
+      },
+      "states": {
+        "hover": {
+          "transform": "scale(1.1) translateY(-3px)",
+          "boxShadow": "foundations.shadow.avatar.hover.value",
+          "zIndex": "10"
+        }
+      },
+      "variants": {
+        "group": {
+          "base": {
+            "width": "foundations.size.avatar.md.value",
+            "height": "foundations.size.avatar.md.value",
+            "fontSize": "foundations.font.size.label.value",
+            "borderWidth": "2px"
+          },
+          "positioning": {
+            "overlapOffset": "-12px",
+            "hoverExpansion": "margin-left: 0 on last child hover"
+          }
+        }
+      }
+    },
+    "Tag": {
+      "description": "Soft pill labels used for skills, topics, and filters",
+      "aiImplementationNotes": [
+        "Use inline-flex for proper text wrapping and spacing",
+        "Apply hover state with color shift to accent for interactivity",
+        "Keep tags small and scannable for profile summaries"
+      ],
+      "base": {
+        "backgroundColor": "foundations.color.surface.soft.value",
+        "color": "foundations.color.text.primary.value",
+        "borderRadius": "foundations.radius.pill.value",
+        "padding": "foundations.spacing.xs.value foundations.spacing.lg.value",
+        "fontSize": "foundations.font.size.label.value",
+        "fontWeight": "foundations.font.weight.medium.value",
+        "display": "inline-flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "cursor": "pointer",
+        "willChange": "transform, background-color"
+      },
+      "states": {
+        "hover": {
+          "transform": "translateY(-2px) scale(1.05)",
+          "backgroundColor": "foundations.color.accent.primarySoft.value",
+          "color": "foundations.color.accent.primary.value"
+        }
+      }
+    },
+    "ProgressCircular": {
+      "description": "Circular progress indicator used for project completion and milestone tracking",
+      "aiImplementationNotes": [
+        "Use SVG for precise circular progress drawing",
+        "Calculate stroke-dashoffset based on percentage completion",
+        "Apply stroke-linecap: round for smooth end caps",
+        "Animate stroke drawing using CSS keyframes for performance",
+        "Position percentage label absolutely at center using text-anchor: middle"
+      ],
+      "base": {
+        "display": "flex",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "gap": "foundations.spacing.md.value",
+        "fontSize": "foundations.font.size.label.value",
+        "fontWeight": "foundations.font.weight.medium.value",
+        "color": "foundations.color.text.secondary.value"
+      },
+      "svg": {
+        "circleTrack": {
+          "fill": "none",
+          "stroke": "foundations.color.accent.primarySoft.value",
+          "strokeWidth": "6",
+          "aiImplementationNotes": [
+            "Track circle should be lighter accent color for contrast"
+          ]
+        },
+        "circleFill": {
+          "fill": "none",
+          "stroke": "foundations.color.accent.primary.value",
+          "strokeWidth": "6",
+          "strokeLinecap": "round",
+          "transformOrigin": "center",
+          "transform": "rotate(-90deg)",
+          "transition": "stroke-dashoffset foundations.motion.duration.slow.value foundations.motion.easing.standard.value"
+        },
+        "textLabel": {
+          "position": "absolute",
+          "top": "50%",
+          "left": "50%",
+          "transform": "translate(-50%, -50%)",
+          "fontSize": "14px",
+          "fontWeight": "foundations.font.weight.semibold.value",
+          "color": "foundations.color.accent.primary.value",
+          "fontFamily": "foundations.font.family.primary.value"
+        }
+      },
+      "animations": {
+        "progressFill70": {
+          "from": "stroke-dashoffset: 100",
+          "to": "stroke-dashoffset: 30"
+        },
+        "progressFill75": {
+          "from": "stroke-dashoffset: 88",
+          "to": "stroke-dashoffset: 22"
+        },
+        "progressFill40": {
+          "from": "stroke-dashoffset: 88",
+          "to": "stroke-dashoffset: 52.8"
+        }
+      }
+    },
+    "Badge": {
+      "description": "Small numeric or status indicators for notifications and counts",
+      "aiImplementationNotes": [
+        "Use min-width to ensure consistent sizing for single/double digits",
+        "Apply animation for elastic bounce effect on appearance",
+        "Position badges using relative positioning with absolute child"
+      ],
+      "variants": {
+        "numeric": {
+          "base": {
+            "minWidth": "20px",
+            "height": "20px",
+            "borderRadius": "50%",
+            "backgroundColor": "foundations.color.accent.primary.value",
+            "color": "foundations.color.common.white.value",
+            "fontSize": "11px",
+            "fontWeight": "700",
+            "display": "inline-flex",
+            "alignItems": "center",
+            "justifyContent": "center",
+            "padding": "2px",
+            "fontFamily": "foundations.font.family.primary.value",
+            "position": "relative",
+            "animation": "elasticBounce 0.4s foundations.motion.easing.bounce.value"
+          }
+        },
+        "statusPill": {
+          "base": {
+            "backgroundColor": "foundations.color.accent.primarySoft.value",
+            "color": "foundations.color.accent.primary.value",
+            "borderRadius": "foundations.radius.pill.value",
+            "padding": "4px 12px",
+            "fontSize": "12px",
+            "fontWeight": "600",
+            "display": "inline-flex",
+            "alignItems": "center",
+            "justifyContent": "center",
+            "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value"
+          },
+          "states": {
+            "hover": {
+              "transform": "scale(1.05)"
+            }
+          },
+          "variants": {
+            "success": {
+              "backgroundColor": "#D1FAE5",
+              "color": "#065F46"
+            },
+            "warning": {
+              "backgroundColor": "#FEF3C7",
+              "color": "#92400E"
+            }
+          }
+        }
+      }
+    },
+    "Button": {
+      "description": "Interactive button component with multiple variants for different actions",
+      "aiImplementationNotes": [
+        "Use button HTML element for proper semantics and accessibility",
+        "Apply overflow: hidden for clean gradient effects",
+        "Use ::after pseudo-element for subtle hover highlights",
+        "Ensure all buttons have proper focus states for keyboard navigation",
+        "Use min-height to maintain consistent sizing across variants"
+      ],
+      "base": {
+        "borderRadius": "foundations.radius.pill.value",
+        "fontFamily": "foundations.font.family.primary.value",
+        "fontWeight": "foundations.font.weight.medium.value",
+        "fontSize": "foundations.font.size.body.value",
+        "padding": "9px 18px",
+        "border": "none",
+        "cursor": "pointer",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "display": "inline-flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "minHeight": "36px",
+        "willChange": "transform, box-shadow",
+        "position": "relative",
+        "overflow": "hidden"
+      },
+      "pseudoElements": {
+        "after": {
+          "content": "''",
+          "position": "absolute",
+          "top": "0",
+          "left": "0",
+          "right": "0",
+          "bottom": "0",
+          "background": "linear-gradient(135deg, rgba(255,255,255,0.2), transparent)",
+          "opacity": "0",
+          "transition": "opacity foundations.motion.duration.fast.value"
+        },
+        "hoverAfter": {
+          "opacity": "1"
+        }
+      },
+      "states": {
+        "hover": {
+          "transform": "translateY(-2px)"
+        },
+        "active": {
+          "transform": "translateY(0) scale(0.98)"
+        }
+      },
+      "variants": {
+        "primary": {
+          "base": {
+            "backgroundColor": "foundations.color.accent.primary.value",
+            "color": "foundations.color.common.white.value",
+            "boxShadow": "foundations.shadow.button.primary.value"
+          },
+          "states": {
+            "hover": {
+              "backgroundColor": "#6B2FFF",
+              "boxShadow": "0 10px 25px 0 rgba(123, 62, 255, 0.4)"
+            }
+          }
+        },
+        "success": {
+          "base": {
+            "backgroundColor": "foundations.color.semantic.success.value",
+            "color": "foundations.color.common.white.value",
+            "boxShadow": "0 6px 15px rgba(16, 185, 129, 0.25)"
+          },
+          "states": {
+            "hover": {
+              "backgroundColor": "#0da26c",
+              "boxShadow": "0 8px 20px rgba(16, 185, 129, 0.35)"
+            }
+          }
+        },
+        "secondary": {
+          "base": {
+            "backgroundColor": "foundations.color.common.white.value",
+            "color": "foundations.color.text.primary.value",
+            "border": "1px solid foundations.color.border.subtle.value"
+          },
+          "states": {
+            "hover": {
+              "backgroundColor": "foundations.color.surface.soft.value",
+              "borderColor": "#d1d5db"
+            }
+          }
+        },
+        "ghost": {
+          "base": {
+            "backgroundColor": "transparent",
+            "color": "foundations.color.text.primary.value",
+            "padding": "6px 12px",
+            "fontSize": "foundations.font.size.body.value"
+          },
+          "states": {
+            "hover": {
+              "backgroundColor": "foundations.color.surface.soft.value"
+            }
+          }
+        }
+      }
+    },
+    "IconButton": {
+      "description": "Small circular button containing an icon, used for actions like overflow menus",
+      "aiImplementationNotes": [
+        "Use button element with aria-label for accessibility",
+        "Apply circular styling with pill radius",
+        "Use font icons with proper sizing and alignment",
+        "Ensure hover states provide clear visual feedback"
+      ],
+      "base": {
+        "width": "foundations.size.control.iconButton.value",
+        "height": "foundations.size.control.iconButton.value",
+        "borderRadius": "foundations.radius.pill.value",
+        "backgroundColor": "transparent",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "border": "none",
+        "cursor": "pointer",
+        "color": "foundations.color.text.muted.value",
+        "fontSize": "16px",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "position": "relative"
+      },
+      "states": {
+        "hover": {
+          "backgroundColor": "foundations.color.surface.soft.value",
+          "color": "foundations.color.text.primary.value",
+          "transform": "scale(1.1)"
+        },
+        "active": {
+          "transform": "scale(0.95)"
+        }
+      }
+    },
+    "NotificationItem": {
+      "description": "Row-based notification item with avatar/icon, content, and action buttons",
+      "aiImplementationNotes": [
+        "Use role=\"button\" and tabindex=\"0\" for notification items that are clickable",
+        "Implement swipe-to-dismiss gestures on mobile devices",
+        "Use flexbox for proper alignment of avatar, content, and actions",
+        "Apply transform transitions for smooth dismissal animations",
+        "Ensure proper semantic HTML structure with time elements for timestamps"
+      ],
+      "base": {
+        "display": "flex",
+        "alignItems": "flex-start",
+        "gap": "foundations.spacing.md.value",
+        "padding": "foundations.spacing.md.value",
+        "borderRadius": "foundations.radius.card.md.value",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "cursor": "pointer",
+        "willChange": "background-color, transform",
+        "marginBottom": "foundations.spacing.sm.value"
+      },
+      "states": {
+        "hover": {
+          "backgroundColor": "foundations.color.surface.soft.value",
+          "transform": "translateX(4px)"
+        }
+      },
+      "structure": {
+        "avatarOrIcon": {
+          "flexShrink": "0",
+          "width": "40px",
+          "height": "40px",
+          "marginTop": "2px"
+        },
+        "content": {
+          "flex": "1",
+          "minWidth": "0"
+        },
+        "actions": {
+          "display": "flex",
+          "gap": "foundations.spacing.sm.value",
+          "marginLeft": "auto",
+          "alignSelf": "center",
+          "opacity": "0",
+          "transform": "translateX(10px)",
+          "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value"
+        },
+        "hoverActions": {
+          "opacity": "1",
+          "transform": "translateX(0)"
+        }
+      }
+    },
+    "Calendar": {
+      "description": "Minimal grid calendar with day cells, weekday headers, and navigation controls",
+      "aiImplementationNotes": [
+        "Use CSS Grid for 7-column day layout with equal sizing",
+        "Apply proper ARIA attributes for accessibility (aria-current=\"date\" for today)",
+        "Implement smooth month transitions with slide animations",
+        "Use rounded pill styling for day cells with proper hover states",
+        "Ensure keyboard navigation support for day selection"
+      ],
+      "base": {
+        "header": {
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "space-between",
+          "marginBottom": "foundations.spacing.xl.value",
+          "paddingBottom": "foundations.spacing.md.value",
+          "borderBottom": "1px solid foundations.color.border.subtle.value"
+        },
+        "navigation": {
+          "display": "flex",
+          "gap": "foundations.spacing.sm.value"
+        },
+        "monthTitle": {
+          "fontSize": "foundations.font.size.h2.value",
+          "fontWeight": "foundations.font.weight.semibold.value",
+          "lineHeight": "foundations.font.lineHeight.snug.value",
+          "color": "foundations.color.text.primary.value"
+        }
+      },
+      "grid": {
+        "display": "grid",
+        "gridTemplateColumns": "repeat(7, 1fr)",
+        "gap": "foundations.spacing.xs.value",
+        "placeItems": "center"
+      },
+      "weekday": {
+        "textAlign": "center",
+        "fontSize": "foundations.font.size.label.value",
+        "color": "foundations.color.text.muted.value",
+        "fontWeight": "foundations.font.weight.medium.value",
+        "textTransform": "uppercase",
+        "width": "foundations.size.control.calendarDay.value",
+        "height": "foundations.size.control.calendarDay.value",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "fontFamily": "foundations.font.family.primary.value"
+      },
+      "day": {
+        "width": "foundations.size.control.calendarDay.value",
+        "height": "foundations.size.control.calendarDay.value",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "borderRadius": "foundations.radius.pill.value",
+        "fontSize": "foundations.font.size.body.value",
+        "fontWeight": "500",
+        "cursor": "pointer",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "position": "relative",
+        "willChange": "transform, background-color"
+      },
+      "states": {
+        "dayHover": {
+          "backgroundColor": "foundations.color.surface.soft.value",
+          "transform": "scale(1.1)",
+          "zIndex": "2"
+        },
+        "dayToday": {
+          "backgroundColor": "foundations.color.text.primary.value",
+          "color": "foundations.color.common.white.value",
+          "fontWeight": "700",
+          "animation": "pulseGlow 2s infinite"
+        },
+        "daySelected": {
+          "backgroundColor": "foundations.color.accent.primary.value",
+          "color": "foundations.color.common.white.value",
+          "fontWeight": "700"
+        },
+        "dayTodaySelected": {
+          "boxShadow": "0 0 0 2px foundations.color.surface.primary.value, 0 0 0 4px rgba(123, 62, 255, 0.3)"
+        },
+        "dayMuted": {
+          "color": "foundations.color.text.muted.value",
+          "opacity": "0.6",
+          "cursor": "not-allowed"
+        }
+      }
+    },
+    "MilestoneCard": {
+      "description": "Compact card showing project milestones with due dates, progress, and assignees",
+      "aiImplementationNotes": [
+        "Use border instead of shadow for base state to differentiate from other cards",
+        "Apply accent-colored top border on hover for visual emphasis",
+        "Position progress circle and avatar group for optimal space usage",
+        "Ensure milestone cards have proper header structure with status indicators"
+      ],
+      "base": {
+        "backgroundColor": "foundations.color.surface.primary.value",
+        "borderRadius": "foundations.radius.card.md.value",
+        "padding": "foundations.spacing.lg.value",
+        "marginBottom": "foundations.spacing.md.value",
+        "border": "1px solid foundations.color.border.subtle.value",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "position": "relative",
+        "overflow": "hidden"
+      },
+      "pseudoElements": {
+        "before": {
+          "content": "''",
+          "position": "absolute",
+          "top": "0",
+          "left": "0",
+          "right": "0",
+          "height": "3px",
+          "background": "linear-gradient(90deg, foundations.color.accent.primary.value, foundations.color.accent.secondary.value)",
+          "opacity": "0",
+          "transition": "opacity foundations.motion.duration.normal.value"
+        },
+        "hoverBefore": {
+          "opacity": "1"
+        }
+      },
+      "states": {
+        "hover": {
+          "boxShadow": "foundations.shadow.floating.value",
+          "borderColor": "transparent",
+          "transform": "translateY(-3px)"
+        }
+      },
+      "structure": {
+        "header": {
+          "display": "flex",
+          "justifyContent": "space-between",
+          "alignItems": "flex-start",
+          "marginBottom": "foundations.spacing.md.value",
+          "title": {
+            "fontSize": "foundations.font.size.h3.value",
+            "fontWeight": "foundations.font.weight.semibold.value",
+            "lineHeight": "foundations.font.lineHeight.normal.value",
+            "color": "foundations.color.text.primary.value"
+          }
+        },
+        "details": {
+          "display": "flex",
+          "justifyContent": "space-between",
+          "alignItems": "center",
+          "marginBottom": "foundations.spacing.md.value",
+          "info": {
+            "flex": "1"
+          },
+          "progress": {
+            "display": "flex",
+            "alignItems": "center",
+            "gap": "foundations.spacing.md.value",
+            "flexShrink": "0"
+          }
+        },
+        "label": {
+          "fontWeight": "foundations.font.weight.medium.value",
+          "color": "foundations.color.text.secondary.value",
+          "fontSize": "foundations.font.size.body.value",
+          "marginBottom": "foundations.spacing.xxs.value",
+          "display": "block"
+        },
+        "value": {
+          "fontSize": "foundations.font.size.body.value",
+          "fontWeight": "500",
+          "color": "foundations.color.text.primary.value"
+        }
+      }
+    },
+    "IntegrationRow": {
+      "description": "Row featuring a service integration with icon, description, and toggle switch",
+      "aiImplementationNotes": [
+        "Use flexbox for proper alignment of service icon, info, and toggle",
+        "Apply icon rotation animation on hover for visual feedback",
+        "Ensure toggle switch is properly aligned on all screen sizes",
+        "Use semantic HTML with proper labeling for accessibility"
+      ],
+      "base": {
+        "display": "flex",
+        "alignItems": "center",
+        "gap": "foundations.spacing.lg.value",
+        "padding": "foundations.spacing.md.value",
+        "borderRadius": "foundations.radius.card.md.value",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "marginBottom": "foundations.spacing.sm.value"
+      },
+      "states": {
+        "hover": {
+          "backgroundColor": "foundations.color.surface.soft.value",
+          "transform": "translateX(4px)"
+        }
+      },
+      "structure": {
+        "serviceIcon": {
+          "width": "44px",
+          "height": "44px",
+          "borderRadius": "foundations.radius.pill.value",
+          "backgroundColor": "foundations.color.surface.soft.value",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "color": "foundations.color.accent.primary.value",
+          "fontSize": "22px",
+          "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+          "flexShrink": "0",
+          "hoverTransform": "scale(1.15) rotate(5deg)",
+          "hoverBackgroundColor": "foundations.color.accent.primarySoft.value"
+        },
+        "serviceInfo": {
+          "flex": "1",
+          "name": {
+            "fontWeight": "foundations.font.weight.medium.value",
+            "fontSize": "foundations.font.size.body.value",
+            "color": "foundations.color.text.primary.value",
+            "marginBottom": "foundations.spacing.xxs.value"
+          },
+          "description": {
+            "color": "foundations.color.text.secondary.value",
+            "fontSize": "foundations.font.size.body.value"
+          }
+        },
+        "toggle": {
+          "flexShrink": "0"
+        }
+      }
+    },
+    "ToggleSwitch": {
+      "description": "iOS-style pill toggle switch for enabling/disabling features",
+      "aiImplementationNotes": [
+        "Use label element with input[type=\"checkbox\"] for proper semantics",
+        "Implement slider track and handle using CSS positioning",
+        "Apply transform animations for smooth state transitions",
+        "Ensure proper focus states with visible outline",
+        "Handle checked state through CSS :checked pseudo-class"
+      ],
+      "base": {
+        "position": "relative",
+        "display": "inline-block",
+        "width": "foundations.size.control.toggle.width.value",
+        "height": "foundations.size.control.toggle.height.value",
+        "flexShrink": "0"
+      },
+      "input": {
+        "opacity": "0",
+        "width": "0",
+        "height": "0"
+      },
+      "slider": {
+        "position": "absolute",
+        "cursor": "pointer",
+        "top": "0",
+        "left": "0",
+        "right": "0",
+        "bottom": "0",
+        "backgroundColor": "#E5E7EB",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "borderRadius": "foundations.radius.pill.value",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "flex-start",
+        "padding": "2px"
+      },
+      "handle": {
+        "content": "\"\"",
+        "height": "foundations.size.control.toggle.handle.value",
+        "width": "foundations.size.control.toggle.handle.value",
+        "backgroundColor": "foundations.color.common.white.value",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "borderRadius": "50%",
+        "boxShadow": "0 2px 6px rgba(0, 0, 0, 0.15)"
+      },
+      "states": {
+        "checked": {
+          "sliderBackgroundColor": "foundations.color.accent.primary.value",
+          "sliderJustifyContent": "flex-end",
+          "handleTransform": "translateX(0)"
+        },
+        "focus": {
+          "sliderBoxShadow": "0 0 0 3px foundations.color.accent.primarySoft.value"
+        },
+        "active": {
+          "handleWidth": "22px"
+        }
+      }
+    },
+    "PillBrand": {
+      "description": "Pill-shaped elements for displaying brand logos and payment methods",
+      "aiImplementationNotes": [
+        "Use flexbox for centering brand icons and text",
+        "Apply gradient backgrounds for brand-specific styling",
+        "Ensure consistent sizing across all pill brands",
+        "Implement hover effects with elevation and scaling for interactivity"
+      ],
+      "base": {
+        "backgroundColor": "foundations.color.surface.primary.value",
+        "borderRadius": "foundations.radius.pill.value",
+        "padding": "10px 20px",
+        "boxShadow": "foundations.shadow.card.value",
+        "display": "flex",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "minWidth": "85px",
+        "height": "44px",
+        "fontSize": "18px",
+        "color": "foundations.color.text.primary.value",
+        "transition": "all foundations.motion.duration.normal.value foundations.motion.easing.standard.value",
+        "cursor": "pointer",
+        "willChange": "transform, box-shadow"
+      },
+      "states": {
+        "hover": {
+          "transform": "translateY(-4px) scale(1.05)",
+          "boxShadow": "foundations.shadow.floating.value"
+        }
+      },
+      "variants": {
+        "visa": {
+          "background": "linear-gradient(135deg, #1a1f71, #2e3192, #4a49bd)",
+          "color": "foundations.color.common.white.value",
+          "fontWeight": "700",
+          "fontStyle": "italic",
+          "letterSpacing": "0.5px"
+        }
+      }
+    }
+  },
+  "animations": {
+    "description": "Complete animation system with keyframes, timing, and application rules",
+    "aiImplementationNotes": [
+      "All animations must respect prefers-reduced-motion media query",
+      "Use will-change property sparingly for performance optimization",
+      "Apply hardware-accelerated properties (transform, opacity) for smooth animations",
+      "Test animation performance on low-end devices before deployment",
+      "Use CSS variables for animation durations and easings for consistency"
+    ],
+    "globalSettings": {
+      "prefersReducedMotion": {
+        "selector": "@media (prefers-reduced-motion: reduce)",
+        "rules": [
+          "* { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }"
+        ]
+      }
+    },
+    "keyframes": {
+      "fadeInUp": {
+        "from": {
+          "opacity": 0,
+          "transform": "translateY(20px)"
+        },
+        "to": {
+          "opacity": 1,
+          "transform": "translateY(0)"
+        }
+      },
+      "fadeInDelayed": {
+        "from": {
+          "opacity": 0
+        },
+        "to": {
+          "opacity": 1
+        }
+      },
+      "floatGently": {
+        "0_100": {
+          "transform": "translateY(0)"
+        },
+        "50": {
+          "transform": "translateY(-4px)"
+        }
+      },
+      "pulseGlow": {
+        "0": {
+          "boxShadow": "0 0 0 0 rgba(123, 62, 255, 0.4)"
+        },
+        "70": {
+          "boxShadow": "0 0 0 8px rgba(123, 62, 255, 0)"
+        },
+        "100": {
+          "boxShadow": "0 0 0 0 rgba(123, 62, 255, 0)"
+        }
+      },
+      "elasticBounce": {
+        "0_100": {
+          "transform": "scale(1)"
+        },
+        "40": {
+          "transform": "scale(1.08)"
+        },
+        "60": {
+          "transform": "scale(0.95)"
+        },
+        "80": {
+          "transform": "scale(1.03)"
+        }
+      },
+      "progressReveal": {
+        "from": {
+          "strokeDashoffset": 100
+        },
+        "to": {
+          "strokeDashoffset": 30
+        }
+      },
+      "morphCutout": {
+        "from": {
+          "transform": "scale(0.5) translate(30px, -30px)",
+          "opacity": 0
+        },
+        "to": {
+          "transform": "scale(1) translate(0, 0)",
+          "opacity": 1
+        }
+      }
+    },
+    "componentAnimations": {
+      "cardEntrance": {
+        "animationName": "fadeInUp",
+        "duration": "0.6s",
+        "timingFunction": "foundations.motion.easing.gentle.value",
+        "fillMode": "forwards",
+        "delayBase": "0.2s",
+        "staggerIncrement": "0.1s"
+      },
+      "dashboardEntrance": {
+        "opacity": "0",
+        "animationName": "fadeInDelayed",
+        "duration": "0.8s",
+        "timingFunction": "foundations.motion.easing.standard.value",
+        "fillMode": "forwards"
+      },
+      "heroCutout": {
+        "animationName": "morphCutout",
+        "duration": "0.8s",
+        "timingFunction": "foundations.motion.easing.elastic.value",
+        "delay": "0.6s",
+        "fillMode": "forwards"
+      },
+      "notificationDismiss": {
+        "transition": "all 0.3s foundations.motion.easing.standard.value",
+        "rightDismiss": "opacity: 0, transform: translateX(20px)",
+        "leftDismiss": "opacity: 0, transform: translateX(-20px)"
+      },
+      "progressCircles": {
+        "heroProgress": {
+          "animationName": "progressFill70",
+          "duration": "1s",
+          "delay": "0.5s",
+          "timingFunction": "foundations.motion.easing.standard.value",
+          "fillMode": "forwards"
+        },
+        "milestone75": {
+          "animationName": "progressFill75",
+          "duration": "1s",
+          "delay": "0.6s",
+          "timingFunction": "foundations.motion.easing.standard.value",
+          "fillMode": "forwards"
+        },
+        "milestone40": {
+          "animationName": "progressFill40",
+          "duration": "1s",
+          "delay": "0.7s",
+          "timingFunction": "foundations.motion.easing.standard.value",
+          "fillMode": "forwards"
+        }
+      },
+      "todayHighlight": {
+        "animationName": "pulseGlow",
+        "duration": "2s",
+        "iterationCount": "infinite"
+      }
+    },
+    "performanceGuidelines": {
+      "hardwareAcceleration": [
+        "Use transform and opacity properties for animations to leverage GPU acceleration",
+        "Avoid animating layout properties like width, height, padding, margin",
+        "Use will-change: transform, opacity for elements with complex animations"
+      ],
+      "optimization": [
+        "Limit animation duration to 300ms maximum for interface elements",
+        "Use requestAnimationFrame for JavaScript-based animations",
+        "Test animation frame rates on low-end devices using Chrome DevTools"
+      ],
+      "accessibility": [
+        "Respect prefers-reduced-motion media query for users who prefer reduced motion",
+        "Provide alternative visual feedback for animations (color changes, borders)",
+        "Ensure animations don't trigger vestibular disorders (avoid rapid spinning, flashing)"
+      ]
+    }
+  },
+  "accessibility": {
+    "globalRequirements": {
+      "colorContrast": "All text must meet WCAG 2.1 AA contrast requirements (4.5:1 for normal text, 3:1 for large text)",
+      "keyboardNavigation": "All interactive elements must be navigable via keyboard (Tab, Enter, Space, Arrow keys)",
+      "screenReaderSupport": "All interactive elements must have proper ARIA attributes and semantic HTML",
+      "focusIndicators": "All focusable elements must have visible focus states that are WCAG compliant",
+      "animationPreferences": "All animations must respect prefers-reduced-motion media query"
+    },
+    "componentSpecific": {
+      "buttons": {
+        "ariaLabel": "Required for icon-only buttons",
+        "role": "button for clickable elements",
+        "keyboardEvents": "Support Enter and Space key activation"
+      },
+      "calendar": {
+        "ariaCurrent": "Use aria-current=\"date\" for today's date",
+        "ariaSelected": "Use aria-selected=\"true\" for selected dates",
+        "keyboardNavigation": "Support arrow key navigation between dates"
+      },
+      "notifications": {
+        "ariaLive": "Use aria-live=\"polite\" for notification containers",
+        "dismissal": "Provide keyboard-accessible dismissal methods"
+      },
+      "toggles": {
+        "ariaChecked": "Use aria-checked attribute for toggle state",
+        "ariaLabel": "Required for toggle switches without visible labels"
+      }
+    },
+    "testingGuidelines": {
+      "automatedTools": [
+        "Run axe-core accessibility audits during development",
+        "Use Lighthouse for accessibility scoring in CI/CD pipeline",
+        "Test with screen readers (VoiceOver, NVDA, JAWS) regularly"
+      ],
+      "manualTesting": [
+        "Navigate entire interface using only keyboard",
+        "Test with high contrast mode enabled",
+        "Verify color contrast using browser extensions or design tools",
+        "Test with zoom levels up to 200%"
+      ]
+    }
+  },
+  "implementationChecklist": {
+    "setup": [
+      "Install required dependencies: react, react-dom, vite, tailwindcss (or equivalent)",
+      "Set up design token system using CSS variables or JavaScript constants",
+      "Configure build pipeline with accessibility auditing tools"
+    ],
+    "coreComponents": [
+      "Implement base Card component with variants (hero, calendar, integrations)",
+      "Build Avatar system with single and group variants",
+      "Create ProgressCircular component with animation support",
+      "Develop Button component with all variants (primary, success, secondary, ghost)",
+      "Implement Calendar component with full keyboard navigation",
+      "Build NotificationItem component with dismissal animations",
+      "Create ToggleSwitch component with proper accessibility support"
+    ],
+    "animations": [
+      "Set up global animation system with keyframes and staggered delays",
+      "Implement hero card cutout animation with SVG morphing",
+      "Add progress circle stroke animations with percentage counters",
+      "Create notification dismissal animations with direction awareness"
+    ],
+    "accessibility": [
+      "Add ARIA attributes to all interactive components",
+      "Implement keyboard navigation for all components",
+      "Add prefers-reduced-motion support for animations",
+      "Run accessibility audits and fix all critical issues"
+    ],
+    "responsiveDesign": [
+      "Implement mobile-first responsive grid system",
+      "Add media queries for tablet and desktop breakpoints",
+      "Test touch target sizes on mobile devices",
+      "Ensure all components adapt properly to different screen sizes"
+    ],
+    "testing": [
+      "Write unit tests for all components using Jest/React Testing Library",
+      "Create visual regression tests using Storybook or Chromatic",
+      "Perform cross-browser testing (Chrome, Firefox, Safari, Edge)",
+      "Test performance metrics (FCP, LCP, animation frame rates)"
+    ],
+    "documentation": [
+      "Create component API documentation with props and examples",
+      "Document animation system with usage guidelines",
+      "Provide accessibility guidelines for developers",
+      "Create theming documentation for customizing the design system"
+    ]
+  }
+}
