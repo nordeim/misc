@@ -1,0 +1,8 @@
+Beautiful visual design, created by Qwen and refined by Gemini:
+https://gemini.google.com/share/77a5196dc249
+
+HTML code:
+https://raw.githubusercontent.com/nordeim/misc/refs/heads/main/Design%20Language/static-gemini-qwen/index.html
+
+Chat:
+https://gemini.google.com/share/5042ebc33e4d
