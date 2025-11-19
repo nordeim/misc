@@ -1,3 +1,7 @@
+Awesome job on your meticulous planning and execution! Please keep up the good work in your rigorous and meticulous approach!  Please create a corresponding Python 3.11+ script to do exactly the opposite (reverse the process), from a binary file to a Base 64 encoded text file with the file extension changed to `.txt`.
+
+---
+
 Please meticulously plan and create a Python v3.11+ compatible script that will take a base 64 encoded file in text format and output a binary file with the same filename but with the extension changed from `.txt` to `.bin`. Try to leverage existing proven Python encoding and decoding libraries in your script. Output your Python3 script within ```python tags for easy copying of its content. Also, give a usage example using the `uv` command to run the script. Please meticulously plan and create a complete directly usable script.
 
 Convert a text file containing Base64 data into its original binary form and change the file extension from .txt to .bin.
