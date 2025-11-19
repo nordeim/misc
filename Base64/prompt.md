@@ -1,0 +1,2 @@
+Please meticulously plan and create a Python v3.11+ compatible script that will take a base 64 encoded file in text format and output a binary file with the same filename but with the extension changed from `.txt` to `.bin`. Try to leverage existing proven Python encoding and decoding libraries in your script. Output your Python3 script within ```python tags for easy copying of its content. Also, give a usage example using the `uv` command to run the script. Please meticulously plan and create a complete directly usable script.
+
