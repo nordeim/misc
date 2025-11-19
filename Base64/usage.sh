@@ -27,3 +27,23 @@ uv run bin_to_base64.py data.bin --force --verbose
 
 # Handle large files with streaming
 uv run bin_to_base64.py video.bin -v  # Shows chunk processing details
+
+---
+
+# Alternative uv Execution Patterns
+
+# Run from stdin (advanced pipeline)
+cat binary_data.bin | uv run python bin_to_base64.py -
+
+# Process multiple files in a directory
+for file in *.bin; do
+    uv run bin_to_base64.py "$file" --force && echo "✅ $file"
+done
+
+# Integration with xargs for parallel processing (safe for independent operations)
+find . -name "*.bin" -print0 | xargs -0 -P4 -I {} sh -c 'uv run bin_to_base64.py "{}" --force'
+
+# In a uv-based project, add to pyproject.toml:
+# [project.scripts]
+# bin2b64 = "bin_to_base64:main"
+# Then run: uv run bin2b64 data.bin
