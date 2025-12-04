@@ -1,3 +1,8 @@
+```
+# troubleshoot:
+https://copilot.microsoft.com/shares/xj2SYehntHQh1y3ABYvYb
+```
+
 LibreChat can be installed on Ubuntu 24.04 most reliably with Docker Compose, then configured to use OpenRouter.ai as a custom OpenAI-compatible endpoint via the `librechat.yaml` configuration.  The outline below assumes a fresh Ubuntu 24.04 server and ends with LibreChat running on a browser, talking to OpenRouter models.[1][2][3][4]
 
 ***
