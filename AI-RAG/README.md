@@ -58,4 +58,4 @@ The second half of the image references a paper from Meta Superintelligence Labs
 ### Summary
 The image perfectly contrasts two competing philosophies emerging in the 2026 RAG landscape: **TGS-RAG** represents the peak of *dynamic, synergistic systems* (combining vectors and graphs efficiently at runtime), while **Meta's SIRA** represents a push toward *predictive, offline-heavy deterministic systems* (bypassing embeddings entirely for mathematically expanded lexical searches).
 
-# 
+# https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221w2Yf_0vu1BljEGZsleitwo8mOrIxYo21%22%5D,%22action%22:%22open%22,%22userId%22:%22103961307342447084491%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing
